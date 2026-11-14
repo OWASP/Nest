@@ -263,3 +263,7 @@ class TestDjangoEmailService:
 
         assert results == {"sent": 0, "failed": 1}
         mock_conn.close.assert_called_once()
+
+    def test_close_connection_safely_with_none(self, service):
+        """Test _close_connection_safely does nothing when connection is None."""
+        service._close_connection_safely(None)

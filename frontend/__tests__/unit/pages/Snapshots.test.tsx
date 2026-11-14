@@ -41,8 +41,9 @@ const mockSnapshots = [
 describe('SnapshotsPage', () => {
   beforeEach(() => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { snapshots: mockSnapshots },
+      data: { snapshots: mockSnapshots, snapshotsCount: 2 },
       error: null,
+      loading: false,
     })
   })
 
@@ -50,7 +51,7 @@ describe('SnapshotsPage', () => {
     jest.clearAllMocks()
   })
 
-  it('renders loading spinner initially', async () => {
+  it('renders loading skeletons initially', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
@@ -76,8 +77,9 @@ describe('SnapshotsPage', () => {
 
   it('renders "No Snapshots found" when no snapshots are available', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { snapshots: [] },
+      data: { snapshots: [], snapshotsCount: 0 },
       error: null,
+      loading: false,
     })
 
     render(<SnapshotsPage />)
@@ -91,6 +93,7 @@ describe('SnapshotsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: new Error('GraphQL error'),
+      loading: false,
     })
 
     render(<SnapshotsPage />)
@@ -116,9 +119,98 @@ describe('SnapshotsPage', () => {
       fireEvent.click(viewSnapshotButton[0])
     })
 
-    // Check if navigate was called with the correct argument
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/community/snapshots/2024-12')
+    })
+  })
+
+  it('renders date filter inputs', async () => {
+    render(<SnapshotsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Start date')).toBeInTheDocument()
+      expect(screen.getByLabelText('End date')).toBeInTheDocument()
+    })
+  })
+
+  it('shows clear button when a date filter is set', async () => {
+    render(<SnapshotsPage />)
+
+    const startDateInput = screen.getByLabelText('Start date')
+
+    await act(async () => {
+      fireEvent.change(startDateInput, { target: { value: '2025-01-01' } })
+    })
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Clear date filters')).toBeInTheDocument()
+    })
+  })
+
+  it('does not show pagination when total pages is 1 or less', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: { snapshots: mockSnapshots, snapshotsCount: 2 },
+      error: null,
+      loading: false,
+    })
+
+    render(<SnapshotsPage />)
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Go to next page')).not.toBeInTheDocument()
+    })
+  })
+
+  it('shows pagination when there are more than 12 snapshots', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: { snapshots: mockSnapshots, snapshotsCount: 24 },
+      error: null,
+      loading: false,
+    })
+
+    window.scrollTo = jest.fn()
+
+    render(<SnapshotsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Go to next page')).toBeInTheDocument()
+      expect(screen.getByLabelText('Go to previous page')).toBeInTheDocument()
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Go to next page'))
+    })
+
+    await waitFor(() => {
+      expect(useQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            offset: 12,
+          }),
+        })
+      )
+    })
+  })
+
+  it('passes filter variables to the query', async () => {
+    render(<SnapshotsPage />)
+
+    const startDateInput = screen.getByLabelText('Start date')
+
+    await act(async () => {
+      fireEvent.change(startDateInput, { target: { value: '2025-06-01' } })
+    })
+
+    await waitFor(() => {
+      expect(useQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            startAtGte: '2025-06-01T00:00:00',
+          }),
+        })
+      )
     })
   })
 })

@@ -76,9 +76,9 @@ class TestSendSnapshotEmailsCommand:
         mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
         mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
         prefetch_result.prefetch_related.assert_called_once_with(
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "projects",
+            "chapters",
+            "committees",
         )
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
@@ -125,9 +125,9 @@ class TestSendSnapshotEmailsCommand:
         mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
         mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
         prefetch_result.prefetch_related.assert_called_once_with(
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "projects",
+            "chapters",
+            "committees",
         )
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
@@ -166,7 +166,7 @@ class TestSendSnapshotEmailsCommand:
         mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
         mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
         prefetch_result.prefetch_related.assert_called_once_with(
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "projects",
+            "chapters",
+            "committees",
         )

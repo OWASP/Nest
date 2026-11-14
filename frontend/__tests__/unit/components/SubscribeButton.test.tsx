@@ -58,9 +58,9 @@ describe('SubscribeButton', () => {
       name: string
       frequency: string
       isActive: boolean
-      subscribedProjects: Array<{ id: number; name: string }>
-      subscribedChapters: Array<{ id: number; name: string }>
-      subscribedCommittees: Array<{ id: number; name: string }>
+      projects: Array<{ id: number; name: string }>
+      chapters: Array<{ id: number; name: string }>
+      committees: Array<{ id: number; name: string }>
     }>,
     createResult = {
       data: { createSnapshotSubscription: { ok: true, message: '' } },
@@ -75,9 +75,9 @@ describe('SubscribeButton', () => {
       name: string
       frequency: string
       isActive: boolean
-      subscribedProjects: Array<{ id: number; name: string }>
-      subscribedChapters: Array<{ id: number; name: string }>
-      subscribedCommittees: Array<{ id: number; name: string }>
+      projects: Array<{ id: number; name: string }>
+      chapters: Array<{ id: number; name: string }>
+      committees: Array<{ id: number; name: string }>
     }>
     createResult?: {
       data: { createSnapshotSubscription: { ok: boolean; message: string } }
@@ -163,9 +163,9 @@ describe('SubscribeButton', () => {
         name: 'My Digest',
         frequency: 'weekly',
         isActive: true,
-        subscribedProjects: [{ id: 42, name: 'Test Project' }],
-        subscribedChapters: [],
-        subscribedCommittees: [],
+        projects: [{ id: 42, name: 'Test Project' }],
+        chapters: [],
+        committees: [],
       },
     ]
 
@@ -196,9 +196,9 @@ describe('SubscribeButton', () => {
       name: `Sub ${i}`,
       frequency: 'weekly',
       isActive: true,
-      subscribedProjects: [{ id: i + 100, name: `Project ${i}` }],
-      subscribedChapters: [],
-      subscribedCommittees: [],
+      projects: [{ id: i + 100, name: `Project ${i}` }],
+      chapters: [],
+      committees: [],
     }))
 
     test('keeps subscribe button enabled when limit reached to allow adding to existing', () => {
@@ -255,18 +255,18 @@ describe('SubscribeButton', () => {
         name: 'My Weekly Digest',
         frequency: 'weekly',
         isActive: true,
-        subscribedProjects: [],
-        subscribedChapters: [],
-        subscribedCommittees: [],
+        projects: [],
+        chapters: [],
+        committees: [],
       },
       {
         id: 'sub-2',
         name: 'Monthly Security',
         frequency: 'monthly',
         isActive: true,
-        subscribedProjects: [],
-        subscribedChapters: [],
-        subscribedCommittees: [],
+        projects: [],
+        chapters: [],
+        committees: [],
       },
     ]
 
@@ -299,7 +299,7 @@ describe('SubscribeButton', () => {
       const subsWithEntity = [
         {
           ...existingSubscriptions[0],
-          subscribedProjects: [{ id: 42, name: 'Test Project' }],
+          projects: [{ id: 42, name: 'Test Project' }],
         },
         existingSubscriptions[1],
       ]
@@ -370,9 +370,9 @@ describe('SubscribeButton', () => {
             name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            subscribedProjects: [],
-            subscribedChapters: [{ id: 42, name: 'Test Chapter' }],
-            subscribedCommittees: [],
+            projects: [],
+            chapters: [{ id: 42, name: 'Test Chapter' }],
+            committees: [],
           },
         ],
       })
@@ -388,9 +388,9 @@ describe('SubscribeButton', () => {
             name: 'My Sub',
             frequency: 'monthly',
             isActive: true,
-            subscribedProjects: [],
-            subscribedChapters: [],
-            subscribedCommittees: [{ id: 42, name: 'Test Committee' }],
+            projects: [],
+            chapters: [],
+            committees: [{ id: 42, name: 'Test Committee' }],
           },
         ],
       })
@@ -406,9 +406,9 @@ describe('SubscribeButton', () => {
             name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            subscribedProjects: [{ id: 99, name: 'Other Project' }],
-            subscribedChapters: [],
-            subscribedCommittees: [],
+            projects: [{ id: 99, name: 'Other Project' }],
+            chapters: [],
+            committees: [],
           },
         ],
       })
@@ -428,9 +428,9 @@ describe('SubscribeButton', () => {
             name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            subscribedProjects: [{ id: 42, name: 'Test Project' }],
-            subscribedChapters: [],
-            subscribedCommittees: [],
+            projects: [{ id: 42, name: 'Test Project' }],
+            chapters: [],
+            committees: [],
           },
         ],
       })
@@ -446,9 +446,9 @@ describe('SubscribeButton', () => {
         name: 'My Weekly Digest',
         frequency: 'weekly',
         isActive: true,
-        subscribedProjects: [],
-        subscribedChapters: [],
-        subscribedCommittees: [],
+        projects: [],
+        chapters: [],
+        committees: [],
       },
     ]
 
@@ -545,9 +545,9 @@ describe('SubscribeButton', () => {
             name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            subscribedProjects: [],
-            subscribedChapters: [],
-            subscribedCommittees: [],
+            projects: [],
+            chapters: [],
+            committees: [],
           },
         ],
       })
@@ -602,6 +602,42 @@ describe('SubscribeButton', () => {
           })
         )
       })
+    })
+  })
+
+  describe('Subscription Modal Form State', () => {
+    test('does not add when no subscription is selected', async () => {
+      const existingSubscriptions = [
+        {
+          id: 'sub-1',
+          name: 'My Weekly Digest',
+          frequency: 'weekly',
+          isActive: true,
+          projects: [],
+          chapters: [],
+          committees: [],
+        },
+      ]
+
+      setupMocks({ subscriptions: existingSubscriptions })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      const addButton = screen.getByText('Add to Subscription')
+      expect(addButton.closest('button')).toBeDisabled()
+      fireEvent.click(addButton)
+      expect(mockUpdateMutation).not.toHaveBeenCalled()
+      expect(mockCreateMutation).not.toHaveBeenCalled()
+    })
+
+    test('allows typing in the name input field', () => {
+      setupMocks()
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      const nameInput = screen.getByPlaceholderText('e.g., My Weekly Digest')
+      fireEvent.change(nameInput, { target: { value: 'Custom Name' } })
+      expect(nameInput).toHaveValue('Custom Name')
     })
   })
 })

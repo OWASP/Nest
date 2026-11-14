@@ -58,9 +58,9 @@ interface SnapshotSubscriptionData {
   includePullRequests: boolean
   includeReleases: boolean
   includeUsers: boolean
-  subscribedProjects: SubscribedEntity[]
-  subscribedChapters: SubscribedEntity[]
-  subscribedCommittees: SubscribedEntity[]
+  projects: SubscribedEntity[]
+  chapters: SubscribedEntity[]
+  committees: SubscribedEntity[]
   createdAt: string
   updatedAt: string
 }
@@ -283,11 +283,9 @@ function SubscriptionCard({
     includeReleases: subscription.includeReleases,
     includeUsers: subscription.includeUsers,
   })
-  const [projects, setProjects] = useState<SubscribedEntity[]>(subscription.subscribedProjects)
-  const [chapters, setChapters] = useState<SubscribedEntity[]>(subscription.subscribedChapters)
-  const [committees, setCommittees] = useState<SubscribedEntity[]>(
-    subscription.subscribedCommittees
-  )
+  const [projects, setProjects] = useState<SubscribedEntity[]>(subscription.projects)
+  const [chapters, setChapters] = useState<SubscribedEntity[]>(subscription.chapters)
+  const [committees, setCommittees] = useState<SubscribedEntity[]>(subscription.committees)
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -304,9 +302,9 @@ function SubscriptionCard({
       includeReleases: subscription.includeReleases,
       includeUsers: subscription.includeUsers,
     })
-    setProjects(subscription.subscribedProjects)
-    setChapters(subscription.subscribedChapters)
-    setCommittees(subscription.subscribedCommittees)
+    setProjects(subscription.projects)
+    setChapters(subscription.chapters)
+    setCommittees(subscription.committees)
   }, [subscription])
 
   const togglePreference = useCallback((key: SnapshotContentKey) => {
@@ -607,11 +605,11 @@ function SubscriptionContent() {
         subscriptionId: decodeRelayId(id),
         inputData: {
           name: data.name,
-          frequency: data.frequency.toUpperCase(),
+          frequency: data.frequency,
           ...data.preferences,
-          subscribedProjectIds: data.projectIds,
-          subscribedChapterIds: data.chapterIds,
-          subscribedCommitteeIds: data.committeeIds,
+          projectIds: data.projectIds,
+          chapterIds: data.chapterIds,
+          committeeIds: data.committeeIds,
         },
       },
     })
@@ -631,11 +629,11 @@ function SubscriptionContent() {
       variables: {
         inputData: {
           name: newName || undefined,
-          frequency: newFrequency.toUpperCase(),
+          frequency: newFrequency,
           ...newPreferences,
-          subscribedProjectIds: newProjects.map((p) => p.id),
-          subscribedChapterIds: newChapters.map((c) => c.id),
-          subscribedCommitteeIds: newCommittees.map((c) => c.id),
+          projectIds: newProjects.map((p) => p.id),
+          chapterIds: newChapters.map((c) => c.id),
+          committeeIds: newCommittees.map((c) => c.id),
         },
       },
     })

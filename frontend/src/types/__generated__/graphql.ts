@@ -186,6 +186,16 @@ export type EntityMemberNode = Node & {
   role: Scalars['String']['output'];
 };
 
+export type EntitySectionNode = {
+  __typename?: 'EntitySectionNode';
+  entityKey: Scalars['String']['output'];
+  entityName: Scalars['String']['output'];
+  entityType: Scalars['String']['output'];
+  issues: Array<IssueNode>;
+  pullRequests: Array<PullRequestNode>;
+  releases: Array<ReleaseNode>;
+};
+
 export type EventNode = Node & {
   __typename?: 'EventNode';
   category: Scalars['String']['output'];
@@ -207,6 +217,12 @@ export enum ExperienceLevelEnum {
   Expert = 'EXPERT',
   Intermediate = 'INTERMEDIATE'
 }
+
+export type FieldError = {
+  __typename?: 'FieldError';
+  field: Scalars['String']['output'];
+  messages: Array<Scalars['String']['output']>;
+};
 
 export type FloatComparisonFilterLookup = {
   /** Exact match. Filter will be skipped on `null` value */
@@ -804,8 +820,10 @@ export type Query = {
   searchUsers: Array<UserNode>;
   snapshot?: Maybe<SnapshotNode>;
   snapshots: Array<SnapshotNode>;
+  snapshotsCount: Scalars['Int']['output'];
   sponsors: Array<SponsorNode>;
   statsOverview: StatsNode;
+  subscriptionByToken?: Maybe<SnapshotSubscriptionNode>;
   topContributedRepositories: Array<RepositoryNode>;
   topContributors: Array<RepositoryContributorNode>;
   upcomingEvents: Array<EventNode>;
@@ -1043,6 +1061,20 @@ export type QuerySnapshotArgs = {
 
 export type QuerySnapshotsArgs = {
   limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+  startAtGte?: InputMaybe<Scalars['String']['input']>;
+  startAtLte?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySnapshotsCountArgs = {
+  startAtGte?: InputMaybe<Scalars['String']['input']>;
+  startAtLte?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySubscriptionByTokenArgs = {
+  token: Scalars['String']['input'];
 };
 
 
@@ -1174,6 +1206,7 @@ export type SnapshotNodeEventsArgs = {
 export type SnapshotNodeIssuesArgs = {
   limit?: Scalars['Int']['input'];
   offset?: Scalars['Int']['input'];
+  repositoryNames?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 
@@ -1186,6 +1219,7 @@ export type SnapshotNodePostsArgs = {
 export type SnapshotNodePullRequestsArgs = {
   limit?: Scalars['Int']['input'];
   offset?: Scalars['Int']['input'];
+  repositoryNames?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 

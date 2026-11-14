@@ -27,9 +27,9 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             "include_pull_requests",
             "include_releases",
             "include_users",
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "projects",
+            "chapters",
+            "committees",
         )
 
     def clean(self):
@@ -43,9 +43,9 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
 
         duplicate_found = SnapshotSubscription.check_duplicate_setup(
             entity_ids={
-                "chapters": [c.pk for c in (cleaned_data.get("subscribed_chapters") or [])],
-                "committees": [c.pk for c in (cleaned_data.get("subscribed_committees") or [])],
-                "projects": [p.pk for p in (cleaned_data.get("subscribed_projects") or [])],
+                "chapters": [c.pk for c in (cleaned_data.get("chapters") or [])],
+                "committees": [c.pk for c in (cleaned_data.get("committees") or [])],
+                "projects": [p.pk for p in (cleaned_data.get("projects") or [])],
             },
             exclude_pk=self.instance.pk if self.instance else None,
             frequency=cleaned_data.get("frequency"),
@@ -71,9 +71,9 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             cleaned_data.get("include_users"),
         )
         has_entities = bool(
-            cleaned_data.get("subscribed_projects")
-            or cleaned_data.get("subscribed_chapters")
-            or cleaned_data.get("subscribed_committees")
+            cleaned_data.get("projects")
+            or cleaned_data.get("chapters")
+            or cleaned_data.get("committees")
         )
 
         if not has_entities and not any(toggles):
@@ -97,7 +97,7 @@ class SnapshotSubscriptionAdmin(admin.ModelAdmin):
     search_fields = ("user__email", "user__username", "name")
     raw_id_fields = ("user",)
     readonly_fields = ("unsubscribe_token", "created_at", "updated_at")
-    autocomplete_fields = ("subscribed_projects", "subscribed_chapters", "subscribed_committees")
+    autocomplete_fields = ("projects", "chapters", "committees")
 
     fieldsets = (
         (None, {"fields": ("user", "name", "frequency", "is_active")}),
@@ -120,9 +120,9 @@ class SnapshotSubscriptionAdmin(admin.ModelAdmin):
             "Subscribed Entities",
             {
                 "fields": (
-                    "subscribed_projects",
-                    "subscribed_chapters",
-                    "subscribed_committees",
+                    "projects",
+                    "chapters",
+                    "committees",
                 ),
             },
         ),

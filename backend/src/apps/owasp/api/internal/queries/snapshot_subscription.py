@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.core.exceptions import ValidationError
 from strawberry.types import Info
 
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
@@ -20,3 +21,19 @@ class SnapshotSubscriptionQuery:
             return []
 
         return SnapshotSubscription.objects.filter(user=user).order_by("created_at")
+
+    @strawberry_django.field
+    def subscription_by_token(self, token: str) -> SnapshotSubscriptionNode | None:
+        """Fetch subscription by unsubscribe token for the filtered snapshot view.
+
+        Args:
+            token: The unsubscribe_token UUID string.
+
+        Returns:
+            The matching SnapshotSubscriptionNode, or None.
+
+        """
+        try:
+            return SnapshotSubscription.objects.get(unsubscribe_token=token)
+        except (SnapshotSubscription.DoesNotExist, ValidationError, ValueError):
+            return None
