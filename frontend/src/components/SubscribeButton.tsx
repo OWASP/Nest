@@ -28,9 +28,9 @@ interface SnapshotSubscriptionData {
   name: string
   frequency: string
   isActive: boolean
-  subscribedProjects: SubscribedEntity[]
-  subscribedChapters: SubscribedEntity[]
-  subscribedCommittees: SubscribedEntity[]
+  projects: SubscribedEntity[]
+  chapters: SubscribedEntity[]
+  committees: SubscribedEntity[]
 }
 
 interface SubscribeButtonProps {
@@ -40,15 +40,15 @@ interface SubscribeButtonProps {
 }
 
 const M2M_FIELD_MAP = {
-  project: 'subscribedProjects',
-  chapter: 'subscribedChapters',
-  committee: 'subscribedCommittees',
+  project: 'projects',
+  chapter: 'chapters',
+  committee: 'committees',
 } as const
 
 const M2M_INPUT_MAP = {
-  project: 'subscribedProjectIds',
-  chapter: 'subscribedChapterIds',
-  committee: 'subscribedCommitteeIds',
+  project: 'projectIds',
+  chapter: 'chapterIds',
+  committee: 'committeeIds',
 } as const
 
 export default function SubscribeButton({
@@ -163,7 +163,7 @@ export default function SubscribeButton({
       variables: {
         inputData: {
           name: newName || undefined,
-          frequency: newFrequency.toUpperCase(),
+          frequency: newFrequency,
           [inputField]: [decodedEntityId],
         },
       },

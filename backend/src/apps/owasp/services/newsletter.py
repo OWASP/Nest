@@ -116,7 +116,7 @@ class SnapshotDigestService:
 
         entity_count = sum(
             getattr(subscription, field).count()
-            for field in ("subscribed_projects", "subscribed_chapters", "subscribed_committees")
+            for field in ("projects", "chapters", "committees")
         )
         limits = self._calculate_limits(preferences, entity_count)
 
@@ -248,9 +248,9 @@ class SnapshotDigestService:
         entity_max = limits.get("entity_max", entity_count)
         all_entity_sections = []
         for entity_type, m2m_field in (
-            ("project", "subscribed_projects"),
-            ("chapter", "subscribed_chapters"),
-            ("committee", "subscribed_committees"),
+            ("project", "projects"),
+            ("chapter", "chapters"),
+            ("committee", "committees"),
         ):
             for entity in getattr(subscription, m2m_field).all():
                 content = self._get_entity_content(snapshot, entity, rows_limit=entity_rows_limit)
@@ -267,6 +267,9 @@ class SnapshotDigestService:
         entities_extra = max(0, len(all_entity_sections) - entity_max)
 
         unsubscribe_url = f"{settings.SITE_URL}/unsubscribe/{subscription.unsubscribe_token}/"
+        list_unsubscribe_url = (
+            f"{settings.SITE_URL}/owasp/unsubscribe/{subscription.unsubscribe_token}/"
+        )
         snapshot_url = (
             f"{settings.SITE_URL}/community/snapshots/{snapshot.key}"
             f"?subscription={subscription.unsubscribe_token}"
@@ -288,6 +291,7 @@ class SnapshotDigestService:
             "snapshot_url": snapshot_url,
             "subscription": subscription,
             "unsubscribe_url": unsubscribe_url,
+            "list_unsubscribe_url": list_unsubscribe_url,
             "users_data": users_data,
         }
 
@@ -414,9 +418,9 @@ def send_digest_email(snapshot_id: int, subscription_id: int, expected_frequency
         subscription = (
             SnapshotSubscription.objects.select_related("user")
             .prefetch_related(
-                "subscribed_projects",
-                "subscribed_chapters",
-                "subscribed_committees",
+                "projects",
+                "chapters",
+                "committees",
             )
             .get(id=subscription_id)
         )
@@ -470,7 +474,7 @@ def send_digest_email(snapshot_id: int, subscription_id: int, expected_frequency
         plain_body = render_to_string(SNAPSHOT_TEMPLATE_TXT, digest)
 
         headers = {
-            "List-Unsubscribe": f"<{digest['unsubscribe_url']}>",
+            "List-Unsubscribe": f"<{digest['list_unsubscribe_url']}>",
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         }
 
