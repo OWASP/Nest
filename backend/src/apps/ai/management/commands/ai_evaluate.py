@@ -1,4 +1,4 @@
-"""Run RAG-agent evaluation against fixed retrieval fixtures."""
+"""Evaluate RAG agents or assistant flows against fixed retrieval fixtures."""
 
 import json
 from pathlib import Path
@@ -6,11 +6,12 @@ from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.ai.evaluation.datasets.rag_fixtures import RAG_FIXTURES
+from apps.ai.evaluation.flow_runner import run_flow_case
 from apps.ai.evaluation.rag_runner import run_rag_case
 
 
 class Command(BaseCommand):
-    help = "Evaluate RAG-agent responses using fixed retrieval fixtures."
+    help = "Evaluate RAG-agent or assistant-flow responses using fixed retrieval fixtures."
     requires_system_checks: list[str] = []
 
     def add_arguments(self, parser):
@@ -27,6 +28,12 @@ class Command(BaseCommand):
         )
         parser.add_argument("--output", help="Optional JSON report path.")
 
+        parser.add_argument(
+            "--scope",
+            choices=("rag_agent", "assistant_flow"),
+            default="rag_agent",
+        )
+
     def handle(self, *args, **options):
         if not options["live"]:
             msg = "Use --live to enable LLM evaluations."
@@ -42,12 +49,16 @@ class Command(BaseCommand):
             list(RAG_FIXTURES[case_id]) if options["scenario"] == "all" else [options["scenario"]]
         )
 
+        scope = options["scope"]
+        runner = run_flow_case if scope == "assistant_flow" else run_rag_case
+
         results = []
         for scenario in scenarios:
             try:
-                result = run_rag_case(case_id, scenario, live=True)
+                result = runner(case_id, scenario, live=True)
             except Exception as error:  # noqa: BLE001 - preserve failures and continue
                 result = {
+                    "scope": scope,
                     "case_id": case_id,
                     "scenario": scenario,
                     "status": "failed",
@@ -60,7 +71,7 @@ class Command(BaseCommand):
             summary[status] = sum(result["status"] == status for result in results)
 
         report = {
-            "scope": "rag_agent",
+            "scope": scope,
             "summary": summary,
             "results": results,
         }

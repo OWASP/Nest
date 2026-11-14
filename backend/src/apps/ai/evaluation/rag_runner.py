@@ -48,13 +48,13 @@ def create_fixture_search(
 
 
 def create_fixture_rag_agent(
-        case_id: str,
-        scenario: str,
-        tool_calls: list[dict],
+    case_id: str,
+    scenario: str,
+    tool_calls: list[dict],
 ) -> Agent:
     """Create a RAG agent whose search uses fixed retrieval results."""
     search_tool = create_fixture_search(case_id, scenario, tool_calls)
-    
+
     agent = create_rag_agent()
     agent.tools = [search_tool]
     agent.cache = False

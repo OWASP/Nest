@@ -157,3 +157,93 @@ def test_observer_records_executing_agent(mocker, use_keywords):
             "result": "Test answer",
         },
     ]
+
+
+def test_observer_records_real_single_agent_flow(mocker):
+    """Record routing and execution through the real assistant flow."""
+    query = "What is the OWASP trademark policy?"
+    analysis = {"is_simple": True, "sub_queries": []}
+    routing = {"intent": "rag", "confidence": 0.95}
+    agent = SimpleNamespace(
+        role="OWASP Knowledge Specialist",
+        llm=SimpleNamespace(model="test-model"),
+    )
+
+    mocker.patch.object(
+        assistant,
+        "analyze_query",
+        return_value=analysis,
+    )
+    mocker.patch.object(
+        assistant,
+        "route",
+        return_value=routing,
+    )
+    factory = mocker.Mock(return_value=agent)
+    mocker.patch.object(
+        assistant,
+        "get_intent_to_agent_map",
+        return_value={"rag": factory},
+    )
+    execute = mocker.patch.object(
+        assistant,
+        "execute_task",
+        return_value="Policy answer",
+    )
+
+    with observe_flow() as events:
+        response = assistant.process_query(query)
+
+    assert response == "Policy answer"
+    factory.assert_called_once_with()
+    execute.assert_called_once_with(agent, query)
+
+    assert [event["stage"] for event in events] == [
+        "process_query",
+        "analyze_query",
+        "route",
+        "execute_task",
+    ]
+    assert events[0]["result"] == "Policy answer"
+    assert events[1]["result"] == analysis
+    assert events[2]["result"] == routing
+    assert events[3]["role"] == agent.role
+
+
+def test_observer_records_collaborative_flow_without_router(mocker):
+    """Record collaboration without inventing a router decision."""
+    query = "Find chapters in Germany and projects about API security."
+    analysis = {
+        "is_simple": False,
+        "sub_queries": [
+            {"query": "Find chapters in Germany", "intent": "chapter"},
+            {"query": "Find API security projects", "intent": "project"},
+        ],
+    }
+
+    mocker.patch.object(
+        assistant,
+        "analyze_query",
+        return_value=analysis,
+    )
+    route = mocker.patch.object(assistant, "route")
+    collaborate = mocker.patch.object(
+        assistant,
+        "handle_collaborative_query",
+        return_value="Combined answer",
+    )
+
+    with observe_flow() as events:
+        response = assistant.process_query(query)
+
+    assert response == "Combined answer"
+    route.assert_not_called()
+    collaborate.assert_called_once_with(query, analysis["sub_queries"])
+
+    assert [event["stage"] for event in events] == [
+        "process_query",
+        "analyze_query",
+        "handle_collaborative_query",
+    ]
+    assert events[1]["result"] == analysis
+    assert events[2]["result"] == "Combined answer"
