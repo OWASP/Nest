@@ -79,7 +79,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
       '
     container_name: e2e-nest-cache
-    image: redis:8.10.1-alpine3.23@sha256:bd999b5cfee25fb24b8320a31fddbd69f462df44c8138c66e369582937beebc0
+    image: redis:8.10.1-alpine3.23@sha256:ef216d85ec44f4fdf7c0e6df2d1757a4734ed32fbb278cabd3181b5a27353b79
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-e2e-password}
     healthcheck:

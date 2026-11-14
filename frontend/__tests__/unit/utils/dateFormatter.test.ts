@@ -1,4 +1,9 @@
-import { formatDate, formatDateForInput, formatDateRange } from 'utils/dateFormatter'
+import {
+  formatCompactDateRange,
+  formatDate,
+  formatDateForInput,
+  formatDateRange,
+} from 'utils/dateFormatter'
 
 describe('formatDate function', () => {
   beforeEach(() => {
@@ -82,6 +87,31 @@ describe('formatDateRange function', () => {
     expect(formatDateRange('1970-01-01T00:00:00+00:00', '1970-01-01T00:00:00+00:00')).toBe(
       'Jan 1, 1970'
     )
+  })
+})
+
+describe('formatCompactDateRange function', () => {
+  test('shows only the end year for ranges across years', () => {
+    expect(formatCompactDateRange('2025-03-24', '2026-03-24')).toBe('Mar 24, 2025 — 2026')
+  })
+
+  test('shows only the end year when the end month and day differ', () => {
+    expect(formatCompactDateRange('2023-12-30', '2024-01-03')).toBe('Dec 30, 2023 — 2024')
+  })
+
+  test.each([
+    ['2023-09-01', '2023-09-04', 'Sep 1 — 4, 2023'],
+    ['2023-09-29', '2023-10-02', 'Sep 29 — Oct 2, 2023'],
+    ['2023-09-01', '2023-09-01', 'Sep 1, 2023'],
+  ])('keeps the regular format for %s to %s in the same year', (start, end, expected) => {
+    expect(formatCompactDateRange(start, end)).toBe(expected)
+  })
+
+  test.each([
+    ['invalid-date', '2024-01-01'],
+    ['2024-01-01', 'invalid-date'],
+  ])('returns empty string for invalid range %s to %s', (start, end) => {
+    expect(formatCompactDateRange(start, end)).toBe('')
   })
 })
 

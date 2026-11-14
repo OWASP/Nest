@@ -137,8 +137,9 @@ const SearchPageLayout = ({
       {isLoaded ? (
         <>
           <div>
-            {!inlineSort && totalPages !== 0 && (
-              <div className="flex justify-end" data-testid="sort-below">
+            {!inlineSort && sortChildren && totalPages !== 0 && (
+              // SearchBar has no vertical padding below md, so the sort row adds its own gap
+              <div className="mt-4 flex justify-end md:mt-0" data-testid="sort-below">
                 {sortChildren}
               </div>
             )}
@@ -155,7 +156,18 @@ const SearchPageLayout = ({
           )}
         </>
       ) : (
-        <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
+        <>
+          {!inlineSort && sortChildren && (
+            // Placeholder for the sort row: full width on mobile, left-aligned with the cards on md+
+            <div
+              className="mt-4 flex w-full md:mt-0 md:max-w-6xl"
+              data-testid="sort-below-skeleton"
+            >
+              <Skeleton className="h-12 w-full rounded-lg md:w-36" aria-hidden="true" />
+            </div>
+          )}
+          <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
+        </>
       )}
     </div>
   )

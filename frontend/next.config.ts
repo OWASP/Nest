@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { withSentryConfig } from '@sentry/nextjs'
+import { withSentryConfig } from '@sentry/nextjs/config'
 import type { NextConfig } from 'next'
 
 const frontendDir = path.dirname(fileURLToPath(import.meta.url))
@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
   experimental: {
     useTypeScriptCli: true,
   },
-  async headers() {
+  headers() {
     return [
       {
         headers,
@@ -93,7 +93,6 @@ const nextConfig: NextConfig = {
 
 export default withSentryConfig(nextConfig, {
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-  disableLogger: false,
   org: 'owasp-org',
   project: 'nest-frontend',
   release: {
@@ -101,6 +100,11 @@ export default withSentryConfig(nextConfig, {
   },
   silent: isLocal,
   telemetry: false,
+  webpack: {
+    treeshake: {
+      removeDebugLogging: false,
+    },
+  },
   widenClientFileUpload: true,
   ...(process.env.NEXT_SENTRY_AUTH_TOKEN
     ? {

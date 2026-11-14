@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.commands.chapters import Chapters
 
@@ -40,29 +40,28 @@ class TestChaptersHandler:
             mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "command_text", "expected_calls"),
-        [
-            (True, "", 1),
-            (True, "search term", 1),
-            (True, "-h", 1),
-            (False, "", 0),
-        ],
-    )
-    def test_chapters_handler(
-        self, mock_client, mock_command, commands_enabled, command_text, expected_calls
-    ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    @pytest.mark.parametrize("command_text", ["", "search term", "-h"])
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_chapters_handler(self, mock_client, mock_command, command_text):
         mock_command["text"] = command_text
 
         ack = MagicMock()
         Chapters().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
-        assert mock_client.chat_postMessage.call_count == expected_calls
+        assert mock_client.chat_postMessage.call_count == 1
 
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_chapters_handler_when_commands_disabled(self, mock_client, mock_command):
+        ack = MagicMock()
+        Chapters().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
+        mock_client.conversations_open.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_chapters_handler_with_results(self, mock_get_chapters, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_get_chapters.return_value = {
             "hits": [
                 {

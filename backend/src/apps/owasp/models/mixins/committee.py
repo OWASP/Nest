@@ -17,7 +17,7 @@ class CommitteeIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_key(self):
         """Return key for indexing."""
-        return self.key.replace("www-committee-", "")
+        return self.key
 
     @property
     def idx_related_urls(self):

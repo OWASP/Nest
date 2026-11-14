@@ -1,8 +1,8 @@
 .PHONY: owasp-add-project-custom-tags owasp-aggregate-entity-contributions \
 	owasp-aggregate-member-contributions owasp-aggregate-projects owasp-create-project-metadata-file \
 	owasp-enrich-chapters owasp-enrich-committees owasp-enrich-events owasp-enrich-projects \
-	owasp-generate-community-snapshot-video owasp-process-snapshots owasp-scrape-chapters \
-	owasp-scrape-committees owasp-scrape-projects owasp-sync-posts owasp-update-events \
+	owasp-generate-community-snapshot-video owasp-process-snapshots owasp-sync-chapters \
+	owasp-sync-committees owasp-sync-posts owasp-sync-projects owasp-update-events \
 	owasp-update-leaders owasp-update-project-health-metrics owasp-update-project-health-requirements \
 	owasp-update-project-health-scores owasp-update-sponsors
 
@@ -70,20 +70,20 @@ owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) backend-exec-command
 
-owasp-scrape-chapters:
-	@echo "Scraping OWASP site chapters data"
-	@CMD="python manage.py owasp_scrape_chapters" $(MAKE) backend-exec-command
+owasp-sync-chapters:
+	@echo "Syncing OWASP chapters"
+	@CMD="python manage.py owasp_sync_chapters" $(MAKE) backend-exec-command
 
-owasp-scrape-committees:
-	@echo "Scraping OWASP site committees data"
-	@CMD="python manage.py owasp_scrape_committees" $(MAKE) backend-exec-command
-
-owasp-scrape-projects:
-	@echo "Scraping OWASP site projects data"
-	@CMD="python manage.py owasp_scrape_projects" $(MAKE) backend-exec-command
+owasp-sync-committees:
+	@echo "Syncing OWASP committees"
+	@CMD="python manage.py owasp_sync_committees" $(MAKE) backend-exec-command
 
 owasp-sync-posts:
 	@CMD="python manage.py owasp_sync_posts" $(MAKE) backend-exec-command
+
+owasp-sync-projects:
+	@echo "Syncing OWASP projects"
+	@CMD="python manage.py owasp_sync_projects" $(MAKE) backend-exec-command
 
 owasp-update-events:
 	@echo "Getting OWASP events data"

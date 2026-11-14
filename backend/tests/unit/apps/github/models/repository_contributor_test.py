@@ -154,7 +154,11 @@ class TestRepositoryContributor(TestCase):
         """Test the project filtering logic in get_top_contributors."""
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
-            RepositoryContributor.get_top_contributors(project="my-project")
+            with patch(
+                "apps.owasp.models.project.Project.get_by_key",
+                return_value=Mock(key="www-project-my-project"),
+            ):
+                RepositoryContributor.get_top_contributors(project="my-project")
             mock_queryset.filter.assert_any_call(
                 repository__project__key__iexact="www-project-my-project"
             )
@@ -163,17 +167,25 @@ class TestRepositoryContributor(TestCase):
         """Test the chapter filtering logic in get_top_contributors."""
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
-            RepositoryContributor.get_top_contributors(chapter="my-chapter")
-            mock_queryset.filter.assert_any_call(repository__key__iexact="www-chapter-my-chapter")
+            with patch(
+                "apps.owasp.models.chapter.Chapter.get_by_key",
+                return_value=Mock(owasp_repository_id=7),
+            ) as mock_get:
+                RepositoryContributor.get_top_contributors(chapter="my-chapter")
+            mock_get.assert_called_once_with("my-chapter")
+            mock_queryset.filter.assert_any_call(repository_id=7)
 
     def test_get_top_contributors_committee_filter(self):
         """Test the committee filtering logic in get_top_contributors."""
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
-            RepositoryContributor.get_top_contributors(committee="my-committee")
-            mock_queryset.filter.assert_any_call(
-                repository__key__iexact="www-committee-my-committee"
-            )
+            with patch(
+                "apps.owasp.models.committee.Committee.get_by_key",
+                return_value=Mock(owasp_repository_id=8),
+            ) as mock_get:
+                RepositoryContributor.get_top_contributors(committee="my-committee")
+            mock_get.assert_called_once_with("my-committee")
+            mock_queryset.filter.assert_any_call(repository_id=8)
 
     def test_get_top_contributors_repository_filter(self):
         """Test the repository filtering logic in get_top_contributors."""
