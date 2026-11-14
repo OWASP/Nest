@@ -549,7 +549,7 @@ describe('<SearchPageLayout />', () => {
     expect(sortWrapper).toHaveClass('[&>div>div:first-child]:rounded-l-none')
   })
 
-  it('spaces the mobile filter row from search by the same gap as other pages', () => {
+  it('spaces the mobile filter row below search with mt-2 (wrapper supplies mb-4 on mobile)', () => {
     const { container } = render(
       <SearchPageLayout
         isLoaded={true}
@@ -569,8 +569,11 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    const mobileFilterRow = container.querySelector(String.raw`div.max-w-md.md\:hidden`)
-    expect(mobileFilterRow).toHaveClass('my-4')
+    const mobileFilterRow = container.querySelector(
+      String.raw`div.mx-auto.mt-2.flex.w-full.max-w-md.items-stretch.md\:hidden`
+    )
+    expect(mobileFilterRow).toHaveClass('mt-2')
+    expect(mobileFilterRow).not.toHaveClass('mb-4')
   })
 
   it('adds no bottom margin to the search wrapper, so content margins are not doubled', () => {
