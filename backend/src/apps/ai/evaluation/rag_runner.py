@@ -3,6 +3,7 @@
 from copy import deepcopy
 from dataclasses import asdict
 
+from crewai import Agent
 from crewai.tools import BaseTool
 
 from apps.ai.agents.rag import create_rag_agent
@@ -46,6 +47,20 @@ def create_fixture_search(
     return semantic_search.model_copy(update={"func": retrieve, "current_usage_count": 0})
 
 
+def create_fixture_rag_agent(
+        case_id: str,
+        scenario: str,
+        tool_calls: list[dict],
+) -> Agent:
+    """Create a RAG agent whose search uses fixed retrieval results."""
+    search_tool = create_fixture_search(case_id, scenario, tool_calls)
+    
+    agent = create_rag_agent()
+    agent.tools = [search_tool]
+    agent.cache = False
+    return agent
+
+
 def run_rag_case(
     case_id: str,
     scenario: str = "relevant",
@@ -63,11 +78,7 @@ def run_rag_case(
         raise ValueError(msg)
 
     tool_calls: list[dict] = []
-    search_tool = create_fixture_search(case_id, scenario, tool_calls)
-
-    agent = create_rag_agent()
-    agent.tools = [search_tool]
-    agent.cache = False
+    agent = create_fixture_rag_agent(case_id, scenario, tool_calls)
 
     response = execute_task(agent, case.query)
     output = AgentOutput(
