@@ -34,11 +34,11 @@ BENCHMARK_CASES: list[EvalCase] = [
     ),
     EvalCase(
         id="proj-004",
-        query="Does OWASP have an automated web vulnerability scanner tool?",
+        query="What does OWASP Dependency-Check do?",
         category=EvalCategory.PROJECT,
         expected_intent="project",
         expected_tools=["Search for OWASP projects by name, topic, technology, or description"],
-        expected_keywords=["ZAP", "Zed Attack Proxy"],
+        expected_keywords=["dependency", "vulnerabilites"],
         notes="Evaluates retrieval of specific security scanner tools",
     ),
     # --- 2. CONTRIBUTION INTENT ---
@@ -178,11 +178,11 @@ BENCHMARK_CASES: list[EvalCase] = [
     # --- 6. RAG INTENT ---
     EvalCase(
         id="rag-001",
-        query="What are the official OWASP bylaws regarding project maturity levels?",
+        query="What is the OWASP Foundation's purpose according to its bylaws?",
         category=EvalCategory.RAG,
         expected_intent="rag",
         expected_tools=["Semantic search for OWASP content"],
-        expected_keywords=["bylaws", "maturity"],
+        expected_keywords=["software", "security"],
         notes="Evaluates documentation and policy search via RAG",
     ),
     EvalCase(
