@@ -999,7 +999,9 @@ describe('SnapshotDetailsPage', () => {
     expect(prShowMore).toBeDefined()
     if (prShowMore) fireEvent.click(prShowMore)
 
-    expect(mockFetchMorePRs).toHaveBeenCalledTimes(1)
+    await waitFor(() => {
+      expect(mockFetchMorePRs).toHaveBeenCalled()
+    })
 
     const prShowMore2 = await waitFor(() => {
       const btn = findButtonInSection('Show more', 'Pull Requests')
@@ -1036,7 +1038,9 @@ describe('SnapshotDetailsPage', () => {
     expect(issueShowMore).toBeDefined()
     if (issueShowMore) fireEvent.click(issueShowMore)
 
-    expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
+    await waitFor(() => {
+      expect(mockFetchMoreIssues).toHaveBeenCalled()
+    })
 
     const issueShowMore2 = await waitFor(() => {
       const btn = findButtonInSection('Show more', 'Issues')
@@ -1050,6 +1054,7 @@ describe('SnapshotDetailsPage', () => {
     })
     expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
   })
+
   test('shows SnapshotFeedback when no subscription token is present', async () => {
     render(<SnapshotDetailsPage />)
 

@@ -1193,6 +1193,7 @@ export type SnapshotFeedbackNode = Node & {
 
 export type SnapshotFeedbackResult = {
   __typename?: 'SnapshotFeedbackResult';
+  code?: Maybe<Scalars['String']['output']>;
   feedback?: Maybe<SnapshotFeedbackNode>;
   fieldErrors?: Maybe<Array<FieldError>>;
   message: Scalars['String']['output'];
