@@ -27,6 +27,7 @@ from .project import ProjectAdmin
 from .project_health_metrics import ProjectHealthMetricsAdmin
 from .scoring_weight import ScoringWeightAdmin
 from .snapshot import SnapshotAdmin
+from .snapshot_feedback import SnapshotFeedbackAdmin
 from .snapshot_subscription import SnapshotSubscriptionAdmin
 from .sponsor import SponsorAdmin
 

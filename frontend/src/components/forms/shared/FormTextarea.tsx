@@ -8,6 +8,7 @@ interface FormTextareaProps {
   placeholder: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  disabled?: boolean
   error?: string
   touched?: boolean
   rows?: number
@@ -22,6 +23,7 @@ export const FormTextarea = ({
   placeholder,
   value,
   onChange,
+  disabled = false,
   error,
   touched,
   rows = 4,
@@ -52,12 +54,13 @@ export const FormTextarea = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          disabled={disabled}
           rows={rows}
           required={required}
           maxLength={maxLength}
           aria-describedby={describedBy || undefined}
           aria-invalid={hasError}
-          className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
+          className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
             hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
         />

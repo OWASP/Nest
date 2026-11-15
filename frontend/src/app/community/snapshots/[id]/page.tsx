@@ -46,6 +46,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import ShareButtons from 'components/ShareButtons'
 import ShowMoreButton from 'components/ShowMoreButton'
 import SnapshotEntitySection from 'components/SnapshotEntitySection'
+import SnapshotFeedback from 'components/SnapshotFeedback'
 import { ReleasesSection } from 'components/SnapshotReleaseSection'
 
 const PR_LIMIT = 6
@@ -62,22 +63,22 @@ const SnapshotDetailsPage: React.FC = () => {
   const searchParams = useSearchParams()
   const subscriptionToken = searchParams.get('subscription')
 
-  const { data: subscriptionData } = useQuery<GetSubscriptionByTokenQuery>(
-    GET_SUBSCRIPTION_BY_TOKEN,
-    {
+  const { data: subscriptionData, loading: isSubscriptionLoading } =
+    useQuery<GetSubscriptionByTokenQuery>(GET_SUBSCRIPTION_BY_TOKEN, {
       variables: { token: subscriptionToken ?? '', snapshotKey },
       skip: !subscriptionToken,
-    }
-  )
+    })
   const subscription = subscriptionData?.subscriptionByToken
-  const showChapters = subscription ? subscription.includeChapters : true
-  const showEvents = subscription ? subscription.includeEvents : true
-  const showIssues = subscription ? subscription.includeIssues : true
-  const showPosts = subscription ? subscription.includePosts : true
-  const showProjects = subscription ? subscription.includeProjects : true
-  const showPullRequests = subscription ? subscription.includePullRequests : true
-  const showReleases = subscription ? subscription.includeReleases : true
-  const showUsers = subscription ? subscription.includeUsers : true
+  const isSubscriptionPending = !!subscriptionToken && isSubscriptionLoading
+  const sectionDefault = !isSubscriptionPending
+  const showChapters = subscription ? subscription.includeChapters : sectionDefault
+  const showEvents = subscription ? subscription.includeEvents : sectionDefault
+  const showIssues = subscription ? subscription.includeIssues : sectionDefault
+  const showPosts = subscription ? subscription.includePosts : sectionDefault
+  const showProjects = subscription ? subscription.includeProjects : sectionDefault
+  const showPullRequests = subscription ? subscription.includePullRequests : sectionDefault
+  const showReleases = subscription ? subscription.includeReleases : sectionDefault
+  const showUsers = subscription ? subscription.includeUsers : sectionDefault
 
   const [showAllReleases, setShowAllReleases] = useState(false)
   const [showAllChapters, setShowAllChapters] = useState(false)
@@ -535,6 +536,9 @@ const SnapshotDetailsPage: React.FC = () => {
             )
           })}
         </div>
+      )}
+      {(!subscriptionToken || (!isSubscriptionLoading && !subscription)) && (
+        <SnapshotFeedback snapshotKey={snapshotKey} />
       )}
     </div>
   )
