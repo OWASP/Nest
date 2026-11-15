@@ -131,6 +131,7 @@ euo
 facebookexternalhit
 fdp
 fossology
+fossologyscanner
 fpr
 gamesec
 geocoders
