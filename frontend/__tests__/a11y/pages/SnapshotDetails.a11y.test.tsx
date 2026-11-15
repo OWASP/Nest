@@ -24,6 +24,11 @@ jest.mock('@/components/MarkdownWrapper', () => {
   ))
 })
 
+jest.mock('@/components/SnapshotFeedback', () => ({
+  __esModule: true,
+  default: () => <div data-testid="snapshot-feedback" />,
+}))
+
 describe.each([
   { theme: 'light', name: 'light' },
   { theme: 'dark', name: 'dark' },

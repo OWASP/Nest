@@ -2,9 +2,10 @@
 
 import strawberry
 
+from .snapshot_feedback import SnapshotFeedbackMutations
 from .snapshot_subscription import SnapshotSubscriptionMutations
 
 
 @strawberry.type
-class OwaspMutations(SnapshotSubscriptionMutations):
+class OwaspMutations(SnapshotFeedbackMutations, SnapshotSubscriptionMutations):
     """OWASP mutations."""
