@@ -53,6 +53,18 @@ describe('Organization', () => {
     expect(screen.getByText('Another Organization')).toBeInTheDocument()
   })
 
+  test('adds mobile-only spacing between search and the organization grid', async () => {
+    render(<Organization />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Organization')).toBeInTheDocument()
+    })
+
+    // SearchBar has no vertical padding below md, so the grid provides the gap itself
+    const grid = screen.getByText('Test Organization').closest('.grid')
+    expect(grid).toHaveClass('mt-4', 'md:mt-0')
+  })
+
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({

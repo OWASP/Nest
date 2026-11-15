@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.common.constants import NL
 from apps.slack.commands.board import Board
@@ -20,33 +20,32 @@ class TestBoardHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "expected_calls"),
-        [
-            (True, 1),
-            (False, 0),
-        ],
-    )
-    def test_board_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_board_handler(self, mock_client, mock_command):
         ack = MagicMock()
         Board().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
-        assert mock_client.chat_postMessage.call_count == expected_calls
+        assert mock_client.chat_postMessage.call_count == 1
 
-        if commands_enabled:
-            mock_client.conversations_open.assert_called_once_with(users="U123456")
-            blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-            block_text = blocks[0]["text"]["text"]
-            expected_text = (
-                f"Please visit <https://owasp.org/www-board/|Global board> page.{NL}{NL}"
-            )
-            assert block_text == expected_text
-            assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
+        mock_client.conversations_open.assert_called_once_with(users="U123456")
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        block_text = blocks[0]["text"]["text"]
+        expected_text = f"Please visit <https://owasp.org/www-board/|Global board> page.{NL}{NL}"
+        assert block_text == expected_text
+        assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
 
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_board_handler_when_commands_disabled(self, mock_client, mock_command):
+        ack = MagicMock()
+        Board().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
+        mock_client.conversations_open.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_board_handler_block_structure(self, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
         ack = MagicMock()
         Board().handler(ack=ack, command=mock_command, client=mock_client)
 

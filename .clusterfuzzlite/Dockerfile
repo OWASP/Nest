@@ -3,7 +3,7 @@ FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:53a670f691b0bd348aa9f97a
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 COPY backend/requirements/cluster-fuzz-lite.txt /tmp/cluster-fuzz-lite.txt
-RUN python -m pip install --no-cache-dir --require-hashes -r /tmp/cluster-fuzz-lite.txt
+RUN python -m pip install --no-cache-dir --only-binary :all: --require-hashes -r /tmp/cluster-fuzz-lite.txt
 
 COPY .clusterfuzzlite/seed_corpora $SRC/seed_corpora
 

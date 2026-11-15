@@ -33,7 +33,6 @@ CANONICAL_VOLUMES = frozenset(
         "backend-venv",
         "cache-data",
         "db-data",
-        "docs-venv",
         "e2e-cache-data",
         "e2e-db-data",
         "frontend-next",

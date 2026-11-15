@@ -12,11 +12,7 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def is_indexable(self) -> bool:
         """Chapters to index."""
-        return (
-            self.latitude is not None
-            and self.longitude is not None
-            and not self.owasp_repository.is_empty
-        )
+        return self.latitude is not None and self.longitude is not None
 
     @property
     def idx_country(self) -> str:
@@ -26,7 +22,10 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_created_at(self) -> str:
         """Return created at for indexing."""
-        return (self.created_at or self.owasp_repository.created_at).isoformat()
+        created_at = self.created_at
+        if created_at is None and self.owasp_repository is not None:
+            created_at = self.owasp_repository.created_at
+        return created_at.isoformat() if created_at else ""
 
     @property
     def idx_geo_location(self) -> tuple[float, float]:
@@ -41,7 +40,7 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_key(self) -> str:
         """Return key for indexing."""
-        return self.key.replace("www-chapter-", "")
+        return self.key
 
     @property
     def idx_meetup_group(self) -> str:
@@ -76,4 +75,7 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_updated_at(self) -> str:
         """Return updated at for indexing."""
-        return (self.updated_at or self.owasp_repository.updated_at).isoformat()
+        updated_at = self.updated_at
+        if updated_at is None and self.owasp_repository is not None:
+            updated_at = self.owasp_repository.updated_at
+        return updated_at.isoformat() if updated_at else ""

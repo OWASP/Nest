@@ -349,34 +349,30 @@ class TestGetProject:
         """Test get project when found."""
         mock_request = MagicMock()
         mock_project = MagicMock()
-        mock_project_model.active_projects.filter.return_value.first.return_value = mock_project
+        mock_project_model.get_by_key.return_value = mock_project
 
         result = get_project(mock_request, "Nest")
 
-        mock_project_model.active_projects.filter.assert_called_once_with(
-            key__iexact="www-project-Nest"
-        )
+        mock_project_model.get_by_key.assert_called_once_with("Nest")
         assert result == mock_project
 
     @patch("apps.api.rest.v0.project.ProjectModel")
     def test_get_project_with_prefix(self, mock_project_model: MagicMock) -> None:
-        """Test get project with www-project- prefix preserves case."""
+        """Test get project accepts a legacy www-project key."""
         mock_request = MagicMock()
         mock_project = MagicMock()
-        mock_project_model.active_projects.filter.return_value.first.return_value = mock_project
+        mock_project_model.get_by_key.return_value = mock_project
 
         result = get_project(mock_request, "www-project-Nest")
 
-        mock_project_model.active_projects.filter.assert_called_once_with(
-            key__iexact="www-project-Nest"
-        )
+        mock_project_model.get_by_key.assert_called_once_with("www-project-Nest")
         assert result == mock_project
 
     @patch("apps.api.rest.v0.project.ProjectModel")
     def test_get_project_not_found(self, mock_project_model: MagicMock) -> None:
         """Test get project returns 404 response when not found."""
         mock_request = MagicMock()
-        mock_project_model.active_projects.filter.return_value.first.return_value = None
+        mock_project_model.get_by_key.return_value = None
 
         result = get_project(mock_request, "NonExistent")
 
