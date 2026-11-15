@@ -151,7 +151,7 @@ def test_failures_are_saved_and_remaining_scenarios_run(runner, tmp_path):
 @pytest.mark.parametrize(
     "arguments",
     [
-        ["--case-id", "rag-001"],
+        ["--case-id", "proj-003"],
         ["--scenario", "unknown"],
         ["--scope", "unknown"],
     ],
@@ -214,7 +214,7 @@ def flow_runner(mocker, runner):
 
 
 @pytest.mark.parametrize("scope", [None, "rag_agent", "assistant_flow"])
-@pytest.mark.parametrize("case_id", ["rag-002", "rag-003"])
+@pytest.mark.parametrize("case_id", ["rag-001", "rag-002", "rag-003"])
 def test_scope_selects_exactly_one_runner(runner, flow_runner, scope, case_id):
     output = StringIO()
     arguments = ["--live", "--case-id", case_id]
@@ -350,4 +350,162 @@ def test_full_flow_diagnostics_are_preserved(runner, flow_runner, tmp_path):
             stdout=StringIO(),
         )
     assert json.loads(destination.read_text())["results"] == [result]
+    runner.assert_not_called()
+
+
+@pytest.mark.parametrize("scenario", ["relevant", "all"])
+@pytest.mark.parametrize("case_id", ["proj-001", "proj-004"])
+def test_project_flow_runs_only_supported_scenario(
+    runner, flow_runner, tmp_path, scenario, case_id
+):
+    output = StringIO()
+    destination = tmp_path / "project.json"
+    call_command(
+        "ai_evaluate",
+        "--live",
+        "--scope",
+        "assistant_flow",
+        "--case-id",
+        case_id,
+        "--scenario",
+        scenario,
+        "--output",
+        str(destination),
+        stdout=output,
+    )
+    flow_runner.assert_called_once_with(case_id, "relevant", live=True)
+    runner.assert_not_called()
+    report = json.loads(destination.read_text())
+    assert report == json.loads(output.getvalue())
+    assert report["scope"] == "assistant_flow"
+    assert report["summary"] == {"total": 1, "passed": 1, "failed": 0, "needs_review": 0}
+    assert report["results"][0]["case_id"] == case_id
+    assert report["results"][0]["scenario"] == "relevant"
+
+
+@pytest.mark.parametrize("scope", [None, "rag_agent"])
+def test_project_case_rejected_in_direct_scope_before_execution(runner, flow_runner, scope):
+    arguments = ["--live", "--case-id", "proj-004"]
+    if scope is not None:
+        arguments.extend(["--scope", scope])
+    with pytest.raises(CommandError, match="unsupported in scope 'rag_agent'"):
+        call_command("ai_evaluate", *arguments, stdout=StringIO())
+    runner.assert_not_called()
+    flow_runner.assert_not_called()
+
+
+@pytest.mark.parametrize("scenario", ["irrelevant", "empty", "mixed"])
+def test_project_scenario_rejected_before_execution(runner, flow_runner, scenario):
+    with pytest.raises(CommandError, match="unsupported for 'proj-004'"):
+        call_command(
+            "ai_evaluate",
+            "--live",
+            "--scope",
+            "assistant_flow",
+            "--case-id",
+            "proj-004",
+            "--scenario",
+            scenario,
+            stdout=StringIO(),
+        )
+    runner.assert_not_called()
+    flow_runner.assert_not_called()
+
+
+def test_project_requires_live_opt_in(runner, flow_runner):
+    with pytest.raises(CommandError, match="--live"):
+        call_command(
+            "ai_evaluate",
+            "--scope",
+            "assistant_flow",
+            "--case-id",
+            "proj-004",
+            stdout=StringIO(),
+        )
+    runner.assert_not_called()
+    flow_runner.assert_not_called()
+
+
+def test_project_output_guard_runs_before_execution(runner, flow_runner, tmp_path):
+    with pytest.raises(CommandError, match="existing directory"):
+        call_command(
+            "ai_evaluate",
+            "--live",
+            "--scope",
+            "assistant_flow",
+            "--case-id",
+            "proj-004",
+            "--output",
+            str(tmp_path / "missing" / "report.json"),
+            stdout=StringIO(),
+        )
+    runner.assert_not_called()
+    flow_runner.assert_not_called()
+
+
+@pytest.mark.parametrize(("status", "returncode"), [("failed", 1), ("needs_review", 2)])
+def test_project_nonpassing_report_saved_before_exit(
+    runner, flow_runner, tmp_path, status, returncode
+):
+    result = {
+        "scope": "assistant_flow",
+        "case_id": "proj-004",
+        "scenario": "relevant",
+        "status": status,
+        "tool_calls": [{"tool": "Example tool", "error": "No controlled fixture"}],
+        "errors": [{"stage": "tool", "error": "No controlled fixture"}],
+    }
+    flow_runner.side_effect = None
+    flow_runner.return_value = result
+    output = StringIO()
+    destination = tmp_path / "project-result.json"
+    with pytest.raises(CommandError) as caught:
+        call_command(
+            "ai_evaluate",
+            "--live",
+            "--scope",
+            "assistant_flow",
+            "--case-id",
+            "proj-004",
+            "--output",
+            str(destination),
+            stdout=output,
+        )
+    assert caught.value.returncode == returncode
+    report = json.loads(destination.read_text())
+    assert report == json.loads(output.getvalue())
+    assert report["results"] == [result]
+    assert report["summary"][status] == 1
+    assert report["summary"]["passed"] == 0
+    runner.assert_not_called()
+
+
+def test_project_runner_exception_is_saved_with_selected_scope(runner, flow_runner, tmp_path):
+    flow_runner.side_effect = RuntimeError("Project provider failed")
+    destination = tmp_path / "project-error.json"
+    with pytest.raises(CommandError) as caught:
+        call_command(
+            "ai_evaluate",
+            "--live",
+            "--scope",
+            "assistant_flow",
+            "--case-id",
+            "proj-004",
+            "--scenario",
+            "all",
+            "--output",
+            str(destination),
+            stdout=StringIO(),
+        )
+    assert caught.value.returncode == 1
+    assert json.loads(destination.read_text())["results"] == [
+        {
+            "scope": "assistant_flow",
+            "case_id": "proj-004",
+            "scenario": "relevant",
+            "status": "failed",
+            "error": "RuntimeError: Project provider failed",
+        }
+    ]
+    flow_runner.assert_called_once_with("proj-004", "relevant", live=True)
     runner.assert_not_called()

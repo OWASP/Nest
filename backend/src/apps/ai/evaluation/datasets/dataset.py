@@ -13,7 +13,11 @@ BENCHMARK_CASES: list[EvalCase] = [
         expected_intent="project",
         expected_tools=["Get all OWASP flagship projects"],
         expected_keywords=["OWASP", "flagship", "project"],
-        notes="Evaluates retrieval and identification of flagship projects",
+        notes=(
+            "Flagship examples; https://owasp.org/projects/dependency-check and "
+            "https://owasp.org/projects/juice-shop; checked 2026-11-15. "
+            "Frozen examples, not an exhaustive catalogue."
+        ),
     ),
     EvalCase(
         id="proj-002",
@@ -38,8 +42,11 @@ BENCHMARK_CASES: list[EvalCase] = [
         category=EvalCategory.PROJECT,
         expected_intent="project",
         expected_tools=["Search for OWASP projects by name, topic, technology, or description"],
-        expected_keywords=["dependency", "vulnerabilites"],
-        notes="Evaluates retrieval of specific security scanner tools",
+        expected_keywords=["dependency", "vulnerabilities"],
+        notes=(
+            "Dependency-Check lookup; https://owasp.org/projects/dependency-check; "
+            "checked 2026-11-15"
+        ),
     ),
     # --- 2. CONTRIBUTION INTENT ---
     EvalCase(
@@ -183,7 +190,7 @@ BENCHMARK_CASES: list[EvalCase] = [
         expected_intent="rag",
         expected_tools=["Semantic search for OWASP content"],
         expected_keywords=["software", "security"],
-        notes="Evaluates documentation and policy search via RAG",
+        notes=("Bylaws Section 1.4; https://owasp.org/policy/bylaws; checked 2026-11-15"),
     ),
     EvalCase(
         id="rag-002",
@@ -192,7 +199,10 @@ BENCHMARK_CASES: list[EvalCase] = [
         expected_intent="rag",
         expected_tools=["Semantic search for OWASP content"],
         expected_keywords=["trademark", "logo", "policy"],
-        notes="Evaluates policy and trademark queries via RAG",
+        notes=(
+            "Trademark policy; https://owasp.org/policy/owasp-word-mark-usage-guidelines; "
+            "checked 2026-11-15"
+        ),
     ),
     EvalCase(
         id="rag-003",
@@ -201,7 +211,10 @@ BENCHMARK_CASES: list[EvalCase] = [
         expected_intent="rag",
         expected_tools=["Semantic search for OWASP content"],
         expected_keywords=["code of conduct", "speakers", "policy"],
-        notes="Evaluates code of conduct policy lookups",
+        notes=(
+            "Code of Conduct participant rules applied to event speakers; "
+            "https://owasp.org/policy/code-of-conduct; checked 2026-11-15"
+        ),
     ),
     # --- 7. COLLABORATIVE QUERIES (primary router intent) ---
     EvalCase(

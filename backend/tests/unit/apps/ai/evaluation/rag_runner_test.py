@@ -102,7 +102,7 @@ def test_rag_runner_requires_live_opt_in(mocker):
     ("case_id", "expected_error"),
     [
         ("unknown-case", ValueError),
-        ("rag-001", KeyError),
+        ("proj-001", KeyError),
     ],
 )
 def test_missing_cases_or_fixtures_fail_before_agent_creation(

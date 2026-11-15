@@ -8,10 +8,13 @@ from apps.ai.agents.contribution.tools import (
     get_gsoc_project_info,
 )
 from apps.ai.agents.project.tools import get_flagship_projects, search_projects
+from apps.ai.agents.project.tools.formatters import format_project_results
 from apps.ai.agents.rag.tools import semantic_search
 from apps.ai.common.intent import Intent
 from apps.ai.evaluation.datasets.dataset import get_case_by_id, get_dataset
+from apps.ai.evaluation.datasets.project_fixtures import get_project_fixture
 from apps.ai.evaluation.datasets.schema import AgentOutput, EvalCategory
+from apps.ai.evaluation.evaluators.response_evaluator import ResponseEvaluator
 from apps.ai.evaluation.evaluators.tool_evaluator import ToolEvaluator
 
 
@@ -147,3 +150,25 @@ def test_collaborative_gsoc_case_requires_project_retrieval():
             tools_used=[get_gsoc_project_info.name],
         ),
     ).passed
+
+
+def test_dependency_check_answer_satisfies_audited_case():
+    case = get_case_by_id("proj-004")
+    output = AgentOutput(
+        query=case.query,
+        response="OWASP Dependency-Check identifies dependencies with known vulnerabilities.",
+        intent="project",
+    )
+    assert ResponseEvaluator().evaluate(case, output).passed
+
+
+def test_flagship_snapshot_satisfies_existing_assertions():
+    case = get_case_by_id("proj-001")
+    output = AgentOutput(
+        query=case.query,
+        response=format_project_results(get_project_fixture(case.id), "Flagship"),
+        intent="project",
+        tools_used=[get_flagship_projects.name],
+    )
+    assert ResponseEvaluator().evaluate(case, output).passed
+    assert ToolEvaluator().evaluate(case, output).passed

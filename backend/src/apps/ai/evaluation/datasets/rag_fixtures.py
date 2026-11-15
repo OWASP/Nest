@@ -4,28 +4,46 @@ Text contains paraphrased source snapshots.
 Distances are artificial test values.
 
 Sources:
-    https://policy.owasp.org/operational/mark-usage-guidelines.html
+    https://owasp.org/policy/owasp-word-mark-usage-guidelines
     https://devguide.owasp.org/code_of_conduct/
-    https://policy.owasp.org/operational/events
-    https://policy.owasp.org/operational/code-of-conduct
+    https://owasp.org/policy/bylaws
+    https://owasp.org/policy/code-of-conduct
 """
 
 from copy import deepcopy
 
+TRADEMARK_DOCUMENTS = [
+    {
+        "text": (
+            "OWASP trademark policy requires licensed users to use logo "
+            "artwork supplied by the Foundation. They must preserve the "
+            "logo's proportions, colors, and arrangement. Use of the mark "
+            "must not imply OWASP endorsement of a company or its products."
+        ),
+        "context": "OWASP Word Mark Usage Guidelines; snapshot checked 2026-11-15",
+        "distance": 0.1,
+    }
+]
+
 RAG_FIXTURES = {
-    "rag-002": {
+    "rag-001": {
         "relevant": [
             {
                 "text": (
-                    "OWASP trademark policy requires licensed users to use logo "
-                    "artwork supplied by the Foundation. They must preserve the "
-                    "logo's proportions, colors, and arrangement. Use of the mark "
-                    "must not imply OWASP endorsement of a company or its products."
+                    "OWASP Foundation's bylaws describe its purpose as improving "
+                    "software security. Its activities include supporting projects, "
+                    "community events and chapters, educational resources, and "
+                    "branding programs."
                 ),
-                "context": "repository www-policy: OWASP Word Mark Usage Guidelines",
+                "context": "OWASP Bylaws, Section 1.4; snapshot checked 2026-11-15",
                 "distance": 0.1,
             }
         ],
+        "irrelevant": deepcopy(TRADEMARK_DOCUMENTS),
+        "empty": [],
+    },
+    "rag-002": {
+        "relevant": deepcopy(TRADEMARK_DOCUMENTS),
         "irrelevant": [
             {
                 "text": (
@@ -38,27 +56,24 @@ RAG_FIXTURES = {
             }
         ],
         "empty": [],
-    }
-}
-
-RAG_FIXTURES["rag-003"] = {
-    "relevant": [
-        {
-            "text": (
-                "OWASP's code of conduct policy applies to participants in "
-                "OWASP activities, including event speakers. Participants "
-                "must interact respectfully and must not harass or intimidate "
-                "others. OWASP events must follow the code of conduct and "
-                "the event attendee policy's anti-harassment provisions. "
-                "Presenters must also sign and follow the speaker/trainer "
-                "agreement."
-            ),
-            "context": ("repository www-policy: Events Policy and Code of Conduct"),
-            "distance": 0.1,
-        }
-    ],
-    "irrelevant": deepcopy(RAG_FIXTURES["rag-002"]["relevant"]),
-    "empty": [],
+    },
+    "rag-003": {
+        "relevant": [
+            {
+                "text": (
+                    "OWASP's code of conduct policy requires participants in "
+                    "OWASP activities to follow its rules. This includes speakers "
+                    "participating in events. Participants must treat others "
+                    "respectfully and must avoid harassment, intimidation, "
+                    "discrimination and abusive conduct."
+                ),
+                "context": ("OWASP Code of Conduct; snapshot checked 2026-11-15"),
+                "distance": 0.1,
+            }
+        ],
+        "irrelevant": deepcopy(TRADEMARK_DOCUMENTS),
+        "empty": [],
+    },
 }
 
 for scenarios in RAG_FIXTURES.values():

@@ -1,24 +1,25 @@
-"""Evaluate RAG agents or assistant flows against fixed retrieval fixtures."""
+"""Evaluate RAG agents or assistant flows against controlled tool fixtures."""
 
 import json
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.ai.evaluation.datasets.project_fixtures import PROJECT_FIXTURES
 from apps.ai.evaluation.datasets.rag_fixtures import RAG_FIXTURES
 from apps.ai.evaluation.flow_runner import run_flow_case
 from apps.ai.evaluation.rag_runner import run_rag_case
 
 
 class Command(BaseCommand):
-    help = "Evaluate RAG-agent or assistant-flow responses using fixed retrieval fixtures."
+    help = "Evaluate RAG-agent or assistant-flow responses using controlled tool fixtures."
     requires_system_checks: list[str] = []
 
     def add_arguments(self, parser):
         parser.add_argument("--live", action="store_true")
         parser.add_argument(
             "--case-id",
-            choices=tuple(RAG_FIXTURES),
+            choices=tuple(RAG_FIXTURES) + tuple(PROJECT_FIXTURES),
             default="rag-002",
         )
         parser.add_argument(
@@ -45,11 +46,26 @@ class Command(BaseCommand):
             raise CommandError(msg)
 
         case_id = options["case_id"]
-        scenarios = (
-            list(RAG_FIXTURES[case_id]) if options["scenario"] == "all" else [options["scenario"]]
-        )
 
         scope = options["scope"]
+
+        if case_id in RAG_FIXTURES:
+            supported_scenarios = tuple(RAG_FIXTURES[case_id])
+        elif scope == "assistant_flow" and case_id in PROJECT_FIXTURES:
+            supported_scenarios = ("relevant",)
+        else:
+            msg = f"Case '{case_id}' is unsupported in scope '{scope}'"
+            raise CommandError(msg)
+
+        requested_scenario = options["scenario"]
+        if requested_scenario != "all" and requested_scenario not in supported_scenarios:
+            msg = f"Scenario '{requested_scenario}' is unsupported for '{case_id}'"
+            raise CommandError(msg)
+
+        scenarios = (
+            list(supported_scenarios) if requested_scenario == "all" else [requested_scenario]
+        )
+
         runner = run_flow_case if scope == "assistant_flow" else run_rag_case
 
         results = []

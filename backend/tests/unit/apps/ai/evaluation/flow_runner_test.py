@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from apps.ai.agents.project import tools as project_tools
 from apps.ai.evaluation.datasets.dataset import get_case_by_id
 from apps.ai.evaluation.datasets.rag_fixtures import get_rag_fixture
 from apps.ai.evaluation.flow_runner import (
@@ -71,6 +72,40 @@ def boundaries(mocker):
 
 
 @pytest.fixture
+def project_boundaries(mocker, boundaries):
+    """Use actual project tool clones and flow, replacing only model boundaries."""
+    tools = [
+        project_tools.get_flagship_projects,
+        project_tools.get_production_projects,
+        project_tools.get_lab_projects,
+        project_tools.get_incubator_projects,
+        project_tools.get_project_age,
+        project_tools.search_projects,
+    ]
+    for tool in tools:
+        mocker.patch.object(
+            tool, "func", side_effect=AssertionError("Original project tool must not run")
+        )
+    boundaries.agent.role = "OWASP Project Specialist"
+    boundaries.agent.tools = tools
+    boundaries.project_factory = mocker.patch(
+        "apps.ai.evaluation.project_runner.create_project_agent", return_value=boundaries.agent
+    )
+    boundaries.route.return_value = {"intent": "project", "confidence": 0.95}
+
+    def answer_with_project_fixture(agent, query=None, **_kwargs):
+        if not agent.tools:
+            return "Combined project answer"
+        search = next(
+            tool for tool in agent.tools if tool.name == project_tools.search_projects.name
+        )
+        return search.run(query=query)
+
+    boundaries.execute.side_effect = answer_with_project_fixture
+    return boundaries
+
+
+@pytest.fixture
 def _original_functions(boundaries):
     """Verify restoration after every collector test, including failure cases."""
     assert assistant.get_cached_response is boundaries.cache_read
@@ -95,9 +130,10 @@ def _original_functions(boundaries):
 
 
 @pytest.mark.usefixtures("_original_functions")
-def test_collector_requires_live_opt_in(boundaries):
+@pytest.mark.parametrize("case_id", ["rag-002", "proj-004"])
+def test_collector_requires_live_opt_in(boundaries, case_id):
     with pytest.raises(ValueError, match="live=True"):
-        collect_flow_case("rag-002")
+        collect_flow_case(case_id)
     boundaries.analyze.assert_not_called()
     boundaries.create_agent.assert_not_called()
 
@@ -106,7 +142,7 @@ def test_collector_requires_live_opt_in(boundaries):
     ("case_id", "scenario", "error"),
     [
         ("unknown-case", "relevant", ValueError),
-        ("rag-001", "relevant", KeyError),
+        ("proj-003", "relevant", ValueError),
         ("rag-002", "unknown-scenario", KeyError),
     ],
 )
@@ -121,6 +157,126 @@ def test_invalid_selection_fails_before_model_execution(boundaries, case_id, sce
 
 
 @pytest.mark.usefixtures("_original_functions")
+def test_project_collector_records_real_flow_and_controlled_search(project_boundaries):
+    result = collect_flow_case("proj-004", live=True)
+    query = get_case_by_id("proj-004").query
+    assert result["scope"] == "assistant_flow"
+    assert result["case_id"] == "proj-004"
+    assert result["scenario"] == "relevant"
+    assert result["query"] == query
+    assert "Dependency-Check" in result["response"]
+    assert result["error"] is None
+    assert "status" not in result
+    assert "scores" not in result
+    assert [event["stage"] for event in result["events"]] == [
+        "process_query",
+        "analyze_query",
+        "route",
+        "execute_task",
+    ]
+    assert result["events"][2]["result"] == {"intent": "project", "confidence": 0.95}
+    assert result["events"][3]["role"] == "OWASP Project Specialist"
+    assert result["tool_calls"] == [
+        {
+            "tool": project_tools.search_projects.name,
+            "query": query,
+            "limit": 5,
+            "result_count": 1,
+        }
+    ]
+    project_boundaries.project_factory.assert_called_once_with()
+    project_boundaries.create_agent.assert_not_called()
+    project_boundaries.cache_read.assert_not_called()
+    project_boundaries.cache_write.assert_not_called()
+
+
+@pytest.mark.parametrize("scenario", ["irrelevant", "empty", "mixed", "all", "unknown"])
+@pytest.mark.usefixtures("_original_functions")
+def test_project_scenarios_are_rejected_before_models(project_boundaries, scenario):
+    with pytest.raises(ValueError, match="only the relevant scenario"):
+        collect_flow_case("proj-004", scenario, live=True)
+    project_boundaries.analyze.assert_not_called()
+    project_boundaries.route.assert_not_called()
+    project_boundaries.project_factory.assert_not_called()
+    project_boundaries.execute.assert_not_called()
+
+
+@pytest.mark.parametrize("intent", ["rag", "community"])
+@pytest.mark.usefixtures("_original_functions")
+def test_project_misrouting_blocks_uncontrolled_experts(project_boundaries, intent):
+    project_boundaries.route.return_value = {"intent": intent, "confidence": 0.9}
+    result = collect_flow_case("proj-004", live=True)
+    assert result["events"][2]["result"]["intent"] == intent
+    assert any(
+        event.get("error")
+        == f"UnsupportedFixtureError: No controlled fixtures for intent '{intent}'"
+        for event in result["events"]
+    )
+    assert result["tool_calls"] == []
+    project_boundaries.project_factory.assert_not_called()
+    project_boundaries.create_agent.assert_not_called()
+    project_boundaries.execute.assert_not_called()
+
+
+@pytest.mark.usefixtures("_original_functions")
+def test_project_provider_failure_remains_observable(project_boundaries):
+    project_boundaries.execute.side_effect = RuntimeError("Project provider failed")
+    result = collect_flow_case("proj-004", live=True)
+    assert result["error"] is None
+    assert result["response"].strip()
+    assert any(
+        event["stage"] == "execute_task"
+        and event.get("error") == "RuntimeError: Project provider failed"
+        for event in result["events"]
+    )
+    assert result["tool_calls"] == []
+
+
+@pytest.mark.usefixtures("_original_functions")
+def test_project_tool_error_survives_when_execution_catches_it(project_boundaries):
+    def catch_tool_error(agent, query=None, **_kwargs):
+        with pytest.raises(ValueError, match="No controlled fixture"):
+            agent.tools[1].run()
+        search = next(
+            tool for tool in agent.tools if tool.name == project_tools.search_projects.name
+        )
+        return search.run(query=query)
+
+    project_boundaries.execute.side_effect = catch_tool_error
+    result = collect_flow_case("proj-004", live=True)
+    assert result["error"] is None
+    assert "Dependency-Check" in result["response"]
+    assert not any(event.get("error") for event in result["events"])
+    assert result["tool_calls"][0] == {
+        "tool": project_tools.get_production_projects.name,
+        "error": f"No controlled fixture for tool '{project_tools.get_production_projects.name}'",
+    }
+    assert result["tool_calls"][1]["result_count"] == 1
+
+
+@pytest.mark.usefixtures("_original_functions")
+def test_project_collaboration_uses_controlled_experts_without_router(mocker, project_boundaries):
+    sub_queries = [
+        {"query": "Find Dependency-Check", "intent": "project"},
+        {"query": "Explain Dependency-Check", "intent": "project"},
+    ]
+    project_boundaries.analyze.return_value = {"is_simple": False, "sub_queries": sub_queries}
+    synthesizer = SimpleNamespace(
+        role="OWASP Result Synthesizer", llm=SimpleNamespace(model="test-model"), tools=[]
+    )
+    mocker.patch.object(collaborative, "create_synthesizer_agent", return_value=synthesizer)
+    result = collect_flow_case("proj-004", live=True)
+    assert result["response"] == "Combined project answer"
+    assert result["error"] is None
+    project_boundaries.route.assert_not_called()
+    assert project_boundaries.project_factory.call_count == 2
+    assert [call["query"] for call in result["tool_calls"]] == [
+        item["query"] for item in sub_queries
+    ]
+    assert all(event["stage"] != "route" for event in result["events"])
+
+
+@pytest.mark.usefixtures("_original_functions")
 def test_channel_case_is_rejected_before_model_execution(mocker, boundaries):
     case = replace(get_case_by_id("rag-002"), channel_id="C_TEST")
     mocker.patch("apps.ai.evaluation.flow_runner.get_case_by_id", return_value=case)
@@ -130,7 +286,7 @@ def test_channel_case_is_rejected_before_model_execution(mocker, boundaries):
     boundaries.create_agent.assert_not_called()
 
 
-@pytest.mark.parametrize("case_id", ["rag-002", "rag-003"])
+@pytest.mark.parametrize("case_id", ["rag-001", "rag-002", "rag-003"])
 @pytest.mark.parametrize("scenario", ["relevant", "irrelevant", "empty", "mixed"])
 @pytest.mark.usefixtures("_original_functions")
 def test_collector_records_real_flow_and_fixture_search(boundaries, case_id, scenario):
@@ -355,7 +511,7 @@ def record_for_scoring(raw_record):
     }
 
 
-@pytest.mark.parametrize("case_id", ["rag-002", "rag-003"])
+@pytest.mark.parametrize("case_id", ["rag-001", "rag-002", "rag-003"])
 @pytest.mark.parametrize(
     ("scenario", "status"),
     [
@@ -370,7 +526,9 @@ def test_grader_scores_positive_evidence_and_reviews_negative_evidence(
 ):
     record_for_scoring["case_id"] = case_id
     record_for_scoring["scenario"] = scenario
-    if case_id == "rag-003":
+    if case_id == "rag-001":
+        record_for_scoring["response"] = "OWASP improves software security"
+    elif case_id == "rag-003":
         record_for_scoring["response"] = "OWASP code of conduct policy for event speakers"
     if scenario in ("irrelevant", "empty"):
         record_for_scoring["tool_calls"][0]["supporting_result_count"] = 0
@@ -478,3 +636,201 @@ def test_flow_runner_retains_live_opt_in(boundaries):
     with pytest.raises(ValueError, match="live=True"):
         run_flow_case("rag-002")
     boundaries.analyze.assert_not_called()
+
+
+@pytest.fixture
+def project_record_for_scoring(record_for_scoring):
+    case = get_case_by_id("proj-004")
+    return record_for_scoring | {
+        "case_id": case.id,
+        "query": case.query,
+        "response": "Dependency-Check detects dependencies with known vulnerabilities.",
+        "events": [{"stage": "route", "result": {"intent": "project", "confidence": 0.95}}],
+        "tool_calls": [{"tool": project_tools.search_projects.name, "result_count": 1}],
+    }
+
+
+def test_project_grader_uses_project_counts_and_preserves_raw_record(project_record_for_scoring):
+    before = deepcopy(project_record_for_scoring)
+    result = score_flow_case(project_record_for_scoring)
+    assert result["status"] == "passed"
+    assert [score["name"] for score in result["scores"]] == [
+        "intent",
+        "tool_selection",
+        "response_coverage",
+    ]
+    assert all(score["passed"] for score in result["scores"])
+    assert result["failure_reasons"] == []
+    assert result["errors"] == []
+    assert result["skipped"] == []
+    assert result is not project_record_for_scoring
+    assert project_record_for_scoring == before
+
+
+@pytest.mark.parametrize("count", [None, 0, -1])
+def test_project_grader_requires_positive_project_count(project_record_for_scoring, count):
+    call = project_record_for_scoring["tool_calls"][0]
+    if count is None:
+        del call["result_count"]
+    else:
+        call["result_count"] = count
+    call["supporting_result_count"] = 1
+    result = score_flow_case(project_record_for_scoring)
+    assert result["status"] == "failed"
+    assert "No supporting fixture results were returned" in result["failure_reasons"]
+
+
+def test_rag_grader_does_not_treat_irrelevant_results_as_support(record_for_scoring):
+    record_for_scoring["tool_calls"][0] = {
+        "tool": "Semantic search for OWASP content",
+        "result_count": 5,
+        "supporting_result_count": 0,
+    }
+    result = score_flow_case(record_for_scoring)
+    assert result["status"] == "failed"
+    assert "No supporting fixture results were returned" in result["failure_reasons"]
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "reason"),
+    [
+        ("tool_calls", [], "Missing expected tools"),
+        ("response", "", "empty response"),
+        ("response", "A useful OWASP project", "Missing expected keywords"),
+        (
+            "events",
+            [{"stage": "route", "result": {"intent": "rag", "confidence": 0.9}}],
+            "Expected intent",
+        ),
+    ],
+)
+def test_project_grader_rejects_incomplete_observations(
+    project_record_for_scoring, field, value, reason
+):
+    project_record_for_scoring[field] = value
+    result = score_flow_case(project_record_for_scoring)
+    assert result["status"] == "failed"
+    assert any(reason in failure for failure in result["failure_reasons"])
+
+
+def test_project_without_routing_requires_review(project_record_for_scoring):
+    project_record_for_scoring["events"] = []
+    result = score_flow_case(project_record_for_scoring)
+    assert result["status"] == "needs_review"
+    assert result["skipped"][0]["evaluator"] == "intent"
+    assert result["failure_reasons"] == []
+
+
+@pytest.mark.parametrize("case_id", ["rag-002", "proj-004"])
+@pytest.mark.parametrize("scenario", ["unknown", "all"])
+def test_grader_rejects_unknown_scenarios(record_for_scoring, case_id, scenario):
+    record_for_scoring.update(case_id=case_id, scenario=scenario)
+    with pytest.raises(ValueError, match="Unsupported scenario"):
+        score_flow_case(record_for_scoring)
+
+
+@pytest.mark.parametrize("scenario", ["mixed", "empty", "irrelevant"])
+def test_project_grader_rejects_unimplemented_scenarios(project_record_for_scoring, scenario):
+    project_record_for_scoring["scenario"] = scenario
+    with pytest.raises(ValueError, match="Unsupported scenario"):
+        score_flow_case(project_record_for_scoring)
+
+
+def test_grader_rejects_case_without_controlled_fixtures(record_for_scoring):
+    record_for_scoring["case_id"] = "proj-003"
+    with pytest.raises(ValueError, match="No grading rules"):
+        score_flow_case(record_for_scoring)
+
+
+def test_error_extraction_copies_tool_errors_and_preserves_order(raw_record):
+    event = {"stage": "execute_task", "error": "Provider failed"}
+    tool_error = {"tool": "Blocked tool", "error": "No fixture", "query": "Example"}
+    raw_record["events"] = [event]
+    raw_record["tool_calls"] = [
+        {"tool": "Successful tool", "result_count": 1},
+        tool_error,
+        {"tool": "Successful tool", "error": None},
+    ]
+    raw_record["error"] = "Collector failed"
+    before = deepcopy(raw_record)
+    errors = get_flow_errors(raw_record)
+    assert errors == [
+        event,
+        tool_error | {"stage": "tool"},
+        {"stage": "collector", "error": "Collector failed"},
+    ]
+    errors[1]["error"] = "Changed report"
+    assert raw_record == before
+
+
+@pytest.mark.parametrize("case_id", ["rag-002", "proj-004"])
+def test_failed_tool_call_cannot_supply_evidence(
+    record_for_scoring, project_record_for_scoring, case_id
+):
+    record = project_record_for_scoring if case_id == "proj-004" else record_for_scoring
+    record["tool_calls"][0]["error"] = "Tool failed after preparing results"
+    result = score_flow_case(record)
+    assert result["status"] == "failed"
+    assert "No supporting fixture results were returned" in result["failure_reasons"]
+    assert "Execution errors were recorded" in result["failure_reasons"]
+    assert result["errors"][0]["stage"] == "tool"
+
+
+@pytest.mark.usefixtures("_original_functions")
+def test_project_runner_collects_and_grades_real_control_flow(project_boundaries):
+    result = run_flow_case("proj-004", live=True)
+    assert result["status"] == "passed"
+    assert result["scope"] == "assistant_flow"
+    assert result["errors"] == []
+    assert result["tool_calls"][0]["result_count"] == 1
+    project_boundaries.analyze.assert_called_once()
+
+
+@pytest.mark.usefixtures("_original_functions")
+def test_caught_project_tool_failure_fails_full_flow_grading(project_boundaries):
+    def catch_error_and_answer(agent, query=None, **_kwargs):
+        with pytest.raises(ValueError, match="No controlled fixture"):
+            agent.tools[1].run()
+        search = next(
+            tool for tool in agent.tools if tool.name == project_tools.search_projects.name
+        )
+        return search.run(query=query)
+
+    project_boundaries.execute.side_effect = catch_error_and_answer
+    result = run_flow_case("proj-004", live=True)
+    assert all(score["passed"] for score in result["scores"])
+    assert result["status"] == "failed"
+    assert result["failure_reasons"] == ["Execution errors were recorded"]
+    assert result["errors"] == [result["tool_calls"][0] | {"stage": "tool"}]
+    assert not any(event.get("error") for event in result["events"])
+
+
+@pytest.mark.usefixtures("_original_functions")
+def test_flagship_case_collects_and_grades_real_flow(project_boundaries):
+    def answer_with_flagship(agent, query=None, **_kwargs):  # noqa: ARG001
+        tool = next(
+            tool for tool in agent.tools if tool.name == project_tools.get_flagship_projects.name
+        )
+        return tool.run()
+
+    project_boundaries.execute.side_effect = answer_with_flagship
+    result = run_flow_case("proj-001", live=True)
+    assert result["status"] == "passed"
+    assert result["case_id"] == "proj-001"
+    assert "Juice Shop" in result["response"]
+    assert "Dependency-Check" in result["response"]
+    assert result["tool_calls"] == [
+        {"tool": project_tools.get_flagship_projects.name, "limit": 15, "result_count": 2}
+    ]
+    assert result["errors"] == []
+    assert all(score["passed"] for score in result["scores"])
+    project_boundaries.create_agent.assert_not_called()
+
+
+@pytest.mark.usefixtures("_original_functions")
+def test_search_cannot_replace_required_flagship_tool(project_boundaries):
+    result = run_flow_case("proj-001", live=True)
+    project_boundaries.execute.assert_called_once()
+    assert result["tool_calls"][0]["tool"] == project_tools.search_projects.name
+    assert result["status"] == "failed"
+    assert any("Missing expected tools" in reason for reason in result["failure_reasons"])

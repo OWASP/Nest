@@ -1,9 +1,12 @@
 import pytest
 
+from apps.ai.evaluation.datasets.dataset import get_case_by_id
 from apps.ai.evaluation.datasets.rag_fixtures import get_rag_fixture
+from apps.ai.evaluation.datasets.schema import AgentOutput
+from apps.ai.evaluation.evaluators.response_evaluator import ResponseEvaluator
 
 
-@pytest.mark.parametrize("case_id", ["rag-002", "rag-003"])
+@pytest.mark.parametrize("case_id", ["rag-001", "rag-002", "rag-003"])
 @pytest.mark.parametrize("scenario", ["relevant", "irrelevant", "mixed"])
 def test_fixture_results_are_independent(case_id, scenario):
     documents = get_rag_fixture(case_id, scenario)
@@ -19,12 +22,12 @@ def test_fixture_results_are_independent(case_id, scenario):
     assert fresh_documents[0]["text"] == original_text
 
 
-@pytest.mark.parametrize("case_id", ["rag-002", "rag-003"])
+@pytest.mark.parametrize("case_id", ["rag-001", "rag-002", "rag-003"])
 def test_empty_retrieval_returns_no_documents(case_id):
     assert get_rag_fixture(case_id, "empty") == []
 
 
-@pytest.mark.parametrize("case_id", ["rag-002", "rag-003"])
+@pytest.mark.parametrize("case_id", ["rag-001", "rag-002", "rag-003"])
 def test_mixed_fixture_places_unrelated_document_before_support(case_id):
     mixed = get_rag_fixture(case_id, "mixed")
 
@@ -42,3 +45,15 @@ def test_mixed_fixture_places_unrelated_document_before_support(case_id):
 def test_unknown_fixture_is_rejected(case_id, scenario):
     with pytest.raises(KeyError):
         get_rag_fixture(case_id, scenario)
+
+
+@pytest.mark.parametrize("case_id", ["rag-001", "rag-002", "rag-003"])
+def test_supporting_evidence_satisfies_required_keywords(case_id):
+    case = get_case_by_id(case_id)
+    documents = get_rag_fixture(case_id, "relevant")
+    output = AgentOutput(
+        query=case.query,
+        response=" ".join(document["text"] for document in documents),
+        intent="rag",
+    )
+    assert ResponseEvaluator().evaluate(case, output).passed

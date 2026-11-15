@@ -3,11 +3,16 @@
 from dataclasses import asdict
 
 from apps.ai.evaluation.datasets.dataset import get_case_by_id
+from apps.ai.evaluation.datasets.project_fixtures import PROJECT_FIXTURES
+from apps.ai.evaluation.datasets.rag_fixtures import RAG_FIXTURES
 from apps.ai.evaluation.datasets.schema import AgentOutput
 from apps.ai.evaluation.evaluators.intent_evaluator import IntentEvaluator
 from apps.ai.evaluation.evaluators.response_evaluator import ResponseEvaluator
 from apps.ai.evaluation.evaluators.tool_evaluator import ToolEvaluator
-from apps.ai.evaluation.fixture_agents import use_rag_fixtures
+from apps.ai.evaluation.fixture_agents import (
+    use_project_fixtures,
+    use_rag_fixtures,
+)
 from apps.ai.evaluation.flow_observer import observe_flow
 from apps.ai.flows import assistant
 
@@ -18,7 +23,7 @@ def collect_flow_case(
     *,
     live: bool = False,
 ) -> dict:
-    """Collect an assistant execution without scores using RAG fixtures."""
+    """Collect an assistant execution using controlled tool fixtures."""
     if not live:
         msg = "Pass live=True to enable an LLM evaluation"
         raise ValueError(msg)
@@ -33,11 +38,24 @@ def collect_flow_case(
         raise ValueError(msg)
 
     tool_calls: list[dict] = []
+
+    if case_id in RAG_FIXTURES:
+        fixture_context = use_rag_fixtures(case_id, scenario, tool_calls)
+    elif case_id in PROJECT_FIXTURES:
+        if scenario != "relevant":
+            msg = "Project fixtures currently support only the relevant scenario"
+            raise ValueError(msg)
+
+        fixture_context = use_project_fixtures(case_id, tool_calls)
+    else:
+        msg = f"No controlled fixtures for benchmark case: {case_id}"
+        raise ValueError(msg)
+
     response = None
     error = None
 
     with (
-        use_rag_fixtures(case_id, scenario, tool_calls),
+        fixture_context,
         observe_flow() as events,
     ):
         try:
@@ -96,10 +114,24 @@ def score_flow_intent(record: dict) -> dict:
 
 
 def score_flow_case(record: dict) -> dict:
-    """Grade a collected flow using the current RAG fixture rules."""
+    """Grade a collected flow using its controlled fixture rules."""
     case = get_case_by_id(record["case_id"])
     if case is None:
         msg = f"Unknown benchmark case: {record['case_id']}"
+        raise ValueError(msg)
+
+    if case.id in RAG_FIXTURES:
+        support_count_key = "supporting_result_count"
+        supported_scenarios = tuple(RAG_FIXTURES[case.id])
+    elif case.id in PROJECT_FIXTURES:
+        support_count_key = "result_count"
+        supported_scenarios = ("relevant",)
+    else:
+        msg = f"No grading rules for benchmark case: {case.id}"
+        raise ValueError(msg)
+
+    if record["scenario"] not in supported_scenarios:
+        msg = f"Unsupported scenario '{record['scenario']}' for {case.id}"
         raise ValueError(msg)
 
     intent_result = score_flow_intent(record)
@@ -131,9 +163,10 @@ def score_flow_case(record: dict) -> dict:
         failure_reasons.append("Assistant returned an empty response")
 
     if requires_support and not any(
-        call.get("supporting_result_count", 0) for call in record["tool_calls"]
+        not call.get("error") and call.get(support_count_key, 0) > 0
+        for call in record["tool_calls"]
     ):
-        failure_reasons.append("No supporting fixture documents were returned")
+        failure_reasons.append("No supporting fixture results were returned")
 
     errors = get_flow_errors(record)
     if errors:
@@ -173,6 +206,8 @@ def get_flow_errors(record: dict) -> list[dict]:
         for event in record["events"]
         if event.get("error") or event["stage"] == "logged_error"
     ]
+
+    errors.extend(call | {"stage": "tool"} for call in record["tool_calls"] if call.get("error"))
 
     if record["error"]:
         errors.append(
