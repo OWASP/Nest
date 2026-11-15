@@ -7,9 +7,9 @@ const MODULE_ISSUE_VIEW_FIELDS = gql`
     menteeCanManageDeadlines
     startedAt
     endedAt
-    taskDeadline(issueNumber: $number)
-    taskAssignedAt(issueNumber: $number)
-    issueByNumber(number: $number) {
+    taskDeadline(issueId: $issueId)
+    taskAssignedAt(issueId: $issueId)
+    issueById(issueId: $issueId) {
       id
       number
       title
@@ -41,13 +41,13 @@ const MODULE_ISSUE_VIEW_FIELDS = gql`
         }
       }
     }
-    interestedUsers(issueNumber: $number) {
+    interestedUsers(issueId: $issueId) {
       id
       login
       name
       avatarUrl
     }
-    issueMentees(issueNumber: $number) {
+    issueMentees(issueId: $issueId) {
       id
       login
       name
@@ -60,7 +60,7 @@ export const GET_MANAGEMENT_MODULE_ISSUE_VIEW = gql`
   query GetManagementModuleIssueView(
     $programKey: String!
     $moduleKey: String!
-    $number: Int!
+    $issueId: ID!
     $limit: Int = 4
     $offset: Int = 0
   ) {
@@ -75,7 +75,7 @@ export const GET_MODULE_ISSUE_VIEW = gql`
   query GetModuleIssueView(
     $programKey: String!
     $moduleKey: String!
-    $number: Int!
+    $issueId: ID!
     $limit: Int = 4
     $offset: Int = 0
   ) {
@@ -90,13 +90,13 @@ export const ASSIGN_ISSUE_TO_USER = gql`
   mutation AssignIssueToUser(
     $programKey: String!
     $moduleKey: String!
-    $issueNumber: Int!
+    $issueId: ID!
     $userLogin: String!
   ) {
     assignIssueToUser(
       programKey: $programKey
       moduleKey: $moduleKey
-      issueNumber: $issueNumber
+      issueId: $issueId
       userLogin: $userLogin
     ) {
       id
@@ -108,13 +108,13 @@ export const UNASSIGN_ISSUE_FROM_USER = gql`
   mutation UnassignIssueFromUser(
     $programKey: String!
     $moduleKey: String!
-    $issueNumber: Int!
+    $issueId: ID!
     $userLogin: String!
   ) {
     unassignIssueFromUser(
       programKey: $programKey
       moduleKey: $moduleKey
-      issueNumber: $issueNumber
+      issueId: $issueId
       userLogin: $userLogin
     ) {
       id
@@ -126,13 +126,13 @@ export const SET_TASK_DEADLINE = gql`
   mutation SetTaskDeadline(
     $programKey: String!
     $moduleKey: String!
-    $issueNumber: Int!
+    $issueId: ID!
     $deadlineAt: DateTime!
   ) {
     setTaskDeadline(
       programKey: $programKey
       moduleKey: $moduleKey
-      issueNumber: $issueNumber
+      issueId: $issueId
       deadlineAt: $deadlineAt
     ) {
       id
@@ -141,8 +141,8 @@ export const SET_TASK_DEADLINE = gql`
 `
 
 export const CLEAR_TASK_DEADLINE = gql`
-  mutation ClearTaskDeadline($programKey: String!, $moduleKey: String!, $issueNumber: Int!) {
-    clearTaskDeadline(programKey: $programKey, moduleKey: $moduleKey, issueNumber: $issueNumber) {
+  mutation ClearTaskDeadline($programKey: String!, $moduleKey: String!, $issueId: ID!) {
+    clearTaskDeadline(programKey: $programKey, moduleKey: $moduleKey, issueId: $issueId) {
       id
     }
   }
