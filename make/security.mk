@@ -162,23 +162,16 @@ security-dependency-check-osv:
 
 security-license-check: ## Check repository files for licenses outside the allowlist
 	@echo "Running FOSSology license check..."
-	if [[ ! -f .fossology-allowlist.json ]]; then
-		echo "Missing .fossology-allowlist.json" >&2
-		exit 1
-	fi
 	image="$$(grep -E '^FROM fossology/fossology:' docker/fossology/Dockerfile | sed 's/^FROM //')"
 	args=(
 		'--rm'
 		'-i'
 		'-v=$(CURDIR):/repo:ro'
 		"$$image"
-		'set -euo pipefail; mkdir /src; tar -C /repo --null -T - -c | tar -C /src -x; cd /src; /bin/fossologyscanner nomos ojo repo --allowlist-path /repo/.fossology-allowlist.json'
+		'bash /repo/tools/security/fossology_scan.sh /repo'
 	)
 	# Scan only files git tracks or would track, so .git, node_modules and caches are skipped.
-	# Files deleted from the working tree are dropped here; any other copy error fails the check.
-	git ls-files -z --cached --others --exclude-standard \
-		| while IFS= read -r -d '' path; do if [[ -e $$path || -L $$path ]]; then printf '%s\0' "$$path"; fi; done \
-		| docker run "$${args[@]}"
+	git ls-files -z --cached --others --exclude-standard | docker run "$${args[@]}"
 
 security-repository-scan-trivy:
 	@echo "Running Trivy repository scan..."
