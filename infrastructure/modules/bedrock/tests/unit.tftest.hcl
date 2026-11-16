@@ -43,8 +43,8 @@ run "test_bedrock_inference_profile_policy" {
     model_name  = "eu.amazon.nova-lite-v1:0"
   }
   assert {
-    condition     = jsondecode(aws_iam_policy.main.policy).Statement[0].Resource == [data.aws_bedrock_inference_profile.main[0].inference_profile_arn] && jsondecode(aws_iam_policy.main.policy).Statement[0].Action == ["bedrock:InvokeModel", "bedrock:GetInferenceProfile"]
-    error_message = "Profile invocation and lookup must be restricted to the selected profile."
+    condition     = length(jsondecode(aws_iam_policy.main.policy).Statement) == 2 && jsondecode(aws_iam_policy.main.policy).Statement[0].Resource == [data.aws_bedrock_inference_profile.main[0].inference_profile_arn] && jsondecode(aws_iam_policy.main.policy).Statement[0].Action == ["bedrock:InvokeModel", "bedrock:GetInferenceProfile"]
+    error_message = "The policy must contain exactly two statements, with profile invocation and lookup restricted to the selected profile."
   }
   assert {
     condition     = toset(jsondecode(aws_iam_policy.main.policy).Statement[1].Resource) == toset([for model in data.aws_bedrock_inference_profile.main[0].models : model.model_arn]) && jsondecode(aws_iam_policy.main.policy).Statement[1].Condition.StringEquals["bedrock:InferenceProfileArn"] == data.aws_bedrock_inference_profile.main[0].inference_profile_arn
