@@ -1,0 +1,31 @@
+{#- Nest docs footer: socials, logos, copyright -#}
+<footer class="md-footer">
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid nest-footer">
+      {% if config.extra.social %} {% include "partials/social.html" %} {% endif %}
+      <div class="nest-footer__logos">
+        <a
+          href="https://owasp.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nest-footer__logo nest-footer__logo--owasp"
+          aria-label="OWASP Foundation"
+        >
+          <img src="{{ 'assets/images/owasp-logo.svg' | url }}" alt="OWASP Logo" />
+        </a>
+        <div class="nest-footer__separator" aria-hidden="true"></div>
+        <a
+          href="https://nest.owasp.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nest-footer__logo nest-footer__logo--nest"
+          aria-label="Nest home"
+        >
+          <img src="{{ 'assets/images/logo.png' | url }}" alt="Nest Logo" />
+          <span>Nest</span>
+        </a>
+      </div>
+      {% include "partials/copyright.html" %}
+    </div>
+  </div>
+</footer>

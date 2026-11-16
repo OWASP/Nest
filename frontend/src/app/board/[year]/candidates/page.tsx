@@ -18,6 +18,7 @@ import {
   GetChapterByKeyDocument,
   GetProjectByKeyDocument,
 } from 'types/__generated__/boardQueries.generated'
+import { contributionCount } from 'utils/contributionDataUtils'
 import { formatDate } from 'utils/dateFormatter'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -232,7 +233,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
         try {
           const { data } = await client.query({
             query: GetChapterByKeyDocument,
-            variables: { key: key.replace('www-chapter-', '') },
+            variables: { key },
           })
 
           if (data?.chapter) {
@@ -261,7 +262,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
         try {
           const { data } = await client.query({
             query: GetProjectByKeyDocument,
-            variables: { key: key.replace('www-project-', '') },
+            variables: { key },
           })
 
           if (data?.project) {
@@ -478,23 +479,20 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             ) : (
               <div className="flex flex-wrap gap-2">
                 {ledChapters.map((chapter) => {
-                  // Strip prefix if present to get bare key
-                  const bareKey = chapter.key.startsWith('www-chapter-')
-                    ? chapter.key.replace('www-chapter-', '')
-                    : chapter.key
-                  // Check both key formats for compatibility
-                  const directKey = snapshot?.chapterContributions?.[bareKey]
-                  const withPrefix = snapshot?.chapterContributions?.[`www-chapter-${bareKey}`]
-                  const contributionCount = directKey || withPrefix || 0
+                  const count = contributionCount(
+                    snapshot?.chapterContributions,
+                    chapter.key,
+                    'www-chapter-'
+                  )
 
                   return (
                     <Link
                       key={chapter.id}
-                      href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
+                      href={`/chapters/${chapter.key}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                        contributionCount === 0
+                        count === 0
                           ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
                           : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
                       }`}
@@ -503,35 +501,30 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                       <span>{chapter.name}</span>
                       <span
                         className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                          contributionCount === 0
+                          count === 0
                             ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
                         }`}
                       >
-                        {contributionCount === 0
-                          ? 'no contributions'
-                          : `${contributionCount} contributions`}
+                        {count === 0 ? 'no contributions' : `${count} contributions`}
                       </span>
                     </Link>
                   )
                 })}
                 {ledProjects.map((project) => {
-                  // Strip prefix if present to get bare key
-                  const bareKey = project.key.startsWith('www-project-')
-                    ? project.key.replace('www-project-', '')
-                    : project.key
-                  // Check both key formats for compatibility
-                  const directKey = snapshot?.projectContributions?.[bareKey]
-                  const withPrefix = snapshot?.projectContributions?.[`www-project-${bareKey}`]
-                  const contributionCount = directKey || withPrefix || 0
+                  const count = contributionCount(
+                    snapshot?.projectContributions,
+                    project.key,
+                    'www-project-'
+                  )
                   return (
                     <Link
                       key={project.id}
-                      href={`/projects/${project.key.replace('www-project-', '')}`}
+                      href={`/projects/${project.key}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                        contributionCount === 0
+                        count === 0
                           ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
                           : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
                       }`}
@@ -540,14 +533,12 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                       <span>{project.name}</span>
                       <span
                         className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                          contributionCount === 0
+                          count === 0
                             ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
                         }`}
                       >
-                        {contributionCount === 0
-                          ? 'no contributions'
-                          : `${contributionCount} contributions`}
+                        {count === 0 ? 'no contributions' : `${count} contributions`}
                       </span>
                     </Link>
                   )

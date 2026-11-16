@@ -35,6 +35,7 @@ export default [
       'frontend/.next/**',
       'frontend/.pnpm-store/**',
       'frontend/build/**',
+      'frontend/coverage/**',
       'frontend/dist/**',
       'frontend/next-env.d.ts',
       'frontend/src/types/__generated__/**',
@@ -206,6 +207,12 @@ export default [
     files: ['frontend/src/utils/logger.ts'],
     rules: {
       'no-console': 'off',
+    },
+  },
+  {
+    files: ['frontend/src/components/CalendarButton.tsx'],
+    rules: {
+      'no-console': ['error', { allow: ['warn'] }],
     },
   },
   {

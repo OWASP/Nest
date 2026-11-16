@@ -6,23 +6,26 @@ test-e2e: ## Run e2e tests
 
 # Implementation targets.
 
-e2e-db-init:
-	@$(MAKE) fetch-nest-dump
+E2E_COMPOSE = docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml
+
+e2e-db-init: fetch-nest-dump
 	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
-	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml build -q backend \
-		1>/dev/null
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit \
-		--attach data-loader \
-		--no-build \
-		--quiet-pull \
-		backend cache db data-loader \
-		--remove-orphans
+	docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
+	build_args=(build -q backend)
+	DOCKER_BUILDKIT=1 $(E2E_COMPOSE) "$${build_args[@]}" 1>/dev/null
+	up_args=(
+		up
+		'--abort-on-container-exit'
+		'--attach=data-loader'
+		'--no-build'
+		'--quiet-pull'
+		backend
+		cache
+		db
+		data-loader
+		'--remove-orphans'
+	)
+	DOCKER_BUILDKIT=1 $(E2E_COMPOSE) "$${up_args[@]}"
 
 e2e-load-data:
 	@$(MAKE) backend-data-load-e2e
@@ -32,39 +35,53 @@ e2e-test:
 	@$(MAKE) e2e-test-no-db-init
 
 e2e-test-no-db-init:
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml build -q backend frontend e2e-tests \
-		1>/dev/null
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit \
-		--attach e2e-tests \
-		--no-build \
-		--quiet-pull \
-		backend cache db frontend e2e-tests \
-		--remove-orphans
+	@build_args=(build -q backend frontend e2e-tests)
+	DOCKER_BUILDKIT=1 $(E2E_COMPOSE) "$${build_args[@]}" 1>/dev/null
+	up_args=(
+		up
+		'--abort-on-container-exit'
+		'--attach=e2e-tests'
+		'--no-build'
+		'--quiet-pull'
+		backend
+		cache
+		db
+		frontend
+		e2e-tests
+		'--remove-orphans'
+	)
+	DOCKER_BUILDKIT=1 $(E2E_COMPOSE) "$${up_args[@]}"
 
 e2e-test-run-backend:
-	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
+	@up_args=(
+		up
+		'--build'
+		'--remove-orphans'
+		'--abort-on-container-exit'
+		backend
+		db
+		cache
+	)
+	DOCKER_BUILDKIT=1 $(E2E_COMPOSE) "$${up_args[@]}"
 
 e2e-test-ui:
 	@$(MAKE) e2e-db-init
 	@$(MAKE) e2e-test-ui-no-db-init
 
 e2e-test-ui-no-db-init:
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml build -q backend frontend e2e-tests \
-		1>/dev/null
-	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit \
-		--attach e2e-tests \
-		--no-build \
-		--quiet-pull \
-		backend cache db frontend e2e-tests \
-		--remove-orphans
+	@build_args=(build -q backend frontend e2e-tests)
+	DOCKER_BUILDKIT=1 $(E2E_COMPOSE) "$${build_args[@]}" 1>/dev/null
+	up_args=(
+		up
+		'--abort-on-container-exit'
+		'--attach=e2e-tests'
+		'--no-build'
+		'--quiet-pull'
+		backend
+		cache
+		db
+		frontend
+		e2e-tests
+		'--remove-orphans'
+	)
+	DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" $(E2E_COMPOSE) "$${up_args[@]}"
