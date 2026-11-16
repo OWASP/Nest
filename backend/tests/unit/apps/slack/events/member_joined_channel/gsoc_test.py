@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.constants import OWASP_GSOC_CHANNEL_ID
 from apps.slack.events.member_joined_channel.gsoc import Gsoc
@@ -18,71 +18,48 @@ class TestGsocEventHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.fixture
-    def check_settings_restored(self, monkeypatch, events_enabled):
-        """Check setting restoration for each handler case, including when run alone."""
-        with monkeypatch.context() as initial_settings:
-            initial_settings.setattr(settings, "SLACK_EVENTS_ENABLED", not events_enabled)
-            yield
-            monkeypatch.undo()
-            assert settings.SLACK_EVENTS_ENABLED is not events_enabled
-
-    @pytest.mark.usefixtures("check_settings_restored")
-    @pytest.mark.parametrize(
-        ("events_enabled", "expected_messages"),
-        [
-            (False, []),
-            (
-                True,
-                [
-                    "Hello <@U123456>",
-                    "start your journey",
-                    "excited",
-                    "feedback",
-                ],
-            ),
-        ],
-    )
-    def test_handler_responses(
-        self,
-        events_enabled,
-        expected_messages,
-        mock_slack_event,
-        mock_slack_client,
-        monkeypatch,
-    ):
-        """Check gsoc messages for each event setting and restore the setting."""
-        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", events_enabled)
+    @override_settings(SLACK_EVENTS_ENABLED=True)
+    def test_handler_responses(self, mock_slack_event, mock_slack_client):
+        expected_messages = [
+            "Hello <@U123456>",
+            "start your journey",
+            "excited",
+            "feedback",
+        ]
 
         gsoc = Gsoc()
         gsoc.handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
 
-        if not events_enabled:
-            mock_slack_client.chat_postEphemeral.assert_not_called()
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-        else:
-            # Check that ephemeral message was sent
-            mock_slack_client.chat_postEphemeral.assert_called_once()
-            ephemeral_call_args = mock_slack_client.chat_postEphemeral.call_args
-            assert ephemeral_call_args[1]["channel"] == mock_slack_event["channel"]
-            assert ephemeral_call_args[1]["user"] == mock_slack_event["user"]
+        # Check that ephemeral message was sent
+        mock_slack_client.chat_postEphemeral.assert_called_once()
+        ephemeral_call_args = mock_slack_client.chat_postEphemeral.call_args
+        assert ephemeral_call_args[1]["channel"] == mock_slack_event["channel"]
+        assert ephemeral_call_args[1]["user"] == mock_slack_event["user"]
 
-            mock_slack_client.conversations_open.assert_called_once_with(
-                users=mock_slack_event["user"]
-            )
+        mock_slack_client.conversations_open.assert_called_once_with(
+            users=mock_slack_event["user"]
+        )
 
-            _, kwargs = mock_slack_client.chat_postMessage.call_args
-            blocks = kwargs["blocks"]
-            block_texts = []
-            for block in blocks:
-                if block.get("type") == "section":
-                    text = block.get("text", {}).get("text", "")
-                    block_texts.append(text)
-            combined_text = " ".join(block_texts)
+        _, kwargs = mock_slack_client.chat_postMessage.call_args
+        blocks = kwargs["blocks"]
+        block_texts = []
+        for block in blocks:
+            if block.get("type") == "section":
+                text = block.get("text", {}).get("text", "")
+                block_texts.append(text)
+        combined_text = " ".join(block_texts)
 
-            for message in expected_messages:
-                assert message in combined_text
+        for message in expected_messages:
+            assert message in combined_text
+
+    @override_settings(SLACK_EVENTS_ENABLED=False)
+    def test_handler_when_events_disabled(self, mock_slack_event, mock_slack_client):
+        gsoc = Gsoc()
+        gsoc.handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
+
+        mock_slack_client.chat_postEphemeral.assert_not_called()
+        mock_slack_client.conversations_open.assert_not_called()
+        mock_slack_client.chat_postMessage.assert_not_called()
 
     @pytest.mark.parametrize(
         ("channel_id", "expected_result"),

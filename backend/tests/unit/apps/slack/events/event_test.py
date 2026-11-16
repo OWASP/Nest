@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
+from django.test import override_settings
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.blocks import DIVIDER, SECTION_BREAK
@@ -68,17 +69,11 @@ class TestEventBase:
         assert event_instance.ephemeral_message_template_path is None
 
     @patch.object(MockEvent, "handle_event")
+    @override_settings(SLACK_EVENTS_ENABLED=False)
     def test_handler_when_events_disabled(
-        self,
-        mock_handle_event,
-        settings,
-        event_instance,
-        mock_event_payload,
-        mock_client,
-        monkeypatch,
+        self, mock_handle_event, event_instance, mock_event_payload, mock_client
     ):
         """Tests that the handler exits early if events are disabled."""
-        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", False)
         ack = MagicMock()
         event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
         ack.assert_called_once()
@@ -86,18 +81,16 @@ class TestEventBase:
 
     @patch("apps.slack.events.event.logger")
     @patch.object(MockEvent, "handle_event")
+    @override_settings(SLACK_EVENTS_ENABLED=True)
     def test_handler_catches_and_logs_generic_exception(
         self,
         mock_handle_event,
         mock_logger,
-        settings,
         event_instance,
         mock_event_payload,
         mock_client,
-        monkeypatch,
     ):
         """Tests that a generic exception in handle_event is caught and logged."""
-        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", True)
         ack = MagicMock()
         mock_handle_event.side_effect = Exception("Something went wrong")
         event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
@@ -106,18 +99,16 @@ class TestEventBase:
 
     @patch("apps.slack.events.event.logger")
     @patch.object(MockEvent, "handle_event")
+    @override_settings(SLACK_EVENTS_ENABLED=True)
     def test_handler_ignores_cannot_dm_bot_error(
         self,
         mock_handle_event,
         mock_logger,
-        settings,
         event_instance,
         mock_event_payload,
         mock_client,
-        monkeypatch,
     ):
         """Tests that a SlackApiError for 'cannot_dm_bot' is caught and ignored."""
-        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", True)
         ack = MagicMock()
         mock_slack_error = SlackApiError(
             message="Cannot DM bot", response={"ok": False, "error": "cannot_dm_bot"}
@@ -245,17 +236,11 @@ class TestEventBase:
         mock_logger.exception.assert_called_once_with("Error sending ephemeral message")
 
     @patch.object(MockEvent, "handle_event")
+    @override_settings(SLACK_EVENTS_ENABLED=True)
     def test_handler_fails_on_unknown_slack_error(
-        self,
-        mock_handle_event,
-        settings,
-        event_instance,
-        mock_event_payload,
-        mock_client,
-        monkeypatch,
+        self, mock_handle_event, event_instance, mock_event_payload, mock_client
     ):
         """Tests that SlackApiErrors other than 'cannot_dm_bot' are re-raised."""
-        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", True)
         ack = MagicMock()
         mock_slack_error = SlackApiError(
             message="Other error", response={"ok": False, "error": "channel_not_found"}
