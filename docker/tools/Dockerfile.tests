@@ -52,12 +52,16 @@ COPY --from=builder /usr/local /usr/local
 
 # hadolint ignore=DL3018
 RUN --mount=type=cache,target=/var/cache/apk \
-    apk --no-cache add gnupg
+    apk --no-cache add bash git gnupg
 
 USER owasp
 WORKDIR /home/owasp/nest
 
+COPY --chown=root:root .fossology-allowlist.json .fossology-allowlist.json
 COPY --chown=root:root .github/scripts .github/scripts
+COPY --chown=root:root backend/src/apps/slack/templates/commands/donate.jinja backend/src/apps/slack/templates/commands/donate.jinja
+COPY --chown=root:root backend/tests/unit/apps/slack/commands/donate_test.py backend/tests/unit/apps/slack/commands/donate_test.py
+COPY --chown=root:root docker/fossology/Dockerfile docker/fossology/Dockerfile
 COPY --chown=root:root frontend/public/.well-known frontend/public/.well-known
 COPY --chown=root:root tools/security tools/security
 COPY --chown=root:root tools/tests tools/tests
