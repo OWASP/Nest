@@ -144,13 +144,13 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="flex h-11 w-11 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-md:min-w-0 max-md:p-0"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
-                <FaTimes className="h-6.5 w-6.5" />
+                <FaTimes className="h-6 w-6 max-md:h-6.5 max-md:w-6.5" />
               ) : (
-                <FaBars className="h-7 w-7" />
+                <FaBars className="h-6 w-6 max-md:h-7 max-md:w-7" />
               )}
             </Button>
           </div>
