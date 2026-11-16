@@ -1,18 +1,4 @@
 mock_provider "aws" {
-  mock_data "aws_bedrock_foundation_model" {
-    defaults = {
-      model_arn = "arn:aws:bedrock:eu-west-1::foundation-model/amazon.nova-lite-v1:0"
-    }
-  }
-  mock_data "aws_bedrock_inference_profile" {
-    defaults = {
-      inference_profile_arn = "arn:aws:bedrock:eu-west-1:123456789012:inference-profile/eu.amazon.nova-lite-v1:0"
-      models = [
-        { model_arn = "arn:aws:bedrock:eu-west-1::foundation-model/amazon.nova-lite-v1:0" },
-        { model_arn = "arn:aws:bedrock:eu-central-1::foundation-model/amazon.nova-lite-v1:0" },
-      ]
-    }
-  }
   mock_data "aws_iam_policy_document" {
     defaults = {
       json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
@@ -43,6 +29,15 @@ run "test_nestbot_provisioned_in_staging" {
   assert {
     condition     = !output.route_slack_to_nestbot && length(local.backend_environment_variables) == 0 && contains(keys(local.backend_parameters_arns), "DJANGO_SLACK_BOT_TOKEN")
     error_message = "Backend Slack must remain configured until cutover."
+  }
+}
+
+run "test_nestbot_inherits_django_configuration" {
+  command = plan
+
+  assert {
+    condition     = !contains(keys(local.nestbot_environment_variables), "DJANGO_CONFIGURATION") && contains(keys(module.parameters.django_ssm_parameter_arns), "DJANGO_CONFIGURATION")
+    error_message = "NestBot must inherit DJANGO_CONFIGURATION from the shared SSM parameters."
   }
 }
 
@@ -105,7 +100,7 @@ run "test_production_defaults_remain_disabled" {
   }
 
   assert {
-    condition     = length(module.nestbot) == 0 && length(module.nestbot_worker) == 0 && length(aws_iam_policy.nestbot_bedrock) == 0 && length(module.nestbot_build_cache) == 0 && length(local.backend_environment_variables) == 0
+    condition     = length(module.nestbot) == 0 && length(module.nestbot_worker) == 0 && length(module.bedrock) == 0 && length(module.nestbot_build_cache) == 0 && length(local.backend_environment_variables) == 0
     error_message = "Production must retain its existing services."
   }
 
@@ -198,11 +193,10 @@ run "test_ai_can_be_disabled_without_changing_routing" {
 run "test_bedrock_configuration" {
   command = plan
 
-  override_resource {
-    target          = aws_iam_policy.nestbot_bedrock[0]
-    override_during = plan
-    values = {
-      arn = "arn:aws:iam::123456789012:policy/nest-staging-nestbot-bedrock"
+  override_module {
+    target = module.bedrock[0]
+    outputs = {
+      policy_arn = "arn:aws:iam::123456789012:policy/nest-staging-nestbot-bedrock"
     }
   }
 
@@ -218,7 +212,7 @@ run "test_bedrock_configuration" {
   }
 
   assert {
-    condition     = contains(module.nestbot[0].additional_task_role_policy_arns, aws_iam_policy.nestbot_bedrock[0].arn)
+    condition     = contains(module.nestbot[0].additional_task_role_policy_arns, module.bedrock[0].policy_arn)
     error_message = "The approved Bedrock policy must be attached to the NestBot application task role."
   }
 }
@@ -247,44 +241,10 @@ run "test_reject_invalid_llm_provider" {
   expect_failures = [var.nestbot_llm_provider]
 }
 
-run "test_bedrock_foundation_model_policy" {
-  command = plan
-  variables {
-    nestbot_llm_provider       = "bedrock"
-    nestbot_bedrock_model_name = "amazon.nova-lite-v1:0"
-  }
-  assert {
-    condition = jsondecode(aws_iam_policy.nestbot_bedrock[0].policy).Statement == [{
-      Effect   = "Allow"
-      Action   = ["bedrock:InvokeModel"]
-      Resource = ["arn:aws:bedrock:eu-west-1::foundation-model/amazon.nova-lite-v1:0"]
-    }]
-    error_message = "Direct invocation must be restricted to the selected foundation model."
-  }
-}
-
-run "test_bedrock_inference_profile_policy" {
-  command = plan
-  variables {
-    nestbot_llm_provider        = "bedrock"
-    nestbot_bedrock_target_type = "inference-profile"
-    nestbot_bedrock_model_name  = "eu.amazon.nova-lite-v1:0"
-  }
-  assert {
-    condition     = jsondecode(aws_iam_policy.nestbot_bedrock[0].policy).Statement[0].Resource == [data.aws_bedrock_inference_profile.nestbot[0].inference_profile_arn] && jsondecode(aws_iam_policy.nestbot_bedrock[0].policy).Statement[0].Action == ["bedrock:InvokeModel", "bedrock:GetInferenceProfile"]
-    error_message = "Profile invocation and lookup must be restricted to the selected profile."
-  }
-  assert {
-    condition     = toset(jsondecode(aws_iam_policy.nestbot_bedrock[0].policy).Statement[1].Resource) == toset([for model in data.aws_bedrock_inference_profile.nestbot[0].models : model.model_arn]) && jsondecode(aws_iam_policy.nestbot_bedrock[0].policy).Statement[1].Condition.StringEquals["bedrock:InferenceProfileArn"] == data.aws_bedrock_inference_profile.nestbot[0].inference_profile_arn
-    error_message = "All destination models must be allowed only through the selected profile."
-  }
-}
-
 run "test_google_has_no_bedrock_resources" {
   command = plan
   assert {
-    condition     = length(aws_iam_policy.nestbot_bedrock) == 0 && length(data.aws_bedrock_foundation_model.nestbot) == 0 && length(data.aws_bedrock_inference_profile.nestbot) == 0
-    error_message = "Google must not create Bedrock policies or look up Bedrock targets."
+    condition     = length(module.bedrock) == 0
+    error_message = "Google must not instantiate the Bedrock module."
   }
-
 }

@@ -74,9 +74,7 @@ with `nest.owasp.dev`. ALB routing does not update the Slack app's configured UR
 
 ## Providers
 
-| Name | Version |
-| ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.67.0 |
+No providers.
 
 ## Modules
 
@@ -85,6 +83,7 @@ with `nest.owasp.dev`. ALB routing does not update the Slack app's configured UR
 | <a name="module_alb"></a> [alb](#module\_alb) | ../modules/alb | n/a |
 | <a name="module_backend"></a> [backend](#module\_backend) | ../modules/service | n/a |
 | <a name="module_backend_build_cache"></a> [backend\_build\_cache](#module\_backend\_build\_cache) | ../modules/ecr-cache | n/a |
+| <a name="module_bedrock"></a> [bedrock](#module\_bedrock) | ../modules/bedrock | n/a |
 | <a name="module_cache"></a> [cache](#module\_cache) | ../modules/cache | n/a |
 | <a name="module_database"></a> [database](#module\_database) | ../modules/database | n/a |
 | <a name="module_frontend"></a> [frontend](#module\_frontend) | ../modules/service | n/a |
@@ -101,11 +100,7 @@ with `nest.owasp.dev`. ALB routing does not update the Slack app's configured UR
 
 ## Resources
 
-| Name | Type |
-| ---- | ---- |
-| [aws_iam_policy.nestbot_bedrock](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_bedrock_foundation_model.nestbot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_foundation_model) | data source |
-| [aws_bedrock_inference_profile.nestbot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_inference_profile) | data source |
+No resources.
 
 ## Inputs
 
