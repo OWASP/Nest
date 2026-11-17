@@ -449,7 +449,7 @@ describe('<SearchPageLayout />', () => {
     )
 
     const sortSkeleton = screen.getByTestId('sort-below-skeleton')
-    expect(sortSkeleton).toHaveClass('mt-4', 'md:mt-0')
+    expect(sortSkeleton).not.toHaveClass('mt-4')
     expect(screen.queryByText('Below Sort')).not.toBeInTheDocument()
   })
 
@@ -476,7 +476,7 @@ describe('<SearchPageLayout />', () => {
     expect(screen.queryByTestId('sort-below-skeleton')).not.toBeInTheDocument()
   })
 
-  it('adds mobile-only top spacing to the sort row below search', () => {
+  it('relies on the search header mb-4 for gap above the sort row below search', () => {
     render(
       <SearchPageLayout
         isLoaded={true}
@@ -495,7 +495,7 @@ describe('<SearchPageLayout />', () => {
     )
 
     const sortRow = screen.getByTestId('sort-below')
-    expect(sortRow).toHaveClass('mt-4', 'md:mt-0')
+    expect(sortRow).not.toHaveClass('mt-4')
   })
 
   it('does not render an empty sort row when sortChildren is not provided', () => {
@@ -549,7 +549,7 @@ describe('<SearchPageLayout />', () => {
     expect(sortWrapper).toHaveClass('[&>div>div:first-child]:rounded-l-none')
   })
 
-  it('spaces the mobile filter row below search with mt-2 (wrapper supplies mb-4 on mobile)', () => {
+  it('spaces the mobile filter row below search with mt-4 (wrapper supplies mb-4 on mobile)', () => {
     const { container } = render(
       <SearchPageLayout
         isLoaded={true}
@@ -570,9 +570,9 @@ describe('<SearchPageLayout />', () => {
     )
 
     const mobileFilterRow = container.querySelector(
-      String.raw`div.mx-auto.mt-2.flex.w-full.max-w-md.items-stretch.md\:hidden`
+      String.raw`div.mx-auto.mt-4.flex.w-full.max-w-md.items-stretch.md\:hidden`
     )
-    expect(mobileFilterRow).toHaveClass('mt-2')
+    expect(mobileFilterRow).toHaveClass('mt-4')
     expect(mobileFilterRow).not.toHaveClass('mb-4')
   })
 
@@ -867,9 +867,9 @@ describe('<SearchPageLayout />', () => {
     expect(searchHeader).toBeInTheDocument()
     expect(searchHeader).toHaveClass('mb-4', 'md:mb-0')
 
-    // Mobile controls row has mt-2 but no longer its own mb-4
+    // Mobile controls row has mt-4 but no longer its own mb-4
     const mobileControls = container.querySelector(
-      String.raw`div.mx-auto.mt-2.flex.w-full.max-w-md.items-stretch.md\:hidden`
+      String.raw`div.mx-auto.mt-4.flex.w-full.max-w-md.items-stretch.md\:hidden`
     )
     expect(mobileControls).toBeInTheDocument()
     expect(mobileControls).not.toHaveClass('mb-4')

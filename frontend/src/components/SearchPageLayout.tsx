@@ -60,7 +60,7 @@ const SearchPageLayout = ({
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       {/* Search header: search bar + optional stacked mobile controls.
-          mb-4 on mobile only — desktop spacing comes from SearchBar's md:py-4. */}
+          mb-4 on mobile only — gap before main content; desktop uses SearchBar md:py-4. */}
       <div className="mb-4 w-full md:mb-0">
         <div
           className={`flex w-full flex-col md:flex-row md:items-center md:justify-center ${
@@ -105,7 +105,7 @@ const SearchPageLayout = ({
         {/* Mobile layout — max-w-md matches SearchBar so stacked controls align with search */}
         {hasFilterControls && (
           <div
-            className={`mx-auto mt-2 flex w-full max-w-md items-stretch md:hidden ${
+            className={`mx-auto mt-4 flex w-full max-w-md items-stretch md:hidden ${
               inlineSort ? 'gap-0' : 'justify-between gap-4'
             }`}
           >
@@ -139,7 +139,7 @@ const SearchPageLayout = ({
           <div>
             {!inlineSort && sortChildren && totalPages !== 0 && (
               // SearchBar has no vertical padding below md, so the sort row adds its own gap
-              <div className="mt-4 flex justify-end md:mt-0" data-testid="sort-below">
+              <div className="flex justify-end" data-testid="sort-below">
                 {sortChildren}
               </div>
             )}
@@ -159,10 +159,7 @@ const SearchPageLayout = ({
         <>
           {!inlineSort && sortChildren && (
             // Placeholder for the sort row: full width on mobile, left-aligned with the cards on md+
-            <div
-              className="mt-4 flex w-full md:mt-0 md:max-w-6xl"
-              data-testid="sort-below-skeleton"
-            >
+            <div className="flex w-full md:max-w-6xl" data-testid="sort-below-skeleton">
               <Skeleton className="h-12 w-full rounded-lg md:w-36" aria-hidden="true" />
             </div>
           )}
