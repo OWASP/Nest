@@ -138,7 +138,7 @@ const SearchPageLayout = ({
         <>
           <div>
             {!inlineSort && sortChildren && totalPages !== 0 && (
-              // SearchBar has no vertical padding below md, so the sort row adds its own gap
+              // Gap below search: header mb-4 on mobile; SearchBar md:py-4 on desktop
               <div className="flex justify-end" data-testid="sort-below">
                 {sortChildren}
               </div>
