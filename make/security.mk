@@ -88,6 +88,8 @@ security-sast-scan-semgrep:
 	image="$$(grep -E '^FROM semgrep/semgrep:' docker/semgrep/Dockerfile | sed 's/^FROM //')"
 	args=(
 		'--rm'
+		"--user=$$(id -u):$$(id -g)"
+		'-e=HOME=/tmp'
 		"-v=$(PWD):/src"
 		'-w=/src'
 		"$$image"
@@ -130,12 +132,15 @@ security-dependency-check-cve-lite-cli:
 security-dependency-check-trivy:
 	@echo "Running Trivy vulnerability check..."
 	image="$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')"
+	mkdir -p '$(CURDIR)/.trivy-cache'
 	args=(
 		'--rm'
+		"--user=$$(id -u):$$(id -g)"
+		'-e=HOME=/tmp'
 		'-v=$(CURDIR):/src'
 		'-v=$(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro'
 		'-v=$(CURDIR)/.trivy.yaml:/.trivy.yaml:ro'
-		'-v=$(CURDIR)/.trivy-cache:/root/.cache/trivy'
+		'-v=$(CURDIR)/.trivy-cache:/tmp/.cache/trivy'
 		"$$image"
 		fs
 		'--config=/.trivy.yaml'
@@ -147,10 +152,13 @@ security-dependency-check-trivy:
 security-dependency-check-osv:
 	@echo "Running OSV vulnerability check..."
 	image="$$(grep -E '^FROM ghcr.io/google/osv-scanner:' docker/osv-scanner/Dockerfile | sed 's/^FROM //')"
+	mkdir -p '$(CURDIR)/.osv-scanner-cache'
 	args=(
 		'--rm'
+		"--user=$$(id -u):$$(id -g)"
+		'-e=HOME=/tmp'
 		'-v=$(CURDIR):/src'
-		'-v=$(CURDIR)/.osv-scanner-cache:/root/.cache/osv-scanner'
+		'-v=$(CURDIR)/.osv-scanner-cache:/tmp/.cache/osv-scanner'
 		"$$image"
 		scan
 		source
@@ -162,12 +170,15 @@ security-dependency-check-osv:
 security-repository-scan-trivy:
 	@echo "Running Trivy repository scan..."
 	image="$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')"
+	mkdir -p '$(CURDIR)/.trivy-cache'
 	args=(
 		'--rm'
+		"--user=$$(id -u):$$(id -g)"
+		'-e=HOME=/tmp'
 		'-v=$(CURDIR):/src'
 		'-v=$(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro'
 		'-v=$(CURDIR)/.trivy.yaml:/.trivy.yaml:ro'
-		'-v=$(CURDIR)/.trivy-cache:/root/.cache/trivy'
+		'-v=$(CURDIR)/.trivy-cache:/tmp/.cache/trivy'
 		"$$image"
 		fs
 		'--config=/.trivy.yaml'
