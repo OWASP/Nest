@@ -1,0 +1,43 @@
+name: DockSec file scan
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - feature/**
+      - main
+    paths:
+      - .clusterfuzzlite/Dockerfile
+      - .docksec-ignore.yml
+      - .github/workflows/run-docksec-scan.yaml
+      - docker/**/Dockerfile
+      - docker/**/Dockerfile.*
+      - make/security.mk
+      - Makefile
+      - tools/security/docksec_scan.py
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: docksec-${{ github.ref }}
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-docksec-scan:
+    name: DockSec
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run DockSec file scan
+        run: make security-docksec-scan
+    timeout-minutes: 15

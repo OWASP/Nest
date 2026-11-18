@@ -33,19 +33,19 @@ jest.mock('@heroui/toast', () => ({
 describe('LoginPageContent', () => {
   const mockPush = jest.fn()
   const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
-  const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
+  const mockUseRouter = useRouter as jest.Mock
   const mockSignIn = signIn as jest.MockedFunction<typeof signIn>
   const mockAddToast = addToast as jest.MockedFunction<typeof addToast>
 
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({
-      push: mockPush,
-      replace: jest.fn(),
       back: jest.fn(),
       forward: jest.fn(),
-      refresh: jest.fn(),
       prefetch: jest.fn(),
+      push: mockPush,
+      refresh: jest.fn(),
+      replace: jest.fn(),
     })
   })
 

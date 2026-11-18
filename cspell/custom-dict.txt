@@ -24,6 +24,7 @@ Emay
 FOSS
 GBP
 GFKs
+GHSA
 GPG
 GRC
 GSOC
@@ -119,6 +120,7 @@ defectdojo
 demojize
 dismissable
 dkr
+docksec
 dsn
 dvo
 eddsa
@@ -156,6 +158,7 @@ jaraco
 jumpstart
 kasya
 langgraph
+ldd
 lhci
 libexpat
 libfuzzer
@@ -163,6 +166,7 @@ libgobject
 libharfbuzz
 libpango
 libpangoft
+librsvg
 libx
 lighthouseci
 lighthouserc
@@ -173,6 +177,7 @@ mamicidal
 markdownit
 markercluster
 mastg
+mcp
 mcr
 mdfile
 mentee
@@ -181,7 +186,6 @@ mentees
 mern
 millify
 misconfig
-mkdocstrings
 mkv
 mpim
 mso
@@ -223,6 +227,7 @@ relativedelta
 replicationgroup
 repositorycontributor
 requirepass
+rhysd
 rqworker
 rsc
 rudransh
@@ -237,6 +242,7 @@ shrivastava
 skillstruck
 slackbot
 slideshare
+smol
 someid
 speakerdeck
 subgrp
@@ -269,5 +275,7 @@ xsser
 xzf
 zapconfig
 zaproxy
+zensical
+zizmor
 zsc
 éàëîôû

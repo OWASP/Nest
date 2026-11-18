@@ -121,19 +121,114 @@ class TestChapterModel:
     @pytest.mark.parametrize(
         ("key", "expected_nest_key"),
         [
-            ("www-chapter-test", "test"),
-            ("www-chapter-new-york", "new-york"),
-            ("www-chapter-", ""),
+            ("algiers", "algiers"),
+            ("new-york", "new-york"),
         ],
     )
     def test_nest_key_property(self, key, expected_nest_key):
-        """Test nest_key property strips www-chapter- prefix."""
+        """Test nest_key is the chapter key."""
         chapter = Chapter(key=key)
         assert chapter.nest_key == expected_nest_key
 
+    def test_owasp_url_uses_the_chapter_slug(self):
+        """Test the public page URL uses the chapter slug."""
+        assert Chapter(key="algiers").owasp_url == "https://owasp.org/chapters/algiers"
+        assert Chapter(key="london").owasp_url == "https://owasp.org/chapters/london"
+
+    def test_adopt_key_renames_the_chapter(self):
+        chapter = Chapter(key="www-chapter-london")
+
+        assert chapter.adopt_key("london")
+
+        assert chapter.key == "london"
+
+    def test_adopt_key_leaves_a_matching_key(self):
+        chapter = Chapter(key="london")
+        existing = Mock()
+
+        assert chapter.adopt_key("London", existing)
+
+        assert chapter.key == "london"
+        existing.delete.assert_not_called()
+
+    def test_adopt_key_takes_the_key_from_a_stub(self):
+        chapter = Chapter(key="www-chapter-london")
+        existing = Mock()
+        existing.pk = 2
+        existing.owasp_repository_id = None
+
+        assert chapter.adopt_key("london", existing)
+
+        assert chapter.key == "london"
+        existing.delete.assert_not_called()
+
+    def test_adopt_key_keeps_the_key_when_the_existing_has_a_repository(self):
+        chapter = Chapter(key="www-chapter-london")
+        existing = Mock()
+        existing.pk = 1
+        existing.owasp_repository_id = 9
+
+        assert not chapter.adopt_key("london", existing)
+
+        assert chapter.key == "www-chapter-london"
+        existing.delete.assert_not_called()
+
+    def test_github_url_uses_the_linked_repository(self, mocker):
+        """Test the GitHub URL is the linked repository."""
+        chapter = Chapter(key="algiers")
+        assert chapter.github_url == ""
+
+        repository = mocker.Mock()
+        repository.url = "https://github.com/OWASP/chapter-site"
+        chapter.owasp_repository_id = 1
+        mocker.patch.object(
+            Chapter,
+            "owasp_repository",
+            new_callable=mocker.PropertyMock,
+            return_value=repository,
+        )
+
+        assert chapter.github_url == "https://github.com/OWASP/chapter-site"
+
+    def test_get_by_key_checks_the_slug_before_the_legacy_key(self, mocker):
+        """Test lookup matches the chapter key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.return_value = found
+        mocker.patch.object(Chapter, "active_chapters", manager)
+
+        assert Chapter.get_by_key("algiers") is found
+        manager.filter.assert_called_once_with(key__iexact="algiers")
+
+    def test_get_by_key_matches_a_legacy_key(self, mocker):
+        """Test a slug looks up a stored www-chapter key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Chapter, "active_chapters", manager)
+
+        assert Chapter.get_by_key("algiers") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="algiers"),
+            mocker.call(key__iexact="www-chapter-algiers"),
+        ]
+
+    def test_get_by_key_matches_a_slug_from_a_prefixed_key(self, mocker):
+        """Test a www-chapter key looks up a stored slug."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Chapter, "active_chapters", manager)
+
+        assert Chapter.get_by_key("www-chapter-algiers") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="www-chapter-algiers"),
+            mocker.call(key__iexact="algiers"),
+        ]
+
     def test_nest_url_property(self):
         """Test nest_url property returns correct URL."""
-        chapter = Chapter(key="www-chapter-new-york")
+        chapter = Chapter(key="new-york")
         with patch("apps.owasp.models.chapter.get_absolute_url") as mock_get_url:
             mock_get_url.return_value = "https://nest.owasp.org/chapters/new-york"
             url = chapter.nest_url
@@ -154,7 +249,6 @@ class TestChapterModel:
                 is_active=True,
                 latitude__isnull=False,
                 longitude__isnull=False,
-                owasp_repository__is_empty=False,
             )
 
     @pytest.mark.parametrize(

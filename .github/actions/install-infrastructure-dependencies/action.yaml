@@ -23,6 +23,6 @@ runs:
           poetry-venv-${{ runner.os }}-${{ runner.arch }}-python-3.13-
 
     - name: Install infrastructure dependencies
-      run: poetry install --no-interaction --with test
+      run: poetry install --no-interaction --no-root --with test
       shell: bash
       working-directory: infrastructure

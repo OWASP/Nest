@@ -12,7 +12,8 @@ import UserCardSkeleton from 'components/skeletons/UserCard'
 function userCardRender() {
   const cardCount = 12
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    // Same top spacing as the loaded Members/Organizations grids
+    <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:mt-0 lg:grid-cols-3 xl:grid-cols-4">
       {Array.from({ length: cardCount }, (_, index) => (
         <UserCardSkeleton key={`user-skeleton-${index}`} />
       ))}
@@ -39,6 +40,8 @@ const SkeletonBase = ({
   loadingImageUrl: string
 }) => {
   let componentProps: CardSkeletonProps
+  // Card has mt-4; on Projects this is the gap below the sort row skeleton from SearchPageLayout
+  let listSpacingClass = 'mt-4'
 
   switch (indexName) {
     case 'chapters':
@@ -48,6 +51,8 @@ const SkeletonBase = ({
         showLink: false,
         showExtraActionButton: true,
       }
+      // The map follows the mobile filter row, which has its own margin
+      listSpacingClass = ''
       break
     case 'issues':
       componentProps = {
@@ -93,7 +98,7 @@ const SkeletonBase = ({
       return <LoadingSpinner imageUrl={loadingImageUrl} />
   }
   return (
-    <div className="flex w-full flex-col items-center justify-center">
+    <div className={`flex w-full flex-col items-center justify-center ${listSpacingClass}`}>
       {indexName === 'chapters' ? (
         <Skeleton className="mb-2 h-96 w-full max-w-6xl" />
       ) : (

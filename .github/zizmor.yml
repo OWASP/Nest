@@ -5,3 +5,9 @@ rules:
       - check-contribution.yaml
       # Labels PRs from configuration; does not checkout PR code.
       - pr-labeler.yaml
+  # zizmor 1.30+ wants uses: $/... for in-repo actions/workflows. GitHub
+  # accepts that syntax, but actionlint 1.7.12 still rejects it
+  # (rhysd/actionlint#732 is unreleased). Re-enable this audit and convert
+  # uses: ./... to uses: $/... once actionlint ships support.
+  self-repository:
+    disable: true

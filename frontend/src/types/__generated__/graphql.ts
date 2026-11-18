@@ -365,7 +365,7 @@ export type ModuleNode = {
   experienceLevel: ExperienceLevelEnum;
   id: Scalars['ID']['output'];
   interestedUsers: Array<UserNode>;
-  issueByNumber?: Maybe<IssueNode>;
+  issueById?: Maybe<IssueNode>;
   issueMentees: Array<UserNode>;
   issues: Array<IssueNode>;
   issuesCount: Scalars['Int']['output'];
@@ -389,17 +389,17 @@ export type ModuleNode = {
 
 
 export type ModuleNodeInterestedUsersArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 
-export type ModuleNodeIssueByNumberArgs = {
-  number: Scalars['Int']['input'];
+export type ModuleNodeIssueByIdArgs = {
+  issueId: Scalars['ID']['input'];
 };
 
 
 export type ModuleNodeIssueMenteesArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 
@@ -422,12 +422,12 @@ export type ModuleNodeRecentPullRequestsArgs = {
 
 
 export type ModuleNodeTaskAssignedAtArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 
 export type ModuleNodeTaskDeadlineArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 export type Mutation = {
@@ -457,7 +457,7 @@ export type Mutation = {
 
 
 export type MutationAssignIssueToUserArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
@@ -465,7 +465,7 @@ export type MutationAssignIssueToUserArgs = {
 
 
 export type MutationClearTaskDeadlineArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
 };
@@ -525,7 +525,7 @@ export type MutationRevokeApiKeyArgs = {
 
 export type MutationSetTaskDeadlineArgs = {
   deadlineAt: Scalars['DateTime']['input'];
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
 };
@@ -537,7 +537,7 @@ export type MutationSubmitSnapshotFeedbackArgs = {
 
 
 export type MutationUnassignIssueFromUserArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
@@ -1146,7 +1146,6 @@ export type RepositoryNode = Node & {
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   isArchived: Scalars['Boolean']['output'];
-  issues: Array<IssueNode>;
   key: Scalars['String']['output'];
   languages: Array<Scalars['String']['output']>;
   latestRelease?: Maybe<Scalars['String']['output']>;
@@ -1155,6 +1154,7 @@ export type RepositoryNode = Node & {
   openIssuesCount: Scalars['Int']['output'];
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
+  recentIssues: Array<IssueNode>;
   recentMilestones: Array<MilestoneNode>;
   releases: Array<ReleaseNode>;
   size: Scalars['Int']['output'];
