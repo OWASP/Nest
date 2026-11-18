@@ -45,7 +45,9 @@ Use the following inline permissions for the `nest-staging` IAM User.
 
 ## Providers
 
-No providers.
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.66.0 |
 
 ## Modules
 
@@ -61,13 +63,16 @@ No providers.
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |
+| <a name="module_secrets"></a> [secrets](#module\_secrets) | ../modules/secrets | n/a |
 | <a name="module_security"></a> [security](#module\_security) | ../modules/security | n/a |
 | <a name="module_storage"></a> [storage](#module\_storage) | ../modules/storage | n/a |
 | <a name="module_tasks"></a> [tasks](#module\_tasks) | ../modules/tasks | n/a |
 
 ## Resources
 
-No resources.
+| Name | Type |
+| ---- | ---- |
+| [aws_secretsmanager_secret_version.external_runtime](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret_version) | data source |
 
 ## Inputs
 
@@ -124,6 +129,7 @@ No resources.
 | <a name="input_redis_node_type"></a> [redis\_node\_type](#input\_redis\_node\_type) | The node type for the Redis cache. | `string` | `"cache.t3.micro"` | no |
 | <a name="input_redis_num_cache_nodes"></a> [redis\_num\_cache\_nodes](#input\_redis\_num\_cache\_nodes) | The number of cache nodes in the Redis cluster. | `number` | `1` | no |
 | <a name="input_redis_port"></a> [redis\_port](#input\_redis\_port) | The port for the Redis cache. | `number` | `6379` | no |
+| <a name="input_retain_legacy_credential_parameters"></a> [retain\_legacy\_credential\_parameters](#input\_retain\_legacy\_credential\_parameters) | Keep migrated SSM credential parameters until the Secrets Manager cutover is verified. | `bool` | `true` | no |
 | <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately. | `number` | `7` | no |
 | <a name="input_slack_bot_token_suffix"></a> [slack\_bot\_token\_suffix](#input\_slack\_bot\_token\_suffix) | The Suffix for the Slack bot token. | `string` | `"T04T40NHX"` | no |
 | <a name="input_tasks_use_fargate_spot"></a> [tasks\_use\_fargate\_spot](#input\_tasks\_use\_fargate\_spot) | Whether to use Fargate Spot for ECS tasks. | `bool` | `true` | no |

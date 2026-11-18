@@ -105,7 +105,7 @@ variable "image_tag" {
 }
 
 variable "kms_key_arn" {
-  description = "The ARN of the KMS key for log encryption."
+  description = "The ARN of the KMS key for log and secret encryption."
   type        = string
 }
 
@@ -138,7 +138,7 @@ variable "min_count" {
 }
 
 variable "parameters_arns" {
-  description = "Map of environment variable names to the ARNs of SSM parameters."
+  description = "Map of environment variable names to SSM and Secrets Manager references."
   type        = map(string)
   default     = {}
 }

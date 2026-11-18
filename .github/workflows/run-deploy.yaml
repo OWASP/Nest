@@ -222,6 +222,7 @@ jobs:
             frontend_use_fargate_spot=${{ inputs.frontend_use_fargate_spot }}
             frontend_image_tag="${{ inputs.release_version }}"
             project_name="nest"
+            retain_legacy_credential_parameters=${{ vars.RETAIN_LEGACY_CREDENTIAL_PARAMETERS || 'true' }}
             tasks_use_fargate_spot=${{ inputs.tasks_use_fargate_spot }}
           working-directory: infrastructure/live
 
