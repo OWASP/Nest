@@ -52,7 +52,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 38bfb07c0c64c304f47eb52090f8288150c77730  # v0.17.1
+    rev: 25bcf95026b96e2dd3c0aec3090c3d6ef6ca2e6c  # v0.17.3
     hooks:
       - id: ruff-check
         args:
@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: 1399b56bfc493191c39ff1a525a8ab9c11201cd3  # v1.46.6
+    rev: 00629e48d7dcd22463abe05adc22725e0bd6ea69  # v1.47.1
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -74,7 +74,7 @@ repos:
           - html
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: 5b5dddc4fb0f83c3ea1fc5616fa63e115dce83e0  # v0.49.1
+    rev: cbcdc463be5464e25e3e955a511599a67b9b987f  # v0.50.0
     hooks:
       - id: markdownlint
         args:
@@ -97,7 +97,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.336.2
+          - strawberry-graphql==0.338.0
           - strawberry-graphql-django==0.93.0
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20261021

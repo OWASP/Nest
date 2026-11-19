@@ -13,8 +13,12 @@ ENV NODE_PATH=/app/e2e/node_modules \
 WORKDIR /app/e2e
 
 COPY e2e/package.json e2e/pnpm-lock.yaml e2e/pnpm-workspace.yaml ./
+# Playwright 1.65 ships Node 26, which no longer bundles corepack. --force replaces
+# the image's yarn shims so corepack can install the pnpm version from package.json.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    corepack install && corepack enable pnpm && \
+    npm install -g corepack@0.36.0 --force && \
+    corepack enable pnpm && \
+    corepack install && \
     pnpm install --frozen-lockfile
 
 COPY e2e/ ./
