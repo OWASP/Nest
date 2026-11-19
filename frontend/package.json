@@ -77,7 +77,7 @@
     "jest": "30.5.2",
     "jest-axe": "11.0.0",
     "jest-environment-jsdom": "30.5.2",
-    "postcss": "8.5.31",
+    "postcss": "8.5.23",
     "require-in-the-middle": "8.0.1",
     "tailwindcss": "4.3.3",
     "tailwindcss-animate": "1.0.7",
