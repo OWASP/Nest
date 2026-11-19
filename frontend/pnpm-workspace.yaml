@@ -41,22 +41,23 @@ minimumReleaseAgeExclude:
   - '@img/sharp-win32-arm64@0.35.5'
   - '@img/sharp-win32-ia32@0.35.5'
   - '@img/sharp-win32-x64@0.35.5'
-  - '@next/env@16.4.3'
-  - '@next/swc-darwin-arm64@16.4.3'
-  - '@next/swc-darwin-x64@16.4.3'
-  - '@next/swc-linux-arm64-gnu@16.4.3'
-  - '@next/swc-linux-arm64-musl@16.4.3'
-  - '@next/swc-linux-x64-gnu@16.4.3'
-  - '@next/swc-linux-x64-musl@16.4.3'
-  - '@next/swc-win32-arm64-msvc@16.4.3'
-  - '@next/swc-win32-x64-msvc@16.4.3'
-  - '@next/third-parties@16.4.3'
+  - '@isaacs/nonrecursive-glob-match@1.1.0'
+  - '@next/env@16.4.6'
+  - '@next/swc-darwin-arm64@16.4.6'
+  - '@next/swc-darwin-x64@16.4.6'
+  - '@next/swc-linux-arm64-gnu@16.4.6'
+  - '@next/swc-linux-arm64-musl@16.4.6'
+  - '@next/swc-linux-x64-gnu@16.4.6'
+  - '@next/swc-linux-x64-musl@16.4.6'
+  - '@next/swc-win32-arm64-msvc@16.4.6'
+  - '@next/swc-win32-x64-msvc@16.4.6'
+  - '@next/third-parties@16.4.6'
   - '@opentelemetry/core@2.8.0'
   - '@opentelemetry/semantic-conventions@1.43.0'
   - '@puppeteer/browsers@3.2.6'
   - argparse@3.0.3
   - baseline-browser-mapping@2.11.1
-  - basic-ftp@6.2.2
+  - basic-ftp@6.2.6
   - body-parser@1.20.9
   - brace-expansion@5.0.12
   - browserslist@4.28.7
@@ -66,14 +67,16 @@ minimumReleaseAgeExclude:
   - enhanced-resolve@5.24.3
   - es-module-lexer@2.3.1
   - fast-uri@3.1.9
+  - glob@14.0.6
   - immutable@5.1.8
   - ip-address@10.7.4
   - js-yaml@4.3.2
   - markdown-it@15.0.3
+  - minimatch@11.0.9
   - modern-tar@0.8.6
   - nanoid@3.3.18
   - next-auth@4.24.15
-  - next@16.4.3
+  - next@16.4.6
   - node-releases@2.0.51
   - postcss@8.5.23
   - protobufjs@7.6.4
@@ -103,7 +106,8 @@ overrides:
   # Keep Puppeteer's browser tools on v3, which removes extract-zip.
   '@puppeteer/browsers': 3.2.6
   # browsers 3.x peer is proxy-agent >=8.0.1; @lhci/cli still declares ^6.4.0.
-  basic-ftp: 6.2.2
+  # GHSA-5pm8-86m8-9m6r is fixed in 6.2.4. GHSA-2w5v-vj22-jp27 is fixed in 6.2.6.
+  basic-ftp: 6.2.6
   # GHSA-27r3-jxmh-p828: compressed-body crash through 1.20.8, fixed in 1.20.9.
   body-parser: 1.20.9
   brace-expansion@5: 5.0.12
@@ -113,11 +117,15 @@ overrides:
   dompurify: 3.4.17
   # GHSA-333x-w4r6-6crp, GHSA-w74x-v6f9-j3xg, GHSA-wjr9-j795-jxcr, GHSA-xhq7-xmqj-769h: fixed in 3.1.9.
   fast-uri: 3.1.9
-  glob: 11.1.0
+  # GHSA-3g3m-2fjr-6pw4 is fixed in 14.0.2. GHSA-qxr8-q827-836c is fixed in 14.0.6.
+  glob: 14.0.6
   immutable: 5.1.8
   # GHSA-rxp7-6hxx-x8q5: fixed in 10.7.4.
   ip-address: 10.7.4
   js-yaml: 4.3.2
+  # GHSA-g3hv-75wg-m249: globparts amplification through 10.x, fixed in 11.0.1.
+  # 11.0.9 satisfies glob 14, which requires minimatch ^11.0.5.
+  minimatch@10: 11.0.9
   nanoid@3: 3.3.18
   postcss: 8.5.23
   protobufjs: 7.6.4
