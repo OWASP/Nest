@@ -45,7 +45,10 @@ def resolve_admins_from_logins(logins: list[str]) -> set:
         except GithubUser.DoesNotExist as e:
             msg = f"GitHub user '{login}' not found."
             logger.warning(msg, exc_info=True)
-            raise ValueError(msg) from e
+            raise GraphQLError(
+                msg,
+                extensions={"code": "VALIDATION_ERROR", "field": "adminLogins"},
+            ) from e
 
     return admins
 
@@ -184,13 +187,24 @@ class ProgramMutation:
         if input_data.status is not None:
             program.status = input_data.status.value
 
+        resolved_admins = None
+        if input_data.admin_logins is not None:
+            resolved_admins = resolve_admins_from_logins(input_data.admin_logins)
+            if not resolved_admins:
+                msg = "A mentorship program must retain at least one administrator."
+                logger.warning("Validation error updating program '%s': %s", program.key, msg)
+                raise GraphQLError(
+                    msg,
+                    extensions={"code": "VALIDATION_ERROR", "field": "adminLogins"},
+                )
+
         try:
             program.save()
         except IntegrityError as e:
             _handle_program_save_integrity_error(e)
 
-        if input_data.admin_logins is not None:
-            program.admins.set(resolve_admins_from_logins(input_data.admin_logins))
+        if resolved_admins is not None:
+            program.admins.set(resolved_admins)
 
         return program
 

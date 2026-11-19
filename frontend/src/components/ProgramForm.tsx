@@ -3,6 +3,7 @@
 import type React from 'react'
 import { useState } from 'react'
 import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
+import { parseCommaSeparated } from 'utils/parser'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
@@ -91,6 +92,13 @@ const ProgramForm = ({
     return undefined
   }
 
+  const validateAdminLogins = (value?: string): string | undefined => {
+    if (isEdit && (!value || parseCommaSeparated(value).length === 0)) {
+      return 'A mentorship program must retain at least one administrator.'
+    }
+    return undefined
+  }
+
   const errors = useFormValidation(
     [
       ...getCommonValidationRules(formData, touched, validateNameLocal, validateEndDateLocal),
@@ -99,14 +107,26 @@ const ProgramForm = ({
         shouldValidate: touched.menteesLimit ?? false,
         validator: () => validateMenteesLimit(formData.menteesLimit),
       },
+      ...(isEdit
+        ? [
+            {
+              field: 'adminLogins',
+              shouldValidate: touched.adminLogins ?? false,
+              validator: () => validateAdminLogins(formData.adminLogins),
+            },
+          ]
+        : []),
     ],
-    [formData, touched, backendErrors]
+    [formData, touched, backendErrors, isEdit]
   )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     const allFields = ['name', 'description', 'startedAt', 'endedAt']
+    if (isEdit) {
+      allFields.push('adminLogins')
+    }
     const newTouched: Record<string, boolean> = {}
     allFields.forEach((field) => {
       newTouched[field] = true
@@ -124,9 +144,17 @@ const ProgramForm = ({
       touched.menteesLimit || formData.menteesLimit !== undefined
         ? validateMenteesLimit(formData.menteesLimit)
         : undefined
+    const adminLoginsError = isEdit ? validateAdminLogins(formData.adminLogins) : undefined
 
     // Prevent submission if any validation errors exist
-    if (nameError || descriptionError || startDateError || endDateError || menteesLimitError) {
+    if (
+      nameError ||
+      descriptionError ||
+      startDateError ||
+      endDateError ||
+      menteesLimitError ||
+      adminLoginsError
+    ) {
       return
     }
 
@@ -242,7 +270,13 @@ const ProgramForm = ({
               label="Admin GitHub Usernames"
               placeholder="johndoe, jane-doe"
               value={formData.adminLogins || ''}
-              onValueChange={(value) => handleInputChange('adminLogins', value)}
+              onValueChange={(value) => {
+                handleInputChange('adminLogins', value)
+                setTouched((prev) => ({ ...prev, adminLogins: true }))
+              }}
+              error={errors.adminLogins || backendErrors.adminLogins}
+              touched={touched.adminLogins}
+              required
               className="w-full min-w-0 lg:col-span-2"
             />
           )}
