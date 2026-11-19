@@ -9,17 +9,19 @@ from lxml.etree import ParserError
 from requests.exceptions import RequestException
 
 from apps.common.constants import OWASP_NEWS_URL
+from apps.owasp.models.project import Project
+from apps.owasp.utils.gsoc import get_gsoc_projects
+from apps.owasp.utils.news import get_news_data
+from apps.owasp.utils.staff import STAFF_YAML_URL, get_staff_data
+from apps.slack.common.handlers.ai import get_response_blocks
 from apps.slack.utils import (
     download_file,
     escape,
+    format_ai_response_for_slack,
     format_links_for_slack,
-    get_gsoc_projects,
-    get_news_data,
-    get_staff_data,
     get_text,
     strip_markdown,
 )
-from apps.slack.utils.content import STAFF_YAML_URL
 
 MOCK_GSOC_PROJECTS = {
     "2023": [
@@ -101,6 +103,114 @@ class TestFormatLinksForSlack:
     def test_format_links_for_slack(self, input_text, expected_output):
         """Test format_links_for_slack with various inputs including empty text."""
         assert format_links_for_slack(input_text) == expected_output
+
+
+class TestFormatAiResponseForSlack:
+    @pytest.mark.parametrize(
+        ("input_text", "expected_output"),
+        [
+            ("", ""),
+            (None, None),
+            (
+                "**OWASP ZAP** is a flagship project.",
+                "*OWASP ZAP* is a flagship project.",
+            ),
+            (
+                "This is __bold text__ in markdown.",
+                "This is *bold text* in markdown.",
+            ),
+            (
+                "### OWASP Top 10",
+                "*OWASP Top 10*",
+            ),
+            (
+                "## Chapter Meetings\nJoin our **local** chapters.",
+                "*Chapter Meetings*\nJoin our *local* chapters.",
+            ),
+            (
+                "### \nordinary text",
+                "### \nordinary text",
+            ),
+            (
+                "Check out [OWASP](https://owasp.org) for details.",
+                "Check out <https://owasp.org|OWASP> for details.",
+            ),
+            (
+                "```\nEntire block wrapped\n```",
+                "Entire block wrapped",
+            ),
+            (
+                "```python\n    print('hello')\n```",
+                "    print('hello')",
+            ),
+            (
+                "\r\n```python\r\n\r\n    print('hello')\r\n\r\n```\r\n",
+                "    print('hello')",
+            ),
+            (
+                "Here is code:\n```python\nprint('hello')\n```\nDone.",
+                "Here is code:\nprint('hello')\nDone.",
+            ),
+            (
+                "# **Bold heading**",
+                "*Bold heading*",
+            ),
+            (
+                "### Explore **OWASP** and __chapters__ with *contributors*",
+                "*Explore OWASP and chapters with contributors*",
+            ),
+            ("# C* pointers", "*C pointers*"),
+            ("## Heading\r\nNext", "*Heading*\nNext"),
+            ("Compare `x < 3` and `<div>`.", "Compare x < 3 and <div>."),
+            ("Run `**not bold**` and **bold**.", "Run `**not bold**` and *bold*."),
+            ("Use `[label](https://example.com)`.", "Use `[label](https://example.com)`."),
+            ("# Use `a*b` pointers", "*Use `a*b` pointers*"),
+            ("`<https://example.com|Example>`", "`<https://example.com|Example>`"),
+            (
+                "Here is code:\n```python\n# This is a comment\nx = 1\n```\nDone.",
+                "Here is code:\n# This is a comment\nx = 1\nDone.",
+            ),
+            (
+                "Run `poetry run pytest` now.",
+                "Run poetry run pytest now.",
+            ),
+            (
+                "Run ```curl --version``` now.",
+                "Run curl --version now.",
+            ),
+            (
+                "Before\n```sh\ncurl --version\n```\nRun ```curl --help``` now.",
+                "Before\ncurl --version\nRun curl --help now.",
+            ),
+            (
+                '```json {"a": 1}```',
+                'json {"a": 1}',
+            ),
+            (
+                "Before\n````python\n# Code\n**unchanged**\n````\nAfter",
+                "Before\n# Code\n**unchanged**\nAfter",
+            ),
+            (
+                "````markdown\n```python\n# Code\n```\n````",
+                "```python\n# Code\n```",
+            ),
+            (
+                "Contact <#C123|community> or <@U456>.",
+                "Contact <#C123|community> or <@U456>.",
+            ),
+            (
+                "```python\n# This is a comment\n**not bold**\nx = [1](https://example.com)\n```",
+                "# This is a comment\n**not bold**\nx = [1](https://example.com)",
+            ),
+            (
+                "Visit [OWASP](https://owasp.org):\n```markdown\n[example](https://example.com)\n```\nDone.",
+                "Visit <https://owasp.org|OWASP>:\n[example](https://example.com)\nDone.",
+            ),
+        ],
+    )
+    def test_format_ai_response_for_slack(self, input_text, expected_output):
+        """Test format_ai_response_for_slack with various markdown inputs."""
+        assert format_ai_response_for_slack(input_text) == expected_output
 
 
 class TestGetText:
@@ -221,6 +331,63 @@ class TestGetText:
         assert get_text(input_blocks) == expected_output
 
 
+class TestDownloadFile:
+    def test_download_file_success(self, monkeypatch):
+        """Test successful file download."""
+        mock_response = Mock()
+        mock_response.content = b"image-bytes"
+        mock_response.raise_for_status = Mock()
+
+        monkeypatch.setattr(
+            "apps.slack.utils.format.requests.get", Mock(return_value=mock_response)
+        )
+
+        result = download_file("https://files.slack.com/image.png", "xoxb-token")
+
+        assert result == b"image-bytes"
+
+    def test_download_file_http_error(self, monkeypatch):
+        """Test download returns None on HTTP error."""
+        mock_response = Mock()
+        mock_response.raise_for_status.side_effect = req.HTTPError("404")
+
+        monkeypatch.setattr(
+            "apps.slack.utils.format.requests.get", Mock(return_value=mock_response)
+        )
+
+        result = download_file("https://files.slack.com/image.png", "xoxb-token")
+
+        assert result is None
+
+    def test_download_file_request_exception(self, monkeypatch):
+        """Test download returns None on request exception."""
+        monkeypatch.setattr(
+            "apps.slack.utils.format.requests.get",
+            Mock(side_effect=req.ConnectionError("timeout")),
+        )
+
+        result = download_file("https://files.slack.com/image.png", "xoxb-token")
+
+        assert result is None
+
+    def test_download_file_sends_auth_header(self, monkeypatch):
+        """Test that download_file sends the correct authorization header."""
+        mock_response = Mock()
+        mock_response.content = b"image-bytes"
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+
+        monkeypatch.setattr("apps.slack.utils.format.requests.get", mock_get)
+
+        download_file("https://files.slack.com/image.png", "xoxb-test-token")
+
+        mock_get.assert_called_once_with(
+            "https://files.slack.com/image.png",
+            headers={"Authorization": "Bearer xoxb-test-token"},
+            timeout=30,
+        )
+
+
 class TestEscape:
     @pytest.mark.parametrize(
         ("input_content", "expected_output"),
@@ -240,33 +407,55 @@ class TestEscape:
 
 class TestGetGsocProjects:
     def test_get_gsoc_projects(self, monkeypatch):
-        """Test getting GSoC projects with mocked data."""
-        mock_get_projects = Mock()
-        mock_get_projects.return_value = {"hits": MOCK_GSOC_PROJECTS["2023"]}
+        """Test getting GSoC projects with mocked database data."""
+        # Create mock project objects
+        mock_project1 = Mock(spec=Project)
+        mock_project1.name = "Project1_2023"
+        mock_project1.key = "www-project-project1"
+        mock_project1.owasp_url = "https://example.com/proj1"
+        mock_project1.custom_tags = ["gsoc2023", "security"]
 
-        monkeypatch.setattr("apps.owasp.index.search.project.get_projects", mock_get_projects)
+        mock_project2 = Mock(spec=Project)
+        mock_project2.name = "Project2_2023"
+        mock_project2.key = "www-project-project2"
+        mock_project2.owasp_url = "https://example.com/proj2"
+        mock_project2.custom_tags = ["gsoc2023", "testing"]
+
+        # Mock the QuerySet chain: filter().only().order_by()
+        projects_list = [mock_project1, mock_project2]
+
+        mock_order_by_result = projects_list
+        mock_order_by = Mock(return_value=mock_order_by_result)
+
+        mock_only_result = Mock()
+        mock_only_result.order_by = mock_order_by
+
+        mock_only = Mock(return_value=mock_only_result)
+
+        mock_queryset = Mock()
+        mock_queryset.only = mock_only
+
+        mock_filter = Mock(return_value=mock_queryset)
+
+        monkeypatch.setattr(Project.objects, "filter", mock_filter)
         get_gsoc_projects.cache_clear()
 
-        result = get_gsoc_projects("2023")
+        result = get_gsoc_projects(2023)
         length = 2
         assert len(result) == length
-        assert result[0]["idx_name"] == "Project1_2023"
-        assert result[1]["idx_url"] == "https://example.com/proj2"
+        assert result[0]["name"] == "Project1_2023"
+        assert result[0]["url"] == "https://example.com/proj1"
+        assert result[1]["name"] == "Project2_2023"
+        assert result[1]["url"] == "https://example.com/proj2"
 
-        mock_get_projects.assert_called_once_with(
-            attributes=["idx_name", "idx_url"],
-            query="gsoc2023",
-            searchable_attributes=[
-                "idx_custom_tags",
-                "idx_languages",
-                "idx_tags",
-                "idx_topics",
-            ],
-        )
-
-        result2 = get_gsoc_projects("2023")
-        assert mock_get_projects.call_count == 1
+        # Test caching - should return same result without another query
+        result2 = get_gsoc_projects(2023)
         assert result == result2
+        mock_filter.assert_called_once_with(
+            is_active=True, custom_tags__isnull=False, custom_tags__icontains="gsoc2023"
+        )
+        mock_only.assert_called_once_with("name", "key")
+        mock_order_by.assert_called_once_with("name")
 
 
 class TestGetNewsData:
@@ -360,7 +549,7 @@ class TestGetNewsData:
         mock_response.raise_for_status = Mock()
         monkeypatch.setattr("requests.get", Mock(return_value=mock_response))
         monkeypatch.setattr(
-            "apps.slack.utils.content.html.fromstring",
+            "apps.owasp.utils.news.html.fromstring",
             Mock(side_effect=ParserError("bad html")),
         )
 
@@ -393,7 +582,7 @@ class TestGetStaffData:
         assert mock_get.call_count == 1
         assert result == result2
 
-    def test_get_staff_data_request_exception(self, monkeypatch):
+    def test_get_staff_data_request_exception(self, monkeypatch, caplog):
         """Test get_staff_data handles RequestException gracefully without caching None."""
         mock_get = Mock(side_effect=RequestException("Network error"))
         monkeypatch.setattr("requests.get", mock_get)
@@ -401,8 +590,19 @@ class TestGetStaffData:
         assert get_staff_data() is None
         assert get_staff_data() is None
         assert mock_get.call_count == 2
+        assert "Unable to fetch OWASP staff data file" in caplog.text
+        assert "Unable to parse OWASP staff data file" not in caplog.text
 
-    def test_get_staff_data_yaml_error(self, monkeypatch):
+    def test_get_staff_data_http_error(self, monkeypatch, caplog):
+        """Log an HTTP failure as a fetch error rather than a YAML parsing failure."""
+        response = Mock()
+        response.raise_for_status.side_effect = RequestException("HTTP error")
+        monkeypatch.setattr("requests.get", Mock(return_value=response))
+        assert get_staff_data() is None
+        assert "Unable to fetch OWASP staff data file" in caplog.text
+        assert "Unable to parse OWASP staff data file" not in caplog.text
+
+    def test_get_staff_data_yaml_error(self, monkeypatch, caplog):
         """Test get_staff_data handles YAML parse errors."""
         mock_response = Mock()
         mock_response.text = "invalid: [\n  - broken"
@@ -411,6 +611,8 @@ class TestGetStaffData:
         monkeypatch.setattr("requests.get", mock_get)
 
         assert get_staff_data() is None
+        assert "Unable to parse OWASP staff data file" in caplog.text
+        assert "Unable to fetch OWASP staff data file" not in caplog.text
 
     def test_get_staff_data_invalid_shape(self, monkeypatch):
         """Test get_staff_data rejects YAML that is not a list of named dicts."""
@@ -433,58 +635,50 @@ class TestGetStaffData:
         assert get_staff_data() is None
 
 
-class TestDownloadFile:
-    def test_download_file_success(self, monkeypatch):
-        """Test successful file download."""
-        mock_response = Mock()
-        mock_response.content = b"image-bytes"
-        mock_response.raise_for_status = Mock()
-
-        monkeypatch.setattr(
-            "apps.slack.utils.format.requests.get", Mock(return_value=mock_response)
+def test_news_author_does_not_cross_heading(monkeypatch):
+    """Do not borrow the author of a later article when the current article has none."""
+    cache.clear()
+    response = Mock(
+        content=(
+            b'<h2><a href="/one">One</a></h2><p>No author</p>'
+            b'<h2><a href="/two">Two</a></h2><p class="author">Second author</p>'
         )
+    )
+    monkeypatch.setattr("requests.get", Mock(return_value=response))
+    articles = get_news_data()
+    assert articles[0]["author"] == ""
+    assert articles[1]["author"] == "Second author"
 
-        result = download_file("https://files.slack.com/image.png", "xoxb-token")
 
-        assert result == b"image-bytes"
+def test_inline_code_stays_literal_in_final_slack_block():
+    """Preserve Markdown examples inside code through final block construction."""
+    response = "Run `**not bold**` or `[example](https://example.com)` and **bold**."
+    block = get_response_blocks(response)[0]
+    assert block["text"]["text"] == (
+        "Run `**not bold**` or `[example](https://example.com)` and *bold*."
+    )
 
-    def test_download_file_http_error(self, monkeypatch):
-        """Test download returns None on HTTP error."""
-        mock_response = Mock()
-        mock_response.raise_for_status.side_effect = req.HTTPError("404")
 
-        monkeypatch.setattr(
-            "apps.slack.utils.format.requests.get", Mock(return_value=mock_response)
-        )
+def test_whole_response_fence_stays_literal_in_final_slack_block():
+    """Keep a fully fenced response literal, including mention and link syntax."""
+    source = "# **literal** <@U123> [example](https://example.com)"
+    assert get_response_blocks(f"```\n{source}\n```") == [
+        {"type": "section", "text": {"type": "plain_text", "text": source + "\n", "emoji": False}},
+    ]
 
-        result = download_file("https://files.slack.com/image.png", "xoxb-token")
 
-        assert result is None
-
-    def test_download_file_request_exception(self, monkeypatch):
-        """Test download returns None on request exception."""
-        monkeypatch.setattr(
-            "apps.slack.utils.format.requests.get",
-            Mock(side_effect=req.ConnectionError("timeout")),
-        )
-
-        result = download_file("https://files.slack.com/image.png", "xoxb-token")
-
-        assert result is None
-
-    def test_download_file_sends_auth_header(self, monkeypatch):
-        """Test that download_file sends the correct authorization header."""
-        mock_response = Mock()
-        mock_response.content = b"image-bytes"
-        mock_response.raise_for_status = Mock()
-        mock_get = Mock(return_value=mock_response)
-
-        monkeypatch.setattr("apps.slack.utils.format.requests.get", mock_get)
-
-        download_file("https://files.slack.com/image.png", "xoxb-test-token")
-
-        mock_get.assert_called_once_with(
-            "https://files.slack.com/image.png",
-            headers={"Authorization": "Bearer xoxb-test-token"},
-            timeout=30,
-        )
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("[`name`](https://example.com)", "<https://example.com|`name`>"),
+        ("[the `name` value](https://example.com)", "<https://example.com|the `name` value>"),
+        ("`[name](https://example.com)`", "`[name](https://example.com)`"),
+        (
+            "`literal` then [`name`](https://example.com)",
+            "`literal` then <https://example.com|`name`>",
+        ),
+    ],
+)
+def test_links_and_inline_code_are_matched_together(source, expected):
+    """Convert a complete link with code in its label, while leaving code examples literal."""
+    assert format_links_for_slack(source) == expected

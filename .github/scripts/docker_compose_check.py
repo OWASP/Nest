@@ -37,6 +37,7 @@ CANONICAL_VOLUMES = frozenset(
         "e2e-db-data",
         "frontend-next",
         "frontend-node-modules",
+        "nestbot-venv",
         "fuzz-cache-data",
         "fuzz-db-data",
     }

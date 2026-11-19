@@ -147,6 +147,19 @@ resource "aws_ssm_parameter" "django_release_version" {
   value       = var.django_release_version
 }
 
+resource "aws_ssm_parameter" "django_google_api_key" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Google API key for NestBot."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_GOOGLE_API_KEY"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "django_open_ai_secret_key" {
   description = "OpenAI Secret Key."
   name        = "/${var.project_name}/${var.environment}/DJANGO_OPEN_AI_SECRET_KEY"
@@ -255,6 +268,78 @@ resource "aws_ssm_parameter" "nest_github_app_private_key" {
   lifecycle {
     ignore_changes = [value]
   }
+}
+
+resource "aws_ssm_parameter" "nestbot_aws_default_region" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "AWS region used by NestBot for Bedrock API calls."
+  name        = "/${var.project_name}/${var.environment}/nestbot/AWS_DEFAULT_REGION"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.nestbot_aws_region
+}
+
+resource "aws_ssm_parameter" "nestbot_bedrock_model_name" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Bedrock model used by NestBot."
+  name        = "/${var.project_name}/${var.environment}/nestbot/BEDROCK_MODEL_NAME"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.nestbot_bedrock_model_name
+}
+
+resource "aws_ssm_parameter" "nestbot_crewai_tracing_enabled" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Whether CrewAI tracing is enabled for NestBot."
+  name        = "/${var.project_name}/${var.environment}/nestbot/CREWAI_TRACING_ENABLED"
+  tags        = var.common_tags
+  type        = "String"
+  value       = "false"
+}
+
+resource "aws_ssm_parameter" "nestbot_django_nestbot_ai_assistant_enabled" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Whether the NestBot AI assistant is enabled."
+  name        = "/${var.project_name}/${var.environment}/nestbot/DJANGO_NESTBOT_AI_ASSISTANT_ENABLED"
+  tags        = var.common_tags
+  type        = "String"
+  value       = tostring(var.nestbot_ai_assistant_enabled)
+}
+
+resource "aws_ssm_parameter" "nestbot_django_settings_module" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Django settings module for the NestBot service."
+  name        = "/${var.project_name}/${var.environment}/nestbot/DJANGO_SETTINGS_MODULE"
+  tags        = var.common_tags
+  type        = "String"
+  value       = "settings.nestbot"
+}
+
+resource "aws_ssm_parameter" "nestbot_embedding_provider" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Embedding provider used by NestBot."
+  name        = "/${var.project_name}/${var.environment}/nestbot/EMBEDDING_PROVIDER"
+  tags        = var.common_tags
+  type        = "String"
+  value       = "google"
+}
+
+resource "aws_ssm_parameter" "nestbot_google_model_name" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Google model used by NestBot."
+  name        = "/${var.project_name}/${var.environment}/nestbot/GOOGLE_MODEL_NAME"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.nestbot_google_model_name
+}
+
+resource "aws_ssm_parameter" "nestbot_llm_provider" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "LLM provider used by NestBot."
+  name        = "/${var.project_name}/${var.environment}/nestbot/LLM_PROVIDER"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.nestbot_llm_provider
 }
 
 resource "aws_ssm_parameter" "next_server_csrf_url" {

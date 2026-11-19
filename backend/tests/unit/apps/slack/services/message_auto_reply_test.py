@@ -3,11 +3,11 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackRequestError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.models import Conversation, Message, Workspace
-from apps.slack.services.message_auto_reply import generate_ai_reply_if_unanswered
+from apps.slack.services.message_auto_reply import _is_unanswered, generate_ai_reply_if_unanswered
 
 TEST_BOT_TOKEN = "xoxb-test-token"  # noqa: S105
 
@@ -68,13 +68,18 @@ class TestMessageAutoReply:
         ]
         mock_client = Mock()
         mock_app.client = mock_client
-        mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
+        mock_client.conversations_history.return_value = {
+            "messages": [{"ts": "1234567890.123456", "reply_count": 0}]
+        }
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
-        mock_client.conversations_replies.assert_called_once_with(
+        assert mock_client.conversations_history.call_count == 2
+        mock_client.conversations_history.assert_called_with(
             channel=mock_message.conversation.slack_channel_id,
-            ts=mock_message.slack_message_id,
+            oldest=mock_message.slack_message_id,
+            latest=mock_message.slack_message_id,
+            inclusive=True,
             limit=1,
         )
         mock_process_ai_query.assert_called_once_with(
@@ -93,6 +98,8 @@ class TestMessageAutoReply:
                 }
             ],
             text="OWASP is a security organization...",
+            mrkdwn=False,
+            parse="none",
             thread_ts=mock_message.slack_message_id,
         )
 
@@ -139,11 +146,30 @@ class TestMessageAutoReply:
         mock_message_get.return_value = mock_message
         mock_client = Mock()
         mock_app.client = mock_client
-        mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 2}]}
+        mock_client.conversations_history.return_value = {
+            "messages": [{"ts": "1234567890.123456", "reply_count": 2}]
+        }
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
         mock_process_ai_query.assert_not_called()
+
+    @pytest.mark.parametrize("response", [{}, {"messages": []}])
+    @patch.object(SlackConfig, "app")
+    @patch("apps.slack.services.message_auto_reply.Message.objects.get")
+    @patch("apps.slack.services.message_auto_reply.process_ai_query")
+    def test_generate_ai_reply_unknown_thread(
+        self, mock_process_ai_query, mock_message_get, mock_app, mock_message, response
+    ):
+        """Do not answer when Slack has not returned the parent message."""
+        mock_message_get.return_value = mock_message
+        mock_app.client.conversations_history.return_value = response
+
+        generate_ai_reply_if_unanswered(mock_message.id)
+
+        mock_process_ai_query.assert_not_called()
+        mock_app.client.chat_postMessage.assert_not_called()
+        mock_app.client.reactions_add.assert_not_called()
 
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
@@ -163,7 +189,7 @@ class TestMessageAutoReply:
         mock_message_get.return_value = mock_message
         mock_client = Mock()
         mock_app.client = mock_client
-        mock_client.conversations_replies.side_effect = SlackApiError("API Error", response=Mock())
+        mock_client.conversations_history.side_effect = SlackApiError("API Error", response=Mock())
         mock_process_ai_query.return_value = "OWASP is a security organization..."
         mock_get_response_blocks.return_value = [
             {
@@ -178,8 +204,9 @@ class TestMessageAutoReply:
         generate_ai_reply_if_unanswered(mock_message.id)
 
         mock_logger.exception.assert_called_once_with("Error checking for replies for message")
-        mock_process_ai_query.assert_called_once()
-        mock_client.chat_postMessage.assert_called_once()
+        mock_process_ai_query.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+        mock_client.reactions_add.assert_not_called()
 
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
@@ -195,7 +222,9 @@ class TestMessageAutoReply:
         mock_message_get.return_value = mock_message
         mock_client = Mock()
         mock_app.client = mock_client
-        mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
+        mock_client.conversations_history.return_value = {
+            "messages": [{"ts": "1234567890.123456", "reply_count": 0}]
+        }
         mock_process_ai_query.return_value = None
 
         generate_ai_reply_if_unanswered(mock_message.id)
@@ -216,9 +245,73 @@ class TestMessageAutoReply:
         mock_message_get.return_value = mock_message
         mock_client = Mock()
         mock_app.client = mock_client
-        mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
+        mock_client.conversations_history.return_value = {
+            "messages": [{"ts": "1234567890.123456", "reply_count": 0}]
+        }
         mock_process_ai_query.return_value = ""
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
         mock_client.chat_postMessage.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "response",
+        [
+            {"messages": [{"ts": "other", "reply_count": 0}]},
+            {"messages": [{"ts": "1234567890.123456", "reply_count": 1}]},
+        ],
+    )
+    def test_reply_confirmation_requires_exact_unanswered_parent(self, mock_message, response):
+        """Reject a different parent or a parent that already has replies."""
+        client = Mock()
+        client.conversations_history.return_value = response
+        assert _is_unanswered(client, mock_message) is False
+
+    def test_reply_arriving_during_generation_prevents_send(self, mocker, mock_message):
+        """Skip a generated response when another reply arrives first."""
+        mocker.patch(
+            "apps.slack.services.message_auto_reply.Message.objects.get", return_value=mock_message
+        )
+        mocker.patch(
+            "apps.slack.services.message_auto_reply.process_ai_query", return_value="answer"
+        )
+        app = mocker.patch.object(SlackConfig, "app")
+        app.client.conversations_history.side_effect = [
+            {"messages": [{"ts": mock_message.slack_message_id}]},
+            {"messages": [{"ts": mock_message.slack_message_id, "reply_count": 1}]},
+        ]
+        generate_ai_reply_if_unanswered(mock_message.id)
+        app.client.chat_postMessage.assert_not_called()
+
+
+def test_confirmation_network_failure_is_closed():
+    """Reject automatic replies when Slack confirmation cannot be fetched."""
+    client = Mock()
+    client.conversations_history.side_effect = SlackRequestError("connection failed")
+    message = Mock(slack_message_id="123.000")
+    assert _is_unanswered(client, message) is False
+
+
+def test_auto_reply_escapes_fallback_special_characters(mocker):
+    """Keep special characters literal in a delayed reply's fallback text."""
+    message = Mock(id=1, text="question", slack_message_id="123.000")
+    message.conversation.is_nest_bot_assistant_enabled = True
+    mocker.patch(
+        "apps.slack.services.message_auto_reply.Message.objects.get", return_value=message
+    )
+    mocker.patch(
+        "apps.slack.services.message_auto_reply.process_ai_query", return_value="A & B < C > D"
+    )
+    blocks = [{"type": "section"}]
+    mocker.patch("apps.slack.services.message_auto_reply.get_response_blocks", return_value=blocks)
+    app = mocker.patch.object(SlackConfig, "app")
+    app.client.conversations_history.return_value = {"messages": [{"ts": "123.000"}]}
+    generate_ai_reply_if_unanswered(1)
+    app.client.chat_postMessage.assert_called_once_with(
+        channel=message.conversation.slack_channel_id,
+        blocks=blocks,
+        text="A &amp; B &lt; C &gt; D",
+        mrkdwn=False,
+        parse="none",
+        thread_ts="123.000",
+    )

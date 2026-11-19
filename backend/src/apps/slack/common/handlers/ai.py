@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
+
 from apps.slack.blocks import markdown
 from apps.slack.utils import format_ai_response_for_slack
+from apps.slack.utils.format import split_fenced_sections
 
 logger = logging.getLogger(__name__)
+MAX_MESSAGE_BLOCKS = 50
 
 
 def get_blocks(
@@ -29,6 +33,9 @@ def get_blocks(
         list: A list of Slack blocks representing the AI response.
 
     """
+    if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
+        return [markdown("NestBot AI assistant is currently disabled.")]
+
     ai_response = process_ai_query(
         query.strip(), images=images, channel_id=channel_id, is_app_mention=is_app_mention
     )
@@ -45,8 +52,31 @@ def get_response_blocks(response: str | None) -> list[dict]:
         list: A list of Slack blocks representing the AI response.
 
     """
-    # Format the AI response for Slack (remove code blocks, fix markdown)
-    return [markdown(format_ai_response_for_slack(response))] if response else get_error_blocks()
+    if not response:
+        return get_error_blocks()
+    blocks = [
+        {"type": "section", "text": {"type": "plain_text", "text": content, "emoji": False}}
+        if fenced
+        else markdown(format_ai_response_for_slack(content))
+        for fenced, content in split_fenced_sections(response)
+        if content.strip()
+    ]
+    if len(blocks) > MAX_MESSAGE_BLOCKS:
+        return [
+            *blocks[: MAX_MESSAGE_BLOCKS - 1],
+            {
+                "type": "section",
+                "text": {
+                    "type": "plain_text",
+                    "text": (
+                        "Response truncated. Ask a more specific question "
+                        "for the remaining details."
+                    ),
+                    "emoji": False,
+                },
+            },
+        ]
+    return blocks
 
 
 def process_ai_query(
@@ -68,6 +98,9 @@ def process_ai_query(
         str | None: The AI response, None if error occurred or should be skipped.
 
     """
+    if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
+        return None
+
     try:
         from apps.ai.flows import process_query
 

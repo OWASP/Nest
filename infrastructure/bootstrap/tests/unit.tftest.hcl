@@ -152,3 +152,30 @@ run "test_shared_bucket_permissions_production" {
     error_message = "The environment with management privileges must have full read and write access to the shared data bucket via S3Management and S3WriteManagement."
   }
 }
+
+run "test_staging_bedrock_lookup_permissions" {
+  command = plan
+  assert {
+    condition     = toset(one([for statement in jsondecode(data.aws_iam_policy_document.part_three.json).Statement : statement if statement.Sid == "NestBotBedrockLookup"]).Action) == toset(["bedrock:GetFoundationModel", "bedrock:GetInferenceProfile"])
+    error_message = "Staging deployment must be able to resolve the approved Bedrock target without invoking it."
+  }
+  assert {
+    condition = toset(one([for statement in jsondecode(data.aws_iam_policy_document.part_three.json).Statement : statement if statement.Sid == "NestBotBedrockLookup"]).Resource) == toset([
+      "arn:aws:bedrock:${var.aws_region}::foundation-model/*",
+      "arn:aws:bedrock:${var.aws_region}:160885282306:inference-profile/*",
+      "arn:aws:bedrock:${var.aws_region}:160885282306:application-inference-profile/*",
+    ])
+    error_message = "Lookup permissions must stay scoped to the configured region and account."
+  }
+}
+
+run "test_production_has_no_bedrock_lookup_permissions" {
+  command = plan
+  variables {
+    environment = "production"
+  }
+  assert {
+    condition     = !strcontains(data.aws_iam_policy_document.part_three.json, "bedrock:")
+    error_message = "Production deployment permissions must remain unchanged."
+  }
+}

@@ -4,6 +4,7 @@ import logging
 from datetime import timedelta
 
 import django_rq
+from django.conf import settings
 
 from apps.ai.common.constants import QUEUE_RESPONSE_TIME_MINUTES
 from apps.slack.common.question_detector import QuestionDetector
@@ -21,7 +22,14 @@ class MessagePosted(EventBase):
 
     def __init__(self):
         """Initialize MessagePosted event handler."""
-        self.question_detector = QuestionDetector()
+        self._question_detector: QuestionDetector | None = None
+
+    @property
+    def question_detector(self) -> QuestionDetector:
+        """Create provider clients only when an enabled channel needs detection."""
+        if self._question_detector is None:
+            self._question_detector = QuestionDetector()
+        return self._question_detector
 
     def handle_event(self, event, client):
         """Handle an incoming message event."""
@@ -37,6 +45,9 @@ class MessagePosted(EventBase):
                 ).update(has_replies=True)
             except Message.DoesNotExist:
                 logger.warning("Thread message not found.")
+            return
+
+        if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
             return
 
         channel_id = event.get("channel")

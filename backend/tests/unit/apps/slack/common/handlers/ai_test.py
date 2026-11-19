@@ -2,6 +2,9 @@
 
 from unittest.mock import patch
 
+import pytest
+
+from apps.slack.commands.ai import Ai
 from apps.slack.common.handlers.ai import (
     get_blocks,
     get_default_response,
@@ -226,3 +229,41 @@ class TestAiHandler:
         assert get_response_blocks("") == error_blocks
         assert get_response_blocks(None) == error_blocks
         assert mock_get_error_blocks.call_count == 2
+
+
+def test_fenced_content_stays_literal_in_blocks_and_fallback(mocker):
+    """Keep fenced source literal in both the visual block and accessible fallback."""
+    source = "**literal** <@U123> <!channel> [link](https://example.com)"
+    mocker.patch(
+        "apps.slack.common.handlers.ai.process_ai_query",
+        return_value=f"Before\n```\n{source}\n```\nAfter",
+    )
+    client = mocker.Mock()
+    client.conversations_open.return_value = {"channel": {"id": "D123"}}
+    Ai().handler(mocker.Mock(), {"text": "help", "user_id": "U123"}, client)
+    posted = client.chat_postMessage.call_args.kwargs
+    assert posted["blocks"][1] == {
+        "type": "section",
+        "text": {"type": "plain_text", "text": source + "\n", "emoji": False},
+    }
+    assert posted["blocks"][0]["text"]["type"] == "mrkdwn"
+    assert "&lt;@U123&gt;" in posted["text"]
+    assert "&lt;!channel&gt;" in posted["text"]
+    assert "**literal**" in posted["text"]
+    assert posted["mrkdwn"] is False
+    assert posted["parse"] == "none"
+
+
+@pytest.mark.parametrize("sections", [49, 50, 51, 75])
+def test_response_block_count_stays_within_slack_limit(sections):
+    """Keep up to fifty blocks, replacing overflow with a visible plain-text notice."""
+    response = "".join(f"```\n**literal {index}** <@U123>\n```\n" for index in range(sections))
+    blocks = get_response_blocks(response)
+    assert len(blocks) == min(sections, 50)
+    assert blocks[0]["text"]["type"] == "plain_text"
+    assert blocks[0]["text"]["text"] == "**literal 0** <@U123>\n"
+    if sections > 50:
+        assert "truncated" in blocks[-1]["text"]["text"]
+        assert blocks[-1]["text"]["type"] == "plain_text"
+    else:
+        assert blocks[-1]["text"]["text"] == f"**literal {sections - 1}** <@U123>\n"

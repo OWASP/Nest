@@ -1,5 +1,21 @@
 mock_provider "aws" {}
 
+override_resource {
+  target          = aws_lb_target_group.backend
+  override_during = plan
+  values = {
+    arn = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/backend/1234567890123456"
+  }
+}
+
+override_resource {
+  target          = aws_lb_target_group.nestbot
+  override_during = plan
+  values = {
+    arn = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nestbot/1234567890123456"
+  }
+}
+
 variables {
   alb_sg_id                  = "sg-alb-12345"
   common_tags                = { Environment = "test", Project = "nest" }
@@ -236,6 +252,67 @@ run "test_backend_target_group_name_format" {
     condition     = aws_lb_target_group.backend.name == "${var.project_name}-${var.environment}-backend-tg"
     error_message = "Backend target group name must follow format: {project}-{environment}-backend-tg."
   }
+}
+
+run "test_nestbot_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_lb_target_group.nestbot) == 0 && length(aws_lb_listener_rule.nestbot_https) == 0 && output.nestbot_target_group_arn == null
+    error_message = "Default configuration must not create NestBot routing resources."
+  }
+}
+
+run "test_nestbot_prewarms_without_traffic" {
+  command = plan
+
+  variables {
+    enable_nestbot = true
+  }
+
+  assert {
+    condition     = aws_lb_target_group.nestbot[0].port == 8000 && aws_lb_target_group.nestbot[0].target_type == "ip" && aws_lb_target_group.nestbot[0].health_check[0].path == "/status/"
+    error_message = "NestBot must use an IP target group on port 8000 with the status probe."
+  }
+
+  assert {
+    condition     = aws_lb_listener_rule.nestbot_https[0].priority < min([for rule in aws_lb_listener_rule.backend_https : rule.priority]...)
+    error_message = "The Slack rule must precede all broad backend rules."
+  }
+
+  assert {
+    condition     = one([for condition in aws_lb_listener_rule.nestbot_https[0].condition : condition.path_pattern if length(condition.path_pattern) > 0])[0].values == toset(["/integrations/slack/*"])
+    error_message = "Only Slack integration paths should match the NestBot rule."
+  }
+
+  assert {
+    condition     = one([for group in aws_lb_listener_rule.nestbot_https[0].action[0].forward[0].target_group : group.weight if group.arn == aws_lb_target_group.nestbot[0].arn]) == 0
+    error_message = "Prewarming must send zero traffic to NestBot."
+  }
+}
+
+run "test_nestbot_slack_cutover" {
+  command = plan
+
+  variables {
+    enable_nestbot         = true
+    route_slack_to_nestbot = true
+  }
+
+  assert {
+    condition     = one([for group in aws_lb_listener_rule.nestbot_https[0].action[0].forward[0].target_group : group.weight if group.arn == aws_lb_target_group.nestbot[0].arn]) == 100 && one([for group in aws_lb_listener_rule.nestbot_https[0].action[0].forward[0].target_group : group.weight if group.arn == aws_lb_target_group.backend.arn]) == 0
+    error_message = "Cutover must send all Slack traffic to NestBot."
+  }
+}
+
+run "test_reject_nestbot_routing_without_target_group" {
+  command = plan
+
+  variables {
+    route_slack_to_nestbot = true
+  }
+
+  expect_failures = [var.route_slack_to_nestbot]
 }
 
 run "test_backend_target_group_port" {

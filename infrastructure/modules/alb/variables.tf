@@ -36,6 +36,12 @@ variable "environment" {
   type        = string
 }
 
+variable "enable_nestbot" {
+  description = "Whether to create the NestBot target group and Slack listener rule."
+  type        = bool
+  default     = false
+}
+
 variable "frontend_health_check_path" {
   description = "The health check path for the frontend target group."
   type        = string
@@ -71,6 +77,17 @@ variable "public_subnet_ids" {
   validation {
     condition     = length(var.public_subnet_ids) > 0
     error_message = "public_subnet_ids must contain at least one subnet."
+  }
+}
+
+variable "route_slack_to_nestbot" {
+  description = "Whether to send Slack traffic to NestBot instead of backend."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.route_slack_to_nestbot || var.enable_nestbot
+    error_message = "Slack routing requires enable_nestbot."
   }
 }
 

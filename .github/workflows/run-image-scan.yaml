@@ -51,6 +51,8 @@ jobs:
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
+      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version
+        }}
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
       contents: read
@@ -88,6 +90,19 @@ jobs:
             make backend-image-sbom BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
             make frontend-image-sbom FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
 
+      - name: Scan NestBot image and generate SBOM
+        if: inputs.environment == 'staging'
+        uses: ./.github/actions/run-trivy-check
+        with:
+          command: |
+            set -euo pipefail
+            DIGEST=$(bash .github/scripts/ecr-image-digest.sh "$NESTBOT_IMAGE")
+            IMAGE_BY_DIGEST="${NESTBOT_IMAGE%:*}@$DIGEST"
+            docker pull "$IMAGE_BY_DIGEST"
+            make backend-security-image-scan BACKEND_IMAGE_NAME="$IMAGE_BY_DIGEST"
+            make backend-image-sbom BACKEND_IMAGE_NAME="$IMAGE_BY_DIGEST" \
+              BACKEND_SBOM_OUTPUT="nestbot-sbom-$RELEASE_VERSION.cdx.json"
+
       - name: Upload unsigned SBOM as artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
@@ -95,4 +110,5 @@ jobs:
           path: |
             backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            ${{ inputs.environment == 'staging' && format('nestbot-sbom-{0}.cdx.json', env.RELEASE_VERSION) || '' }}
     timeout-minutes: 10

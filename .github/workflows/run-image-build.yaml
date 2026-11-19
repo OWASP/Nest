@@ -91,6 +91,9 @@ jobs:
       FRONTEND_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_cache_repo }}:cache
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
+      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version
+        }}
+      NESTBOT_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot-cache:cache
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
       contents: read
@@ -145,6 +148,31 @@ jobs:
           RAW_SIZE=$(bash .github/scripts/ecr-image-size.sh "$BACKEND_IMAGE")
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
+
+      - name: Verify NestBot ECR bootstrap
+        if: inputs.environment == 'staging'
+        run: aws ecr describe-repositories --repository-names nest-staging-nestbot nest-staging-nestbot-cache > /dev/null
+
+      - name: Build NestBot image
+        if: inputs.environment == 'staging'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          build-args: |
+            OWASP_GID=${{ inputs.backend_gid }}
+            OWASP_UID=${{ inputs.backend_uid }}
+          cache-from: |
+            type=gha,scope=nestbot
+            type=registry,ref=${{ env.NESTBOT_CACHE_REF }}
+          cache-to: |
+            type=gha,scope=nestbot,mode=max
+            type=registry,ref=${{ env.NESTBOT_CACHE_REF }},mode=max
+          context: backend
+          file: docker/backend/Dockerfile.nestbot
+          platforms: linux/arm64
+          provenance: mode=min
+          push: true
+          sbom: true
+          tags: ${{ env.NESTBOT_IMAGE }}
 
       - name: Prepare frontend public environment
         env:
