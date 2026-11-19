@@ -176,6 +176,9 @@ class Certificate(TimestampedModel):
             CertificateIssuanceError: If provider resolution or issuance fails.
 
         """
+        if score <= 0:
+            return
+
         # Lock the User row to serialize concurrent certificate issuances for this user
         user = User.objects.select_for_update().get(id=user.id)
 
