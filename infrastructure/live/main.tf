@@ -15,16 +15,6 @@ terraform {
 }
 
 locals {
-  nestbot_environment_variables = {
-    AWS_DEFAULT_REGION                  = var.aws_region
-    BEDROCK_MODEL_NAME                  = var.nestbot_bedrock_model_name
-    CREWAI_TRACING_ENABLED              = "false"
-    DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = tostring(var.nestbot_ai_assistant_enabled)
-    DJANGO_SETTINGS_MODULE              = "settings.nestbot"
-    EMBEDDING_PROVIDER                  = "google"
-    GOOGLE_MODEL_NAME                   = var.nestbot_google_model_name
-    LLM_PROVIDER                        = var.nestbot_llm_provider
-  }
   nestbot_enabled           = var.environment == "staging"
   nestbot_container_port    = 8000
   nestbot_health_check_path = "/status/"
@@ -228,15 +218,15 @@ module "nestbot" {
   desired_count          = var.nestbot_desired_count
   enable_auto_scaling    = false
   environment            = var.environment
-  environment_variables  = local.nestbot_environment_variables
   health_check_command   = local.nestbot_health_check_command
   health_check_path      = local.nestbot_health_check_path
   image_tag              = var.nestbot_image_tag
   kms_key_arn            = module.kms.key_arn
-  parameters_arns = {
-    for name, arn in merge(module.parameters.django_ssm_parameter_arns, module.parameters.nestbot_ssm_parameter_arns) : name => arn
-    if !contains(keys(local.nestbot_environment_variables), name)
-  }
+  # NestBot parameters come last so their settings module overrides the shared Django one.
+  parameters_arns = merge(
+    module.parameters.django_ssm_parameter_arns,
+    module.parameters.nestbot_ssm_parameter_arns,
+  )
   private_subnet_ids    = module.networking.private_subnet_ids
   project_name          = var.project_name
   security_group_id     = module.security.backend_sg_id
@@ -290,6 +280,11 @@ module "parameters" {
   enable_additional_parameters  = var.enable_additional_parameters
   enable_nestbot                = local.nestbot_enabled
   environment                   = var.environment
+  nestbot_ai_assistant_enabled  = var.nestbot_ai_assistant_enabled
+  nestbot_aws_region            = var.aws_region
+  nestbot_bedrock_model_name    = var.nestbot_bedrock_model_name
+  nestbot_google_model_name     = var.nestbot_google_model_name
+  nestbot_llm_provider          = var.nestbot_llm_provider
   next_server_csrf_url          = "https://${var.domain_name}/csrf/"
   next_server_graphql_url       = "https://${var.domain_name}/graphql/"
   nextauth_url                  = "https://${var.domain_name}"

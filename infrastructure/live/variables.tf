@@ -291,21 +291,10 @@ variable "nestbot_ai_assistant_enabled" {
   default     = true
 }
 
-variable "nestbot_llm_provider" {
-  description = "NestBot answer provider. Use google until approved Bedrock access is configured."
-  type        = string
-  default     = "google"
-
-  validation {
-    condition     = contains(["google", "openai", "bedrock"], var.nestbot_llm_provider)
-    error_message = "nestbot_llm_provider must be google, openai or bedrock."
-  }
-}
-
 variable "nestbot_bedrock_model_name" {
-  description = "Approved Bedrock model or inference profile ID; required when Bedrock is selected."
+  description = "The Bedrock model or inference profile ID used by NestBot."
   type        = string
-  default     = ""
+  default     = "us.amazon.nova-micro-v1:0"
 
   validation {
     condition     = var.nestbot_llm_provider != "bedrock" || trimspace(var.nestbot_bedrock_model_name) != ""
@@ -313,10 +302,12 @@ variable "nestbot_bedrock_model_name" {
   }
 }
 
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_inference_profile
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_foundation_model
 variable "nestbot_bedrock_target_type" {
-  description = "Type of the approved Bedrock target: foundation-model or inference-profile."
+  description = "The type of Bedrock target selected by nestbot_bedrock_model_name."
   type        = string
-  default     = "foundation-model"
+  default     = "inference-profile"
 
   validation {
     condition     = contains(["foundation-model", "inference-profile"], var.nestbot_bedrock_target_type)
@@ -354,6 +345,17 @@ variable "nestbot_image_tag" {
   validation {
     condition     = var.environment != "staging" || try(trimspace(var.nestbot_image_tag) != "", false)
     error_message = "nestbot_image_tag is required in staging."
+  }
+}
+
+variable "nestbot_llm_provider" {
+  description = "The answer provider used by NestBot."
+  type        = string
+  default     = "google"
+
+  validation {
+    condition     = contains(["google", "openai", "bedrock"], var.nestbot_llm_provider)
+    error_message = "nestbot_llm_provider must be google, openai or bedrock."
   }
 }
 

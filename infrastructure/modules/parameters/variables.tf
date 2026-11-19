@@ -77,15 +77,60 @@ variable "enable_additional_parameters" {
   default     = false
 }
 
+variable "enable_nestbot" {
+  description = "Whether to create NestBot provider parameters."
+  type        = bool
+  default     = false
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
 }
 
-variable "enable_nestbot" {
-  description = "Whether to create NestBot provider parameters."
+variable "nestbot_ai_assistant_enabled" {
+  description = "Whether the NestBot AI assistant is enabled."
   type        = bool
-  default     = false
+}
+
+variable "nestbot_aws_region" {
+  description = "The AWS region used by NestBot for Bedrock API calls."
+  type        = string
+
+  validation {
+    condition     = trimspace(var.nestbot_aws_region) != ""
+    error_message = "nestbot_aws_region must not be empty."
+  }
+}
+
+variable "nestbot_bedrock_model_name" {
+  description = "The Bedrock model or inference profile ID used by NestBot."
+  type        = string
+
+  validation {
+    condition     = trimspace(var.nestbot_bedrock_model_name) != ""
+    error_message = "nestbot_bedrock_model_name must not be empty."
+  }
+}
+
+variable "nestbot_google_model_name" {
+  description = "The Google model used by NestBot answers."
+  type        = string
+
+  validation {
+    condition     = trimspace(var.nestbot_google_model_name) != ""
+    error_message = "nestbot_google_model_name must not be empty."
+  }
+}
+
+variable "nestbot_llm_provider" {
+  description = "The answer provider used by NestBot."
+  type        = string
+
+  validation {
+    condition     = trimspace(var.nestbot_llm_provider) != ""
+    error_message = "nestbot_llm_provider must not be empty."
+  }
 }
 
 variable "next_server_csrf_url" {

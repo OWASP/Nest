@@ -15,6 +15,11 @@ variables {
   django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
   environment                   = "test"
+  nestbot_ai_assistant_enabled  = true
+  nestbot_aws_region            = "us-east-2"
+  nestbot_bedrock_model_name    = "us.amazon.nova-micro-v1:0"
+  nestbot_google_model_name     = "gemini-3.5-flash-lite"
+  nestbot_llm_provider          = "google"
   next_server_csrf_url          = "https://nest.owasp.dev/csrf"
   next_server_graphql_url       = "https://nest.owasp.dev/graphql"
   nextauth_url                  = "https://nest.owasp.dev"
@@ -57,6 +62,40 @@ run "test_nestbot_google_parameter" {
   assert {
     condition     = contains(keys(output.nestbot_ssm_parameter_arns), "DJANGO_GOOGLE_API_KEY") && !contains(keys(output.django_ssm_parameter_arns), "DJANGO_GOOGLE_API_KEY")
     error_message = "The Google key must only be added to NestBot's provider map."
+  }
+}
+
+run "test_nestbot_configuration_values" {
+  command = plan
+
+  variables {
+    enable_nestbot               = true
+    nestbot_ai_assistant_enabled = false
+    nestbot_aws_region           = "eu-west-1"
+    nestbot_google_model_name    = "gemini-test"
+    nestbot_llm_provider         = "bedrock"
+  }
+
+  assert {
+    condition = (
+      aws_ssm_parameter.nestbot_aws_default_region[0].value == "eu-west-1" &&
+      aws_ssm_parameter.nestbot_bedrock_model_name[0].value == var.nestbot_bedrock_model_name &&
+      aws_ssm_parameter.nestbot_crewai_tracing_enabled[0].value == "false" &&
+      aws_ssm_parameter.nestbot_django_nestbot_ai_assistant_enabled[0].value == "false" &&
+      aws_ssm_parameter.nestbot_django_settings_module[0].value == "settings.nestbot" &&
+      aws_ssm_parameter.nestbot_embedding_provider[0].value == "google" &&
+      aws_ssm_parameter.nestbot_google_model_name[0].value == "gemini-test" &&
+      aws_ssm_parameter.nestbot_llm_provider[0].value == "bedrock"
+    )
+    error_message = "NestBot parameters must reflect the configured region, models, provider and AI switch."
+  }
+
+  assert {
+    condition = length(output.nestbot_ssm_parameter_arns) == 9 && alltrue([
+      for name in ["AWS_DEFAULT_REGION", "BEDROCK_MODEL_NAME", "CREWAI_TRACING_ENABLED", "DJANGO_GOOGLE_API_KEY", "DJANGO_NESTBOT_AI_ASSISTANT_ENABLED", "DJANGO_SETTINGS_MODULE", "EMBEDDING_PROVIDER", "GOOGLE_MODEL_NAME", "LLM_PROVIDER"] :
+      contains(keys(output.nestbot_ssm_parameter_arns), name)
+    ])
+    error_message = "The NestBot provider map must contain every NestBot parameter."
   }
 }
 

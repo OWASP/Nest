@@ -36,8 +36,8 @@ run "test_nestbot_inherits_django_configuration" {
   command = plan
 
   assert {
-    condition     = !contains(keys(local.nestbot_environment_variables), "DJANGO_CONFIGURATION") && contains(keys(module.parameters.django_ssm_parameter_arns), "DJANGO_CONFIGURATION")
-    error_message = "NestBot must inherit DJANGO_CONFIGURATION from the shared SSM parameters."
+    condition     = contains([for secret in module.nestbot[0].task_context.container_definition.secrets : secret.name], "DJANGO_CONFIGURATION")
+    error_message = "NestBot must receive DJANGO_CONFIGURATION from the shared SSM parameters."
   }
 }
 
@@ -164,11 +164,6 @@ run "test_ai_switch_independent_of_routing" {
     condition     = var.nestbot_ai_assistant_enabled && !output.route_slack_to_nestbot
     error_message = "Enabling AI must not change Slack routing."
   }
-
-  assert {
-    condition     = module.nestbot[0].container_environment.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "true" && module.nestbot_worker[0].container_environment.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "true"
-    error_message = "Both NestBot containers must receive AI true independently of routing."
-  }
 }
 
 run "test_ai_can_be_disabled_without_changing_routing" {
@@ -182,11 +177,6 @@ run "test_ai_can_be_disabled_without_changing_routing" {
   assert {
     condition     = !var.nestbot_ai_assistant_enabled && output.route_slack_to_nestbot
     error_message = "Disabling AI must preserve separately configured Slack routing."
-  }
-
-  assert {
-    condition     = module.nestbot[0].container_environment.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "false" && module.nestbot_worker[0].container_environment.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "false"
-    error_message = "Both NestBot containers must receive AI false independently of routing."
   }
 }
 
@@ -202,13 +192,8 @@ run "test_bedrock_configuration" {
 
   variables {
     nestbot_llm_provider       = "bedrock"
-    nestbot_bedrock_model_name = "amazon.nova-lite-v1:0"
+    nestbot_bedrock_model_name = "eu.amazon.nova-lite-v1:0"
     aws_region                 = "eu-west-1"
-  }
-
-  assert {
-    condition     = local.nestbot_environment_variables.LLM_PROVIDER == "bedrock" && local.nestbot_environment_variables.BEDROCK_MODEL_NAME == "amazon.nova-lite-v1:0" && local.nestbot_environment_variables.AWS_DEFAULT_REGION == "eu-west-1" && local.nestbot_environment_variables.EMBEDDING_PROVIDER == "google"
-    error_message = "Bedrock answer configuration must preserve Google embeddings and use the configured region."
   }
 
   assert {
@@ -220,7 +205,8 @@ run "test_bedrock_configuration" {
 run "test_bedrock_requires_model" {
   command = plan
   variables {
-    nestbot_llm_provider = "bedrock"
+    nestbot_llm_provider       = "bedrock"
+    nestbot_bedrock_model_name = ""
   }
   expect_failures = [var.nestbot_bedrock_model_name]
 }

@@ -46,6 +46,14 @@ No modules.
 | [aws_ssm_parameter.django_slack_signing_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.github_token](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.nest_github_app_private_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_aws_default_region](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_bedrock_model_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_crewai_tracing_enabled](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_django_nestbot_ai_assistant_enabled](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_django_settings_module](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_embedding_provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_google_model_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.nestbot_llm_provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.next_server_csrf_url](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.next_server_disable_ssr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.next_server_github_client_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -78,6 +86,11 @@ No modules.
 | <a name="input_enable_additional_parameters"></a> [enable\_additional\_parameters](#input\_enable\_additional\_parameters) | Whether to create additional parameters (e.g. for production). | `bool` | `false` | no |
 | <a name="input_enable_nestbot"></a> [enable\_nestbot](#input\_enable\_nestbot) | Whether to create NestBot provider parameters. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_nestbot_ai_assistant_enabled"></a> [nestbot\_ai\_assistant\_enabled](#input\_nestbot\_ai\_assistant\_enabled) | Whether the NestBot AI assistant is enabled. | `bool` | n/a | yes |
+| <a name="input_nestbot_aws_region"></a> [nestbot\_aws\_region](#input\_nestbot\_aws\_region) | The AWS region used by NestBot for Bedrock API calls. | `string` | n/a | yes |
+| <a name="input_nestbot_bedrock_model_name"></a> [nestbot\_bedrock\_model\_name](#input\_nestbot\_bedrock\_model\_name) | The Bedrock model or inference profile ID used by NestBot. | `string` | n/a | yes |
+| <a name="input_nestbot_google_model_name"></a> [nestbot\_google\_model\_name](#input\_nestbot\_google\_model\_name) | The Google model used by NestBot answers. | `string` | n/a | yes |
+| <a name="input_nestbot_llm_provider"></a> [nestbot\_llm\_provider](#input\_nestbot\_llm\_provider) | The answer provider used by NestBot. | `string` | n/a | yes |
 | <a name="input_next_server_csrf_url"></a> [next\_server\_csrf\_url](#input\_next\_server\_csrf\_url) | The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/). | `string` | n/a | yes |
 | <a name="input_next_server_graphql_url"></a> [next\_server\_graphql\_url](#input\_next\_server\_graphql\_url) | The server-side GraphQL URL for Next.js SSR (e.g., https://nest.owasp.dev/graphql/). | `string` | n/a | yes |
 | <a name="input_nextauth_url"></a> [nextauth\_url](#input\_nextauth\_url) | The NextAuth base URL (frontend URL with protocol). | `string` | n/a | yes |
@@ -91,5 +104,5 @@ No modules.
 | ---- | ----------- |
 | <a name="output_django_ssm_parameter_arns"></a> [django\_ssm\_parameter\_arns](#output\_django\_ssm\_parameter\_arns) | Map of environment variable names to the ARNs of all SSM parameters (Required by Django). |
 | <a name="output_frontend_ssm_parameter_arns"></a> [frontend\_ssm\_parameter\_arns](#output\_frontend\_ssm\_parameter\_arns) | Map of frontend environment variable names to the ARNs of all SSM parameters. |
-| <a name="output_nestbot_ssm_parameter_arns"></a> [nestbot\_ssm\_parameter\_arns](#output\_nestbot\_ssm\_parameter\_arns) | NestBot provider parameter ARNs, or an empty map when disabled. |
+| <a name="output_nestbot_ssm_parameter_arns"></a> [nestbot\_ssm\_parameter\_arns](#output\_nestbot\_ssm\_parameter\_arns) | NestBot-specific parameter ARNs, or an empty map when disabled. |
 <!-- END_TF_DOCS -->

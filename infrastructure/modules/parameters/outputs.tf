@@ -35,11 +35,19 @@ output "django_ssm_parameter_arns" {
 }
 
 output "nestbot_ssm_parameter_arns" {
-  description = "NestBot provider parameter ARNs, or an empty map when disabled."
+  description = "NestBot-specific parameter ARNs, or an empty map when disabled."
   sensitive   = true
-  value = {
-    for parameter in aws_ssm_parameter.django_google_api_key : "DJANGO_GOOGLE_API_KEY" => parameter.arn
-  }
+  value = var.enable_nestbot ? {
+    "AWS_DEFAULT_REGION"                  = aws_ssm_parameter.nestbot_aws_default_region[0].arn
+    "BEDROCK_MODEL_NAME"                  = aws_ssm_parameter.nestbot_bedrock_model_name[0].arn
+    "CREWAI_TRACING_ENABLED"              = aws_ssm_parameter.nestbot_crewai_tracing_enabled[0].arn
+    "DJANGO_GOOGLE_API_KEY"               = aws_ssm_parameter.django_google_api_key[0].arn
+    "DJANGO_NESTBOT_AI_ASSISTANT_ENABLED" = aws_ssm_parameter.nestbot_django_nestbot_ai_assistant_enabled[0].arn
+    "DJANGO_SETTINGS_MODULE"              = aws_ssm_parameter.nestbot_django_settings_module[0].arn
+    "EMBEDDING_PROVIDER"                  = aws_ssm_parameter.nestbot_embedding_provider[0].arn
+    "GOOGLE_MODEL_NAME"                   = aws_ssm_parameter.nestbot_google_model_name[0].arn
+    "LLM_PROVIDER"                        = aws_ssm_parameter.nestbot_llm_provider[0].arn
+  } : {}
 }
 
 output "frontend_ssm_parameter_arns" {

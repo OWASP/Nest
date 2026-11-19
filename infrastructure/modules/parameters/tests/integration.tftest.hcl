@@ -23,6 +23,11 @@ variables {
   django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
   environment                   = "test"
+  nestbot_ai_assistant_enabled  = true
+  nestbot_aws_region            = "us-east-1"
+  nestbot_bedrock_model_name    = "us.amazon.nova-micro-v1:0"
+  nestbot_google_model_name     = "gemini-3.5-flash-lite"
+  nestbot_llm_provider          = "google"
   next_server_csrf_url          = "https://nest.owasp.dev/csrf"
   next_server_graphql_url       = "https://nest.owasp.dev/graphql"
   nextauth_url                  = "https://nest.owasp.dev"
