@@ -2,6 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
+import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
 jest.mock('server/fetchAlgoliaData', () => ({
@@ -15,6 +16,17 @@ jest.mock('app/global-error', () => ({
 const mockFetchAlgoliaData = fetchAlgoliaData as jest.Mock
 const mockUseSearchParams = useSearchParams as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
+const mockHandleAppError = handleAppError as jest.Mock
+
+function createDeferred<T>() {
+  let resolve!: (value: T) => void
+  let reject!: (reason?: unknown) => void
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  return { promise, resolve, reject }
+}
 
 const defaultOptions = {
   indexName: 'projects',
@@ -319,5 +331,112 @@ describe('useSearchPage', () => {
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith('?q=nest')
     })
+  })
+
+  it('ignores a stale response when pages change rapidly', async () => {
+    const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+
+    try {
+      const { result } = await renderSearchPage('')
+
+      const page2 = createDeferred<{ hits: { objectID: string }[]; totalPages: number }>()
+      const page3 = createDeferred<{ hits: { objectID: string }[]; totalPages: number }>()
+      mockFetchAlgoliaData.mockImplementation((_index, _query, page) =>
+        page === 2 ? page2.promise : page3.promise
+      )
+
+      act(() => {
+        result.current.handlePageChange(2)
+      })
+      act(() => {
+        result.current.handlePageChange(3)
+      })
+
+      await act(async () => {
+        page2.resolve({ hits: [{ objectID: 'page-2' }], totalPages: 7 })
+      })
+
+      expect(result.current.isLoaded).toBe(false)
+      expect(result.current.items).toEqual([{ objectID: '1' }])
+      expect(result.current.totalPages).toBe(5)
+
+      await act(async () => {
+        page3.resolve({ hits: [{ objectID: 'page-3' }], totalPages: 9 })
+      })
+
+      expect(result.current.currentPage).toBe(3)
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.items).toEqual([{ objectID: 'page-3' }])
+      expect(result.current.totalPages).toBe(9)
+    } finally {
+      scrollTo.mockRestore()
+    }
+  })
+
+  it('ignores a stale response that resolves after the latest search query', async () => {
+    const { result } = await renderSearchPage('')
+
+    const first = createDeferred<{ hits: { objectID: string }[]; totalPages: number }>()
+    mockFetchAlgoliaData.mockImplementation((_index, query) =>
+      query === 'owasp'
+        ? first.promise
+        : Promise.resolve({ hits: [{ objectID: 'nest' }], totalPages: 2 })
+    )
+
+    act(() => {
+      result.current.handleSearch('owasp')
+    })
+    act(() => {
+      result.current.handleSearch('nest')
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.items).toEqual([{ objectID: 'nest' }])
+    })
+
+    await act(async () => {
+      first.resolve({ hits: [{ objectID: 'owasp' }], totalPages: 4 })
+    })
+
+    expect(result.current.searchQuery).toBe('nest')
+    expect(result.current.items).toEqual([{ objectID: 'nest' }])
+    expect(result.current.totalPages).toBe(2)
+  })
+
+  it('does not report errors from stale requests', async () => {
+    const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+
+    try {
+      const { result } = await renderSearchPage('')
+
+      const page2 = createDeferred<never>()
+      mockFetchAlgoliaData.mockImplementation((_index, _query, page) =>
+        page === 2
+          ? page2.promise
+          : Promise.resolve({ hits: [{ objectID: 'page-3' }], totalPages: 9 })
+      )
+
+      act(() => {
+        result.current.handlePageChange(2)
+      })
+      act(() => {
+        result.current.handlePageChange(3)
+      })
+
+      await waitFor(() => {
+        expect(result.current.items).toEqual([{ objectID: 'page-3' }])
+      })
+
+      await act(async () => {
+        page2.reject(new Error('stale failure'))
+      })
+
+      expect(mockHandleAppError).not.toHaveBeenCalled()
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.items).toEqual([{ objectID: 'page-3' }])
+    } finally {
+      scrollTo.mockRestore()
+    }
   })
 })
