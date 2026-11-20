@@ -6,7 +6,11 @@ from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
-from apps.github.api.internal.nodes.repository import RECENT_ISSUES_LIMIT, RepositoryNode
+from apps.github.api.internal.nodes.repository import (
+    RECENT_ISSUES_LIMIT,
+    RECENT_MILESTONES_PREFETCH,
+    RepositoryNode,
+)
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -148,17 +152,44 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == mock_project
 
-    def test_recent_milestones_method(self):
-        """Test recent_milestones method resolution."""
+    def test_recent_milestones_method_prefetched(self):
+        """Test recent_milestones method resolution with prefetched milestones."""
         mock_repository = Mock()
+        mock_milestone_1 = Mock()
+        mock_milestone_2 = Mock()
+        mock_repository.prefetched_recent_milestones = [mock_milestone_1, mock_milestone_2]
         mock_milestones = Mock()
-        mock_milestones.order_by.return_value.__getitem__ = Mock(return_value=[])
+        mock_repository.recent_milestones = mock_milestones
+
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(None, mock_repository, limit=1)
+
+        assert result == [mock_milestone_1]
+        mock_milestones.__getitem__.assert_not_called()
+
+    def test_recent_milestones_method_fallback(self):
+        """Test recent_milestones method fallback when not prefetched."""
+        mock_repository = Mock(spec=["recent_milestones"])
+        mock_milestones = Mock()
+        mock_milestones.__getitem__ = Mock(return_value=[])
         mock_repository.recent_milestones = mock_milestones
 
         field = self._get_field_by_name("recent_milestones", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
         resolver(None, mock_repository, limit=3)
-        mock_milestones.order_by.assert_called_with("-created_at")
+
+        mock_milestones.__getitem__.assert_called_once()
+
+    def test_recent_milestones_prefetch(self):
+        """Test recent_milestones prefetch configuration."""
+        assert RECENT_MILESTONES_PREFETCH.prefetch_through == "milestones"
+        assert RECENT_MILESTONES_PREFETCH.to_attr == "prefetched_recent_milestones"
+        assert RECENT_MILESTONES_PREFETCH.queryset.query.order_by == ("-created_at",)
+        assert RECENT_MILESTONES_PREFETCH.queryset.query.select_related == {
+            "author": {},
+            "repository": {"organization": {}},
+        }
 
     def test_releases_method(self):
         """Test releases method resolution."""

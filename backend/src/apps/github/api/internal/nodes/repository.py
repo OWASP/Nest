@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Annotated
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -11,6 +12,7 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
+from apps.github.models.milestone import Milestone
 from apps.github.models.repository import Repository
 
 if TYPE_CHECKING:
@@ -18,6 +20,14 @@ if TYPE_CHECKING:
 
 MAX_LIMIT = 1000
 RECENT_ISSUES_LIMIT = 5
+RECENT_MILESTONES_PREFETCH = Prefetch(
+    "milestones",
+    queryset=Milestone.objects.select_related(
+        "author",
+        "repository__organization",
+    ).order_by("-created_at"),
+    to_attr="prefetched_recent_milestones",
+)
 RECENT_RELEASES_LIMIT = 5
 
 
@@ -67,13 +77,16 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve recent issues."""
         return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry_django.field(prefetch_related=["milestones"])
+    @strawberry_django.field(prefetch_related=[RECENT_MILESTONES_PREFETCH])
     def recent_milestones(self, root: Repository, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return root.recent_milestones.order_by("-created_at")[:normalized_limit]
+        if (milestones := getattr(root, "prefetched_recent_milestones", None)) is not None:
+            return milestones[:normalized_limit]
+
+        return root.recent_milestones[:normalized_limit]
 
     @strawberry_django.field(prefetch_related=["releases"])
     def releases(self, root: Repository) -> list[ReleaseNode]:
