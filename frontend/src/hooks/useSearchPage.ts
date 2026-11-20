@@ -188,6 +188,7 @@ export function useSearchPage<T>({
 
   // Fetch data when state changes
   useEffect(() => {
+    let cancelled = false
     setIsLoaded(false)
 
     const fetchData = async () => {
@@ -211,6 +212,8 @@ export function useSearchPage<T>({
           [...stableFacetFilters]
         )
 
+        if (cancelled) return
+
         if ('hits' in response) {
           setItems(response.hits)
           setTotalPages(response.totalPages ?? 0)
@@ -218,12 +221,17 @@ export function useSearchPage<T>({
           handleAppError(response)
         }
       } catch (error) {
+        if (cancelled) return
         handleAppError(error)
       }
       setIsLoaded(true)
     }
 
     fetchData()
+
+    return () => {
+      cancelled = true
+    }
   }, [
     currentPage,
     searchQuery,
