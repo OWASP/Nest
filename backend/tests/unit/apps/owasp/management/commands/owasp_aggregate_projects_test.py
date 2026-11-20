@@ -160,6 +160,7 @@ class TestOwaspAggregateProjects:
         mock_repository.top_languages = []
         mock_repository.license = None
         mock_repository.topics = None
+        mock_project.released_at = "2024-01-01T00:00:00Z"
         mock_project.repositories.all.return_value = [mock_repository]
         mock_project.repositories.filter.return_value = MockQuerySet([mock_repository])
         mock_projects_list = [mock_project]
@@ -177,18 +178,19 @@ class TestOwaspAggregateProjects:
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
         mock_bulk_save.assert_called()
+        assert mock_project.released_at is None
 
     @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Project, "bulk_save", autospec=True)
     def test_handle_uses_max_for_stars_forks_contributors(
         self, mock_bulk_save, command, mock_project
     ):
-        """Test that stars, forks, and contributors use max instead of sum."""
+        """Test that stars, forks, contributors, and timestamps use max instead of sum."""
         mock_repo1 = mock.Mock(
             commits_count=10,
             contributors_count=5,
             forks_count=20,
-            latest_release=None,
+            latest_release=mock.Mock(published_at="2024-12-30T00:00:00Z"),
             license="MIT",
             open_issues_count=4,
             organization=mock.Mock(),
@@ -206,7 +208,7 @@ class TestOwaspAggregateProjects:
             commits_count=20,
             contributors_count=8,
             forks_count=15,
-            latest_release=None,
+            latest_release=mock.Mock(published_at="2024-12-25T00:00:00Z"),
             license="Apache-2.0",
             open_issues_count=2,
             organization=None,
@@ -240,3 +242,32 @@ class TestOwaspAggregateProjects:
         assert mock_project.contributors_count == 8
         assert mock_project.forks_count == 20
         assert mock_project.stars_count == 100
+        assert mock_project.pushed_at == "2024-12-29T00:00:00Z"
+        assert mock_project.released_at == "2024-12-30T00:00:00Z"
+        assert mock_project.updated_at == "2024-12-30T00:00:00Z"
+
+    @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    def test_handle_empty_repositories(self, mock_bulk_save, command, mock_project):
+        """Test handle resets timestamps and counters when project has no repositories."""
+        mock_project.pushed_at = "2024-01-01T00:00:00Z"
+        mock_project.released_at = "2024-01-01T00:00:00Z"
+        mock_project.updated_at = "2024-01-01T00:00:00Z"
+        mock_project.repositories.filter.return_value = MockQuerySet([])
+
+        mock_qs = mock.MagicMock(count=mock.Mock(return_value=1))
+        mock_qs.__getitem__.return_value = [mock_project]
+        mock_qs.order_by.return_value = mock_qs
+
+        with mock.patch.object(Project, "active_projects", mock_qs):
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+
+        mock_bulk_save.assert_called_once_with([mock_project])
+        assert mock_project.pushed_at is None
+        assert mock_project.released_at is None
+        assert mock_project.updated_at is None
+        assert mock_project.commits_count == 0
+        assert mock_project.stars_count == 0
+
+
