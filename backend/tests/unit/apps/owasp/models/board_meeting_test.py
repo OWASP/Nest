@@ -114,10 +114,10 @@ class TestBoardMeetingModel:
             "apps.owasp.models.board_discussion.BoardDiscussion.objects.filter"
         )
         mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
-        referenced_qs = Mock()
-        referenced_qs.values_list.return_value = []
+        amendment_refs_qs = Mock()
+        amendment_refs_qs.exclude.return_value.values_list.return_value = []
         deletable_qs = Mock()
-        mock_motion.side_effect = [referenced_qs, deletable_qs]
+        mock_motion.side_effect = [amendment_refs_qs, deletable_qs]
         mock_outcome = mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
 
         BoardMeeting.clear_agenda(meeting)
@@ -125,10 +125,55 @@ class TestBoardMeetingModel:
         delete_qs.delete.assert_called_once()
         mock_discussion.assert_called_once_with(id__in=[1])
         assert mock_motion.call_args_list[0].kwargs == {"amends_motion_id__in": [2]}
+        amendment_refs_qs.exclude.assert_called_once_with(id__in=[2])
         assert mock_motion.call_args_list[1].kwargs == {"id__in": [2]}
         deletable_qs.exclude.assert_called_once()
         deletable_qs.exclude.return_value.delete.assert_called_once()
         mock_outcome.assert_called_once_with(id__in=[3])
+
+    def test_clear_agenda_deletes_internally_amended_motions(self, mocker):
+        """Amendment links between motions in the same cleanup set do not retain orphans."""
+        target = Mock(discussion_id=None, motion_id=10, outcome_id=None)
+        amendment = Mock(discussion_id=None, motion_id=11, outcome_id=None)
+        delete_qs = Mock()
+        meeting = Mock()
+        meeting.actions.all.side_effect = [[target, amendment], delete_qs]
+
+        mocker.patch("apps.owasp.models.board_discussion.BoardDiscussion.objects.filter")
+        mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
+        amendment_refs_qs = Mock()
+        # B amends A, but B is also in the cleanup set → ignore that ref.
+        amendment_refs_qs.exclude.return_value.values_list.return_value = []
+        deletable_qs = Mock()
+        mock_motion.side_effect = [amendment_refs_qs, deletable_qs]
+        mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
+
+        BoardMeeting.clear_agenda(meeting)
+
+        amendment_refs_qs.exclude.assert_called_once_with(id__in=[10, 11])
+        deletable_qs.exclude.assert_called_once_with(id__in=[])
+        deletable_qs.exclude.return_value.delete.assert_called_once()
+
+    def test_clear_agenda_preserves_motion_amended_by_external_motion(self, mocker):
+        """A surviving external amendment keeps its target motion."""
+        action = Mock(discussion_id=None, motion_id=10, outcome_id=None)
+        delete_qs = Mock()
+        meeting = Mock()
+        meeting.actions.all.side_effect = [[action], delete_qs]
+
+        mocker.patch("apps.owasp.models.board_discussion.BoardDiscussion.objects.filter")
+        mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
+        amendment_refs_qs = Mock()
+        amendment_refs_qs.exclude.return_value.values_list.return_value = [10]
+        deletable_qs = Mock()
+        mock_motion.side_effect = [amendment_refs_qs, deletable_qs]
+        mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
+
+        BoardMeeting.clear_agenda(meeting)
+
+        amendment_refs_qs.exclude.assert_called_once_with(id__in=[10])
+        deletable_qs.exclude.assert_called_once_with(id__in=[10])
+        deletable_qs.exclude.return_value.delete.assert_called_once()
 
     def test_delete_clears_agenda_inside_transaction(self, mocker):
         """delete() clears the agenda and removes the meeting in one transaction."""

@@ -57,8 +57,9 @@ class BoardMeeting(TimestampedModel):
     def clear_agenda(self) -> None:
         """Delete this meeting's action links and unreferenced target rows.
 
-        Motions still referenced by another motion's ``amends_motion`` are left in
-        place so those cross-meeting links are not silently nulled.
+        Motions are retained only when an ``amends_motion`` reference comes from a
+        motion outside this cleanup set (a surviving external motion). Amendment
+        links between motions that are both being removed do not keep orphans.
         """
         actions = list(self.actions.all())
         discussion_ids = [action.discussion_id for action in actions if action.discussion_id]
@@ -70,11 +71,14 @@ class BoardMeeting(TimestampedModel):
         if discussion_ids:
             BoardDiscussion.objects.filter(id__in=discussion_ids).delete()
         if motion_ids:
-            referenced_motion_ids = BoardMotion.objects.filter(
-                amends_motion_id__in=motion_ids
-            ).values_list("amends_motion_id", flat=True)
+            # Ignore amendment refs from motions also in this cleanup set.
+            preserved_motion_ids = (
+                BoardMotion.objects.filter(amends_motion_id__in=motion_ids)
+                .exclude(id__in=motion_ids)
+                .values_list("amends_motion_id", flat=True)
+            )
             BoardMotion.objects.filter(id__in=motion_ids).exclude(
-                id__in=referenced_motion_ids
+                id__in=preserved_motion_ids
             ).delete()
         if outcome_ids:
             BoardOutcome.objects.filter(id__in=outcome_ids).delete()
