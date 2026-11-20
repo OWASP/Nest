@@ -87,8 +87,8 @@ class BoardMeetingDetail(BoardMeetingBase):
 
     @staticmethod
     def resolve_actions(obj: BoardMeetingModel) -> list[BoardMeetingActionModel]:
-        """Resolve action rows in agenda order."""
-        return list(obj.actions.order_by("order"))
+        """Resolve action rows (ordered by the view's Prefetch)."""
+        return list(obj.actions.all())
 
     @staticmethod
     def resolve_attendees(obj: BoardMeetingModel) -> list[EntityMember]:

@@ -1,6 +1,6 @@
 """OWASP app board meeting model."""
 
-from django.db import models
+from django.db import models, transaction
 
 from apps.common.models import TimestampedModel
 from apps.owasp.models.board_discussion import BoardDiscussion
@@ -55,7 +55,11 @@ class BoardMeeting(TimestampedModel):
         return f"Board Meeting: {label}"
 
     def clear_agenda(self) -> None:
-        """Delete this meeting's action links and their exclusive target rows."""
+        """Delete this meeting's action links and unreferenced target rows.
+
+        Motions still referenced by another motion's ``amends_motion`` are left in
+        place so those cross-meeting links are not silently nulled.
+        """
         actions = list(self.actions.all())
         discussion_ids = [action.discussion_id for action in actions if action.discussion_id]
         motion_ids = [action.motion_id for action in actions if action.motion_id]
@@ -66,11 +70,17 @@ class BoardMeeting(TimestampedModel):
         if discussion_ids:
             BoardDiscussion.objects.filter(id__in=discussion_ids).delete()
         if motion_ids:
-            BoardMotion.objects.filter(id__in=motion_ids).delete()
+            referenced_motion_ids = BoardMotion.objects.filter(
+                amends_motion_id__in=motion_ids
+            ).values_list("amends_motion_id", flat=True)
+            BoardMotion.objects.filter(id__in=motion_ids).exclude(
+                id__in=referenced_motion_ids
+            ).delete()
         if outcome_ids:
             BoardOutcome.objects.filter(id__in=outcome_ids).delete()
 
     def delete(self, *args, **kwargs):
-        """Delete the meeting and orphaned discussion/motion/outcome rows."""
-        self.clear_agenda()
-        return super().delete(*args, **kwargs)
+        """Delete the meeting and its unreferenced discussion/motion/outcome rows."""
+        with transaction.atomic():
+            self.clear_agenda()
+            return super().delete(*args, **kwargs)

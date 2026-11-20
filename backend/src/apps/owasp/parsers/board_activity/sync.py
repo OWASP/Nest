@@ -48,6 +48,8 @@ YEARMONTH_PREFIX_LEN = 6  # YYYY + MM
 FILENAME_PREFIX_RE = re.compile(rf"^\d{{{YEARMONTH_PREFIX_LEN}}}")
 MIN_YEAR = 1000
 MAX_YEAR = 9999
+MIN_MONTH = 1
+MAX_MONTH = 12
 
 SYSTEM_PROMPT = """\
 You extract structured data from OWASP Board of Directors meeting minutes (unstructured Markdown)
@@ -353,7 +355,8 @@ def target_paths(
         str: A matching file path.
 
     Raises:
-        ValueError: If month is set without year, or year is not a 4-digit value.
+        ValueError: If month is set without year, year is not a 4-digit value, or
+            month is outside 1-12. Year/month validation is skipped when ``path`` is set.
 
     """
     if path:
@@ -363,6 +366,10 @@ def target_paths(
 
     if month is not None and year is None:
         message = "month requires year."
+        raise ValueError(message)
+
+    if month is not None and not (MIN_MONTH <= month <= MAX_MONTH):
+        message = f"month must be between {MIN_MONTH} and {MAX_MONTH}."
         raise ValueError(message)
 
     prefix = ""
@@ -484,7 +491,7 @@ def run(
         SyncStats: Aggregate status counters.
 
     Raises:
-        ValueError: If month is set without year, or year/month filters are invalid.
+        ValueError: If year/month filters are invalid when ``path`` is not set.
 
     """
     stats = SyncStats()

@@ -278,6 +278,26 @@ class TestOpenAi:
 
     @patch("apps.common.open_ai.logger")
     @patch("openai.OpenAI")
+    def test_parse_empty_choices_returns_none(self, mock_openai, mock_logger):
+        """An empty choices list is logged as an unexpected error and returns None."""
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.choices = []
+        mock_client.beta.chat.completions.parse.return_value = mock_response
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "Unexpected OpenAI API error: %s",
+            "IndexError",
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
     def test_parse_rate_limit_error(self, mock_openai, mock_logger):
         """Test that RateLimitError is caught and logged as a warning."""
         mock_client = MagicMock()

@@ -130,6 +130,12 @@ class TestTargetPaths:
         with pytest.raises(ValueError, match="month requires year"):
             list(sync.target_paths(tree, month=8))
 
+    @pytest.mark.parametrize("month", [0, -1, 13, 100])
+    def test_rejects_month_out_of_range(self, tree, month):
+        """Month outside 1-12 is rejected instead of silently matching nothing."""
+        with pytest.raises(ValueError, match="month must be between"):
+            list(sync.target_paths(tree, year=2025, month=month))
+
     @pytest.mark.parametrize("year", [1, 202, 10000])
     def test_rejects_non_four_digit_year(self, tree, year):
         """Year outside 1000-9999 is rejected so short prefixes don't match multiple years."""

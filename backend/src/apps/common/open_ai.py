@@ -105,6 +105,9 @@ class OpenAi:
                 response_format=schema,
                 temperature=self.temperature,
             )
+            message = response.choices[0].message
+            if message.parsed is None and getattr(message, "refusal", None):
+                logger.warning("OpenAI refused structured parse: %s", message.refusal)
         except openai.AuthenticationError:
             logger.exception(
                 "OpenAI authentication failed: invalid or missing API key. "
@@ -129,9 +132,6 @@ class OpenAi:
                 type(e).__name__,
             )
         else:
-            message = response.choices[0].message
-            if message.parsed is None and getattr(message, "refusal", None):
-                logger.warning("OpenAI refused structured parse: %s", message.refusal)
             return message.parsed
         return None
 

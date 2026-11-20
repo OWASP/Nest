@@ -1,5 +1,6 @@
 """Tests for BoardMeeting model."""
 
+from contextlib import nullcontext
 from datetime import UTC, datetime
 from unittest.mock import Mock
 
@@ -103,7 +104,7 @@ class TestBoardMeetingModel:
         assert hasattr(BoardMeeting, "nest_updated_at")
 
     def test_clear_agenda_deletes_links_then_targets(self, mocker):
-        """clear_agenda removes action rows first, then exclusive target rows."""
+        """clear_agenda removes action rows first, then unreferenced target rows."""
         action = Mock(discussion_id=1, motion_id=2, outcome_id=3)
         delete_qs = Mock()
         meeting = Mock()
@@ -113,11 +114,41 @@ class TestBoardMeetingModel:
             "apps.owasp.models.board_discussion.BoardDiscussion.objects.filter"
         )
         mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
+        referenced_qs = Mock()
+        referenced_qs.values_list.return_value = []
+        deletable_qs = Mock()
+        mock_motion.side_effect = [referenced_qs, deletable_qs]
         mock_outcome = mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
 
         BoardMeeting.clear_agenda(meeting)
 
         delete_qs.delete.assert_called_once()
         mock_discussion.assert_called_once_with(id__in=[1])
-        mock_motion.assert_called_once_with(id__in=[2])
+        assert mock_motion.call_args_list[0].kwargs == {"amends_motion_id__in": [2]}
+        assert mock_motion.call_args_list[1].kwargs == {"id__in": [2]}
+        deletable_qs.exclude.assert_called_once()
+        deletable_qs.exclude.return_value.delete.assert_called_once()
         mock_outcome.assert_called_once_with(id__in=[3])
+
+    def test_delete_clears_agenda_inside_transaction(self, mocker):
+        """delete() clears the agenda and removes the meeting in one transaction."""
+        meeting = BoardMeeting(
+            title="August 2025",
+            date=datetime(2025, 8, 26, 13, 0, tzinfo=UTC),
+        )
+        mock_atomic = mocker.patch(
+            "apps.owasp.models.board_meeting.transaction.atomic",
+            return_value=nullcontext(),
+        )
+        mock_clear = mocker.patch.object(BoardMeeting, "clear_agenda")
+        mock_super_delete = mocker.patch(
+            "apps.owasp.models.board_meeting.TimestampedModel.delete",
+            return_value=(1, {"owasp.BoardMeeting": 1}),
+        )
+
+        result = BoardMeeting.delete(meeting)
+
+        mock_atomic.assert_called_once_with()
+        mock_clear.assert_called_once_with()
+        mock_super_delete.assert_called_once()
+        assert result == (1, {"owasp.BoardMeeting": 1})
