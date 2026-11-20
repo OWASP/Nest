@@ -14,11 +14,25 @@ if [[ ! -f "$allowlist" ]]; then
 fi
 
 scan_root="$(mktemp -d)"
+trap 'rm -rf -- "$scan_root"' EXIT
+
+# A path counts as deleted only when its closest existing parent can be searched. Otherwise
+# it is passed on so tar reports the permission error instead of the file being skipped.
+is_missing() {
+    local target="$1"
+    [[ -e "$target" || -L "$target" ]] && return 1
+    while [[ ! -e "$target" ]]; do
+        target="$(dirname "$target")"
+    done
+    [[ -x "$target" ]]
+}
+
 while IFS= read -r -d '' path; do
-    if [[ -e "$repository_root/$path" || -L "$repository_root/$path" ]]; then
+    if ! is_missing "$repository_root/$path"; then
         printf '%s\0' "$path"
     fi
-done | tar -C "$repository_root" --null --files-from=- --create | tar -C "$scan_root" --extract
+done | tar -C "$repository_root" --null --no-recursion --files-from=- --create |
+    tar -C "$scan_root" --extract
 
 cd "$scan_root"
 "$scanner" nomos ojo repo --allowlist-path "$allowlist"

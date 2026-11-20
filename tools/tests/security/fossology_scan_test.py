@@ -96,6 +96,31 @@ class TestFossologyScan:
             f"{repository}/.fossology-allowlist.json",
         ]
 
+    def test_does_not_scan_inside_tracked_path_replaced_by_directory(
+        self, repository: Path, scan_environment: dict[str, str]
+    ) -> None:
+        """Files under a tracked path that is now a directory are not in the git list."""
+        (repository / "tracked.txt").unlink()
+        (repository / "tracked.txt").mkdir()
+        (repository / "tracked.txt" / "ignored.txt").write_text("ignored\n")
+
+        result = self.run_scan(repository, scan_environment)
+
+        assert result.returncode == 0, result.stderr
+        assert "./tracked.txt/ignored.txt" not in Path(scan_environment["SCAN_FILES"]).read_text()
+
+    def test_removes_scan_copy(
+        self, repository: Path, scan_environment: dict[str, str], tmp_path: Path
+    ) -> None:
+        """The copied files are removed once the scan finishes, even when it fails."""
+        temporary = tmp_path / "temporary"
+        temporary.mkdir()
+        scan_environment["TMPDIR"] = str(temporary)
+        scan_environment["SCAN_STATUS"] = "1"
+
+        assert self.run_scan(repository, scan_environment).returncode == 1
+        assert not any(temporary.iterdir())
+
     @pytest.mark.parametrize("status", [1, 2])
     def test_scanner_findings_fail_the_check(
         self, repository: Path, scan_environment: dict[str, str], status: int
@@ -113,6 +138,33 @@ class TestFossologyScan:
         (repository / "tracked.txt").chmod(0)
 
         result = self.run_scan(repository, scan_environment)
+
+        assert result.returncode != 0
+        assert not Path(scan_environment["SCAN_ARGS"]).exists()
+
+    @pytest.mark.skipif(os.geteuid() == 0, reason="root can read files without permission")
+    def test_unreadable_directory_fails_before_scanning(
+        self, repository: Path, scan_environment: dict[str, str]
+    ) -> None:
+        """A tracked file inside a directory that cannot be searched is not treated as deleted."""
+        files = subprocess.run(  # noqa: S603
+            [GIT, "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+            cwd=repository,
+            capture_output=True,
+            check=True,
+        ).stdout
+        (repository / "nested").chmod(0)
+        try:
+            result = subprocess.run(  # noqa: S603
+                ["/bin/bash", str(SCAN_SCRIPT), str(repository)],
+                input=files.decode(),
+                env=scan_environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        finally:
+            (repository / "nested").chmod(0o755)
 
         assert result.returncode != 0
         assert not Path(scan_environment["SCAN_ARGS"]).exists()
