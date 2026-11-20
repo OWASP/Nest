@@ -457,6 +457,7 @@ This command runs:
 
 - SAST (Semgrep)
 - Repository scanning for secrets and misconfigurations (Trivy)
+- License checking of repository files (FOSSology)
 - Dependency scanning for known vulnerabilities (package audits, CVE Lite CLI, Trivy, and OSV-Scanner)
 - Container image scans for backend and frontend
 - DAST (ZAP baseline scan against the running frontend)
@@ -492,6 +493,19 @@ incomplete detection data, and continues checking the remaining lock files after
 failure. The same command and configuration run in CI, in the dependency check job, which
 follows the existing non-blocking dependency check policy. It is also included in
 `make security-dependency-check`, `make security-dependency-scan`, and `make security-scan`.
+
+#### Running License Checks Only
+
+```bash
+make security-license-check
+```
+
+This runs the [FOSSology](https://github.com/fossology/fossology) license scanners on files
+tracked by git (plus new files that are not ignored). It fails if the scanners detect a license
+that is not listed in `.fossology-allowlist.json`. Contents of archives (e.g. `.gz`, `.zip`) are
+not scanned. Add a license to the allowlist only if it is compatible with the project, and use
+`exclude` for exact paths that are false positives (findings in excluded paths are filtered out
+from the scanner results).
 
 #### Running SAST Scans Only
 

@@ -131,6 +131,8 @@ ephemerals
 euo
 facebookexternalhit
 fdp
+fossology
+fossologyscanner
 fpr
 gamesec
 geocoders
@@ -193,10 +195,12 @@ nestbot
 ngx
 nohup
 noinput
+nomos
 nosniff
 notab
 nspname
 numfmt
+ojo
 openblas
 opencre
 openstreetmap
