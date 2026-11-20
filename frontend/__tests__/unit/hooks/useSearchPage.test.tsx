@@ -439,4 +439,40 @@ describe('useSearchPage', () => {
       scrollTo.mockRestore()
     }
   })
+
+  it('reports errors from the latest request', async () => {
+    const { result } = await renderSearchPage('')
+
+    const error = new Error('search failed')
+    mockFetchAlgoliaData.mockRejectedValue(error)
+
+    act(() => {
+      result.current.handleSearch('nest')
+    })
+
+    await waitFor(() => {
+      expect(mockHandleAppError).toHaveBeenCalledWith(error)
+    })
+    expect(result.current.isLoaded).toBe(true)
+  })
+
+  it('ignores a response that arrives after unmount', async () => {
+    const { result, unmount } = await renderSearchPage('')
+
+    const pending = createDeferred<never>()
+    mockFetchAlgoliaData.mockReturnValue(pending.promise)
+
+    act(() => {
+      result.current.handleSearch('nest')
+    })
+    expect(mockFetchAlgoliaData.mock.lastCall?.[1]).toBe('nest')
+
+    unmount()
+
+    await act(async () => {
+      pending.reject(new Error('late failure'))
+    })
+
+    expect(mockHandleAppError).not.toHaveBeenCalled()
+  })
 })
