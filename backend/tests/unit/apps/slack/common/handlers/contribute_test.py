@@ -85,7 +85,10 @@ class TestContributeHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        assert "Extended search over 100 open issues" in blocks[-1]["text"]["text"]
+        assert any(
+            "Extended search over 100 open issues" in block.get("text", {}).get("text", "")
+            for block in blocks
+        )
 
     def test_get_blocks_without_feedback(self, setup_mocks, mock_contribute_data):
         setup_mocks["get_issues"].return_value = mock_contribute_data
@@ -95,14 +98,34 @@ class TestContributeHandler:
 
         assert not any("Extended search" in str(block) for block in blocks)
 
-    def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_contribute_data):
-        """Test that pagination buttons are added on page 2."""
+    @pytest.mark.parametrize(
+        ("total_pages", "page", "expected_buttons"),
+        [
+            (1, 1, []),
+            (2, 1, [("Next", "2")]),
+            (2, 2, [("Previous", "1")]),
+            (3, 1, [("Next", "2")]),
+            (3, 2, [("Previous", "1"), ("Next", "3")]),
+            (3, 3, [("Previous", "2")]),
+        ],
+    )
+    def test_get_blocks_pagination(
+        self, setup_mocks, mock_contribute_data, total_pages, page, expected_buttons
+    ):
+        """Keep every result page reachable without offering a page past the end."""
+        mock_contribute_data["nbPages"] = total_pages
         setup_mocks["get_issues"].return_value = mock_contribute_data
-        presentation = EntityPresentation(include_pagination=True)
+        presentation = EntityPresentation(include_pagination=True, include_feedback=False)
 
-        blocks = get_blocks(page=2, presentation=presentation)
+        blocks = get_blocks(page=page, presentation=presentation)
 
-        assert any(block.get("type") == "actions" for block in blocks)
+        buttons = [
+            (button["text"]["text"], button["value"])
+            for block in blocks
+            if block.get("type") == "actions"
+            for button in block["elements"]
+        ]
+        assert buttons == expected_buttons
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_contribute_data):
         """Test that no pagination buttons are added when include_pagination is disabled."""

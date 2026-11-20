@@ -109,7 +109,10 @@ class TestCommitteeHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        assert "Extended search over 15 OWASP committees" in blocks[-1]["text"]["text"]
+        assert any(
+            "Extended search over 15 OWASP committees" in block.get("text", {}).get("text", "")
+            for block in blocks
+        )
 
     def test_search_query_escaping(self, setup_mocks, mock_committee_data):
         setup_mocks["get_committees"].return_value = mock_committee_data
@@ -165,16 +168,34 @@ class TestCommitteeHandler:
 
         assert not any(block.get("type") == "actions" for block in blocks)
 
-    def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_committee_data):
-        """Test that pagination buttons are added on page 2."""
+    @pytest.mark.parametrize(
+        ("total_pages", "page", "expected_buttons"),
+        [
+            (1, 1, []),
+            (2, 1, [("Next", "2")]),
+            (2, 2, [("Previous", "1")]),
+            (3, 1, [("Next", "2")]),
+            (3, 2, [("Previous", "1"), ("Next", "3")]),
+            (3, 3, [("Previous", "2")]),
+        ],
+    )
+    def test_get_blocks_pagination(
+        self, setup_mocks, mock_committee_data, total_pages, page, expected_buttons
+    ):
+        """Keep every result page reachable without offering a page past the end."""
+        mock_committee_data["nbPages"] = total_pages
         setup_mocks["get_committees"].return_value = mock_committee_data
-        presentation = EntityPresentation(include_pagination=True)
+        presentation = EntityPresentation(include_pagination=True, include_feedback=False)
 
-        blocks = get_blocks(page=2, presentation=presentation)
+        blocks = get_blocks(page=page, presentation=presentation)
 
-        action_blocks = [block for block in blocks if block.get("type") == "actions"]
-        assert len(action_blocks) > 0
-        assert action_blocks[0] in blocks
+        buttons = [
+            (button["text"]["text"], button["value"])
+            for block in blocks
+            if block.get("type") == "actions"
+            for button in block["elements"]
+        ]
+        assert buttons == expected_buttons
 
     def test_get_blocks_no_results_no_search_query(self, setup_mocks, mock_empty_committee_data):
         """Test get_blocks with no results and no search query."""

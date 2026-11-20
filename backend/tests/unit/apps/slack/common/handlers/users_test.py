@@ -63,7 +63,7 @@ class TestGetUsersBlocks:
         presentation = EntityPresentation(include_pagination=include_pagination)
         get_blocks(presentation=presentation)
         if should_call_pagination:
-            mock_get_pagination.assert_called_once_with("users", 1, 2)
+            mock_get_pagination.assert_called_once_with("users", 1, 3)
         else:
             mock_get_pagination.assert_not_called()
 
@@ -156,16 +156,34 @@ class TestGetUsersBlocks:
 
         assert any("Extended search over OWASP community users" in str(block) for block in blocks)
 
-    def test_get_blocks_with_pagination_on_page_2(self, mocker, mock_users_data):
-        """Test that pagination buttons are added on page 2."""
+    @pytest.mark.parametrize(
+        ("total_pages", "page", "expected_buttons"),
+        [
+            (1, 1, []),
+            (2, 1, [("Next", "2")]),
+            (2, 2, [("Previous", "1")]),
+            (3, 1, [("Next", "2")]),
+            (3, 2, [("Previous", "1"), ("Next", "3")]),
+            (3, 3, [("Previous", "2")]),
+        ],
+    )
+    def test_get_blocks_pagination(
+        self, mocker, mock_users_data, total_pages, page, expected_buttons
+    ):
+        """Keep every result page reachable without offering a page past the end."""
+        mock_users_data["nbPages"] = total_pages
         mocker.patch("apps.github.index.search.user.get_users", return_value=mock_users_data)
-        presentation = EntityPresentation(include_pagination=True)
+        presentation = EntityPresentation(include_pagination=True, include_feedback=False)
 
-        blocks = get_blocks(page=2, presentation=presentation)
+        blocks = get_blocks(page=page, presentation=presentation)
 
-        action_blocks = [block for block in blocks if block.get("type") == "actions"]
-        assert len(action_blocks) > 0
-        assert action_blocks[0] in blocks
+        buttons = [
+            (button["text"]["text"], button["value"])
+            for block in blocks
+            if block.get("type") == "actions"
+            for button in block["elements"]
+        ]
+        assert buttons == expected_buttons
 
     def test_get_blocks_no_search_query(self, mocker, mock_users_data):
         """Test get_blocks without search query."""
