@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import uuid
 
 from apps.api.internal.nodes.api_key import ApiKeyNode
@@ -30,5 +30,5 @@ class TestApiKeyNode:
         assert fields_map["uuid"].type is uuid.UUID
         assert fields_map["name"].type is str
         assert fields_map["is_revoked"].type is bool
-        assert fields_map["created_at"].type is datetime.datetime
-        assert fields_map["expires_at"].type is datetime.datetime
+        assert fields_map["created_at"].type is dt.datetime
+        assert fields_map["expires_at"].type is dt.datetime

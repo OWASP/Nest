@@ -33,6 +33,7 @@ Ghsas
 Golovanova
 Hackbright
 Héllo
+ICN
 Illia
 Ime
 Iyonsi
@@ -185,7 +186,6 @@ mentees
 mern
 millify
 misconfig
-mkdocstrings
 mkv
 mpim
 navlink
@@ -274,6 +274,7 @@ xsser
 xzf
 zapconfig
 zaproxy
+zensical
 zizmor
 zsc
 éàëîôû

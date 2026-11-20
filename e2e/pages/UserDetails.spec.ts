@@ -29,6 +29,42 @@ test.describe('User Details Page', () => {
     }
   })
 
+  test('keeps contribution cells square when the viewport or theme changes', async ({ page }) => {
+    const cells = page.locator('.contribution-heatmap .apexcharts-heatmap-rect[val]')
+
+    for (const width of [390, 768, 1280]) {
+      await page.setViewportSize({ width, height: 900 })
+      await expect(cells.first()).toBeVisible()
+      for (const change of [1, 2]) {
+        const toggle = page.getByRole('button', { name: /^Enable (light|dark) mode$/ })
+        const requestedTheme = await toggle.getAttribute('aria-label')
+        await toggle.click()
+        await expect
+          .poll(() => page.locator('html').evaluate((el) => el.classList.contains('dark')))
+          .toBe(requestedTheme === 'Enable dark mode')
+        await expect
+          .poll(
+            () =>
+              cells.evaluateAll((elements) =>
+                elements.length
+                  ? Math.max(
+                      ...elements.map((element) => {
+                        const { width, height } = element.getBoundingClientRect()
+                        return Math.abs(width - height)
+                      })
+                    )
+                  : Number.POSITIVE_INFINITY
+              ),
+            {
+              message: `Contribution cells should be square at ${width}px after theme change ${change}`,
+              timeout: 10000,
+            }
+          )
+          .toBeLessThanOrEqual(0.25)
+      }
+    }
+  })
+
   test('should have user activity sections', async ({ page }) => {
     await expect(
       page.locator('[data-anchor-title="true"]', { hasText: 'Recent Issues' })
