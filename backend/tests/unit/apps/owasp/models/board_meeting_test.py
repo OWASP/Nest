@@ -1,0 +1,199 @@
+"""Tests for BoardMeeting model."""
+
+from contextlib import nullcontext
+from datetime import UTC, datetime
+from unittest.mock import Mock
+
+from apps.owasp.models.board_meeting import BoardMeeting
+
+
+class TestBoardMeetingModel:
+    """Test cases for BoardMeeting model."""
+
+    def test_str_representation_with_title(self):
+        """Test string representation prefers title."""
+        meeting = BoardMeeting(
+            title="August 2025",
+            date=datetime(2025, 8, 26, 13, 0, tzinfo=UTC),
+        )
+
+        assert str(meeting) == "Board Meeting: August 2025"
+
+    def test_str_representation_without_title(self):
+        """Test string representation falls back to ISO datetime when title is empty."""
+        meeting = BoardMeeting(
+            title="",
+            date=datetime(2025, 8, 26, 13, 0, tzinfo=UTC),
+        )
+
+        assert str(meeting) == "Board Meeting: 2025-08-26T13:00:00+00:00"
+
+    def test_meta_options(self):
+        """Test Meta options for BoardMeeting."""
+        assert BoardMeeting._meta.db_table == "owasp_board_meetings"
+        assert BoardMeeting._meta.verbose_name_plural == "Board Meetings"
+
+    def test_source_path_unique(self):
+        """Test source_path is unique."""
+        assert BoardMeeting._meta.get_field("source_path").unique is True
+
+    def test_type_choices(self):
+        """Test Type choices are correctly defined."""
+        assert BoardMeeting.Type.PRIVATE == "private"
+        assert BoardMeeting.Type.PUBLIC == "public"
+        assert BoardMeeting.Type.SPECIAL == "special"
+        assert BoardMeeting.Type.SUMMIT == "summit"
+
+    def test_type_default_is_public(self):
+        """Test type default is PUBLIC."""
+        assert BoardMeeting._meta.get_field("type").default == BoardMeeting.Type.PUBLIC
+
+    def test_field_defaults(self):
+        """Test default values on optional fields."""
+        assert BoardMeeting._meta.get_field("metadata").default is dict
+        assert BoardMeeting._meta.get_field("attachments").default is list
+        assert BoardMeeting._meta.get_field("call_in_url").default == ""
+        assert BoardMeeting._meta.get_field("recording_url").default == ""
+        assert BoardMeeting._meta.get_field("location").default == ""
+        assert BoardMeeting._meta.get_field("title").default == ""
+        assert BoardMeeting._meta.get_field("source_checksum").default == ""
+
+    def test_quorum_present_nullable(self):
+        """Test quorum_present is nullable."""
+        assert BoardMeeting._meta.get_field("quorum_present").null is True
+
+    def test_date_is_datetime_field(self):
+        """Test date field is a DateTimeField."""
+        field = BoardMeeting._meta.get_field("date")
+
+        assert field.get_internal_type() == "DateTimeField"
+
+    def test_board_foreign_key_targets_board_of_directors_cascade(self):
+        """Test board foreign key targets BoardOfDirectors and cascades."""
+        field = BoardMeeting._meta.get_field("board")
+
+        assert field.related_model.__name__ == "BoardOfDirectors"
+        assert field.null is False
+        assert field.remote_field.on_delete.__name__ == "CASCADE"
+
+    def test_source_path_max_length(self):
+        """Test source_path max_length is 500."""
+        assert BoardMeeting._meta.get_field("source_path").max_length == 500
+
+    def test_attendance_m2m_fields_target_entity_member(self):
+        """Test attendees and absentees M2M fields target EntityMember."""
+        for name in ("attendees", "absentees"):
+            field = BoardMeeting._meta.get_field(name)
+            assert field.many_to_many
+            assert field.related_model.__name__ == "EntityMember"
+
+    def test_guests_is_json_list(self):
+        """Test guests is a JSON field defaulting to an empty list."""
+        field = BoardMeeting._meta.get_field("guests")
+
+        assert field.get_internal_type() == "JSONField"
+        assert field.default is list
+
+    def test_source_checksum_max_length(self):
+        """Test source_checksum max_length is 64 (SHA-256 hex)."""
+        assert BoardMeeting._meta.get_field("source_checksum").max_length == 64
+
+    def test_has_timestamp_fields(self):
+        """Test presence of TimestampedModel fields."""
+        assert hasattr(BoardMeeting, "nest_created_at")
+        assert hasattr(BoardMeeting, "nest_updated_at")
+
+    def test_clear_agenda_deletes_links_then_targets(self, mocker):
+        """clear_agenda removes action rows first, then unreferenced target rows."""
+        action = Mock(discussion_id=1, motion_id=2, outcome_id=3)
+        delete_qs = Mock()
+        meeting = Mock()
+        meeting.actions.all.side_effect = [[action], delete_qs]
+
+        mock_discussion = mocker.patch(
+            "apps.owasp.models.board_discussion.BoardDiscussion.objects.filter"
+        )
+        mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
+        amendment_refs_qs = Mock()
+        amendment_refs_qs.exclude.return_value.values_list.return_value = []
+        deletable_qs = Mock()
+        mock_motion.side_effect = [amendment_refs_qs, deletable_qs]
+        mock_outcome = mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
+
+        BoardMeeting.clear_agenda(meeting)
+
+        delete_qs.delete.assert_called_once()
+        mock_discussion.assert_called_once_with(id__in=[1])
+        assert mock_motion.call_args_list[0].kwargs == {"amends_motion_id__in": [2]}
+        amendment_refs_qs.exclude.assert_called_once_with(id__in=[2])
+        assert mock_motion.call_args_list[1].kwargs == {"id__in": [2]}
+        deletable_qs.exclude.assert_called_once()
+        deletable_qs.exclude.return_value.delete.assert_called_once()
+        mock_outcome.assert_called_once_with(id__in=[3])
+
+    def test_clear_agenda_deletes_internally_amended_motions(self, mocker):
+        """Amendment links between motions in the same cleanup set do not retain orphans."""
+        target = Mock(discussion_id=None, motion_id=10, outcome_id=None)
+        amendment = Mock(discussion_id=None, motion_id=11, outcome_id=None)
+        delete_qs = Mock()
+        meeting = Mock()
+        meeting.actions.all.side_effect = [[target, amendment], delete_qs]
+
+        mocker.patch("apps.owasp.models.board_discussion.BoardDiscussion.objects.filter")
+        mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
+        amendment_refs_qs = Mock()
+        # B amends A, but B is also in the cleanup set → ignore that ref.
+        amendment_refs_qs.exclude.return_value.values_list.return_value = []
+        deletable_qs = Mock()
+        mock_motion.side_effect = [amendment_refs_qs, deletable_qs]
+        mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
+
+        BoardMeeting.clear_agenda(meeting)
+
+        amendment_refs_qs.exclude.assert_called_once_with(id__in=[10, 11])
+        deletable_qs.exclude.assert_called_once_with(id__in=[])
+        deletable_qs.exclude.return_value.delete.assert_called_once()
+
+    def test_clear_agenda_preserves_motion_amended_by_external_motion(self, mocker):
+        """A surviving external amendment keeps its target motion."""
+        action = Mock(discussion_id=None, motion_id=10, outcome_id=None)
+        delete_qs = Mock()
+        meeting = Mock()
+        meeting.actions.all.side_effect = [[action], delete_qs]
+
+        mocker.patch("apps.owasp.models.board_discussion.BoardDiscussion.objects.filter")
+        mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
+        amendment_refs_qs = Mock()
+        amendment_refs_qs.exclude.return_value.values_list.return_value = [10]
+        deletable_qs = Mock()
+        mock_motion.side_effect = [amendment_refs_qs, deletable_qs]
+        mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
+
+        BoardMeeting.clear_agenda(meeting)
+
+        amendment_refs_qs.exclude.assert_called_once_with(id__in=[10])
+        deletable_qs.exclude.assert_called_once_with(id__in=[10])
+        deletable_qs.exclude.return_value.delete.assert_called_once()
+
+    def test_delete_clears_agenda_inside_transaction(self, mocker):
+        """delete() clears the agenda and removes the meeting in one transaction."""
+        meeting = BoardMeeting(
+            title="August 2025",
+            date=datetime(2025, 8, 26, 13, 0, tzinfo=UTC),
+        )
+        mock_atomic = mocker.patch(
+            "apps.owasp.models.board_meeting.transaction.atomic",
+            return_value=nullcontext(),
+        )
+        mock_clear = mocker.patch.object(BoardMeeting, "clear_agenda")
+        mock_super_delete = mocker.patch(
+            "apps.owasp.models.board_meeting.TimestampedModel.delete",
+            return_value=(1, {"owasp.BoardMeeting": 1}),
+        )
+
+        result = BoardMeeting.delete(meeting)
+
+        mock_atomic.assert_called_once_with()
+        mock_clear.assert_called_once_with()
+        mock_super_delete.assert_called_once()
+        assert result == (1, {"owasp.BoardMeeting": 1})
