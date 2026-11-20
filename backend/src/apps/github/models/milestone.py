@@ -79,7 +79,7 @@ class Milestone(GenericIssueModel):
 
         for model_field, gh_field in field_mapping.items():
             value = getattr(gh_milestone, gh_field)
-            if value is not None:
+            if value is not None or model_field == "due_on":
                 setattr(self, model_field, value)
 
         self.author = author
