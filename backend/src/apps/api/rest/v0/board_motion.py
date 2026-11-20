@@ -129,7 +129,7 @@ def get_board_motion(
     """Get a board motion by id."""
     motion = (
         annotate_meeting_date(BoardMotionModel.objects, action_field="motion")
-        .select_related("sponsor", "sponsor__member", "second", "second__member", "amends_motion")
+        .select_related("sponsor", "sponsor__member", "second", "second__member")
         .filter(id=motion_id)
         .first()
     )

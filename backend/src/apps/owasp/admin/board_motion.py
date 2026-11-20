@@ -9,6 +9,7 @@ class BoardMotionAdmin(admin.ModelAdmin):
     """Admin for BoardMotion model."""
 
     list_display = ("title", "sponsor", "second")
+    list_select_related = ("sponsor__member", "second__member")
     raw_id_fields = ("sponsor", "second", "amends_motion")
     search_fields = ("title", "description", "background")
 

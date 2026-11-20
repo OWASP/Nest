@@ -16,6 +16,18 @@ class TestBoardOutcomeModel:
         assert str(outcome).startswith("Outcome (Pending):")
         assert "Finalize the Q1 audit report" in str(outcome)
 
+    def test_str_representation_truncates_long_description(self):
+        """Descriptions longer than 60 characters are truncated in __str__."""
+        description = "A" * 80
+        outcome = BoardOutcome(
+            description=description,
+            status=BoardOutcome.Status.COMPLETED,
+        )
+
+        rendered = str(outcome)
+        assert rendered == f"Outcome (Completed): {'A' * 60}"
+        assert len(rendered.split(": ", 1)[1]) == 60
+
     def test_meta_options(self):
         """Test Meta options for BoardOutcome."""
         assert BoardOutcome._meta.db_table == "owasp_board_outcomes"

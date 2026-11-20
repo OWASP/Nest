@@ -312,6 +312,27 @@ def fetch_tree() -> dict[str, str]:
     }
 
 
+def is_eligible_meeting_path(tree_path: str) -> bool:
+    """Return whether a repo path looks like a board meeting markdown file.
+
+    Args:
+        tree_path (str): Repo-relative path.
+
+    Returns:
+        bool: True when the path is an eligible meeting minutes file.
+
+    """
+    if not tree_path.endswith(".md"):
+        return False
+    if not any(tree_path.startswith(directory) for directory in MEETING_DIRS):
+        return False
+
+    filename = tree_path.rsplit("/", 1)[-1]
+    if filename.startswith("_"):
+        return False
+    return bool(FILENAME_PREFIX_RE.match(filename))
+
+
 def target_paths(
     tree: dict[str, str],
     *,
@@ -326,19 +347,23 @@ def target_paths(
         year (int, optional): Restrict to files whose filename begins with the given 4-digit year.
         month (int, optional): Restrict to files whose filename begins with
             year and month. Requires year.
-        path (str, optional): Return only the given path if present in the tree.
+        path (str, optional): Return only the given path if present and eligible.
 
     Yields:
         str: A matching file path.
 
     Raises:
-        ValueError: If year is not a 4-digit value.
+        ValueError: If month is set without year, or year is not a 4-digit value.
 
     """
     if path:
-        if path in tree:
+        if path in tree and is_eligible_meeting_path(path):
             yield path
         return
+
+    if month is not None and year is None:
+        message = "month requires year."
+        raise ValueError(message)
 
     prefix = ""
     if year is not None:
@@ -350,30 +375,25 @@ def target_paths(
             prefix = f"{year}{month:02d}"
 
     for tree_path in tree:
-        if not tree_path.endswith(".md"):
-            continue
-        if not any(tree_path.startswith(d) for d in MEETING_DIRS):
+        if not is_eligible_meeting_path(tree_path):
             continue
 
         filename = tree_path.rsplit("/", 1)[-1]
-        if filename.startswith("_"):
-            continue
-        if not FILENAME_PREFIX_RE.match(filename):
-            continue
         if prefix and not filename.startswith(prefix):
             continue
 
         yield tree_path
 
 
-def fetch_file_content(path: str) -> str:
+def fetch_file_content(path: str) -> str | None:
     """Fetch the raw content of a file from the www-board repository.
 
     Args:
         path (str): Repo-relative path of the file.
 
     Returns:
-        str: The file content, or empty string if the fetch failed or returned non-2xx.
+        str | None: The file content, empty string for an empty body, or ``None`` when
+            the fetch failed or returned a non-2xx response.
 
     """
     url = RAW_FILE_URL_TEMPLATE.format(path=path)
@@ -381,11 +401,11 @@ def fetch_file_content(path: str) -> str:
         response = requests.get(url, timeout=GITHUB_TIMEOUT)
     except RequestException:
         logger.exception("Failed to fetch %s", url)
-        return ""
+        return None
 
     if not response.ok:
         logger.warning("Non-OK status %s for %s", response.status_code, url)
-        return ""
+        return None
 
     return response.text
 
@@ -414,6 +434,9 @@ def sync_file(
         return SyncStatus.UNCHANGED
 
     content = fetch_file_content(path)
+    if content is None:
+        logger.error("Failed to fetch content for %s", path)
+        return SyncStatus.ERRORED
     if not content:
         logger.warning("Empty content for %s; skipping", path)
         return SyncStatus.SKIPPED
@@ -459,6 +482,9 @@ def run(
 
     Returns:
         SyncStats: Aggregate status counters.
+
+    Raises:
+        ValueError: If month is set without year, or year/month filters are invalid.
 
     """
     stats = SyncStats()

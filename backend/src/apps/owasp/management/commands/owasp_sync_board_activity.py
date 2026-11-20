@@ -49,12 +49,17 @@ class Command(BaseCommand):
         """Run the board activity sync.
 
         Raises:
-            CommandError: If --month or --year is invalid, or if any file failed to sync.
+            CommandError: If arguments are invalid, a requested path matches nothing,
+                or any sync operation failed.
 
         """
         year = options.get("year")
         month = options.get("month")
         path = options.get("path")
+
+        if path is not None and not path.strip():
+            message = "--path must be a non-empty repo-relative file path."
+            raise CommandError(message)
 
         if not path:
             if month is not None and year is None:
@@ -69,18 +74,25 @@ class Command(BaseCommand):
                 message = f"--year must be a 4-digit value between {MIN_YEAR} and {MAX_YEAR}."
                 raise CommandError(message)
 
-        stats = sync.run(
-            year=year,
-            month=month,
-            path=path,
-            force=options.get("force", False),
-            dry_run=options.get("dry_run", False),
-        )
+        try:
+            stats = sync.run(
+                year=year,
+                month=month,
+                path=path,
+                force=options.get("force", False),
+                dry_run=options.get("dry_run", False),
+            )
+        except ValueError as exc:
+            raise CommandError(str(exc)) from exc
+
+        if path and not stats.counts:
+            message = f"No eligible meeting file matched --path {path!r}."
+            raise CommandError(message)
 
         summary = ", ".join(f"{k}={v}" for k, v in sorted(stats.counts.items())) or "no files"
         self.stdout.write(self.style.SUCCESS(f"Board activity sync: {summary}"))
 
         errored = stats.counts.get(SyncStatus.ERRORED, 0)
         if errored:
-            message = f"Board activity sync had {errored} errored file(s)."
+            message = f"Board activity sync had {errored} error(s). Check the logs for details."
             raise CommandError(message)

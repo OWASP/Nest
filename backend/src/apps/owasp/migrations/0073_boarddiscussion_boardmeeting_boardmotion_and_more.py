@@ -258,7 +258,7 @@ class Migration(migrations.Migration):
                 ("order", models.PositiveIntegerField()),
                 (
                     "discussion",
-                    models.ForeignKey(
+                    models.OneToOneField(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
@@ -276,7 +276,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "motion",
-                    models.ForeignKey(
+                    models.OneToOneField(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
@@ -286,7 +286,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "outcome",
-                    models.ForeignKey(
+                    models.OneToOneField(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,

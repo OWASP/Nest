@@ -108,7 +108,7 @@ class TestTargetPaths:
         assert result == {"meetings-historical/2025/202508.md"}
 
     def test_single_path_short_circuits(self, tree):
-        """Passing --path returns that path only when present in the tree."""
+        """Passing --path returns that path only when present and eligible."""
         result = list(sync.target_paths(tree, path="meetings-historical/2025/202508.md"))
 
         assert result == ["meetings-historical/2025/202508.md"]
@@ -118,6 +118,17 @@ class TestTargetPaths:
         result = list(sync.target_paths(tree, path="nonexistent.md"))
 
         assert result == []
+
+    def test_single_path_rejects_ineligible_blob(self, tree):
+        """--path still applies meeting-file eligibility checks."""
+        result = list(sync.target_paths(tree, path="meetings-historical/2025/README.md"))
+
+        assert result == []
+
+    def test_month_without_year_raises(self, tree):
+        """Month without year is rejected at the sync API boundary."""
+        with pytest.raises(ValueError, match="month requires year"):
+            list(sync.target_paths(tree, month=8))
 
     @pytest.mark.parametrize("year", [1, 202, 10000])
     def test_rejects_non_four_digit_year(self, tree, year):
@@ -139,24 +150,24 @@ class TestFetchFileContent:
 
         assert sync.fetch_file_content("p.md") == "hello"
 
-    def test_returns_empty_on_non_ok(self, mocker):
-        """A non-ok response returns empty string so the error body is not fed to the LLM."""
+    def test_returns_none_on_non_ok(self, mocker):
+        """A non-ok response returns None so sync_file can treat it as ERRORED."""
         response = Mock(ok=False, status_code=404, text="error body")
         mocker.patch(
             "apps.owasp.parsers.board_activity.sync.requests.get",
             return_value=response,
         )
 
-        assert sync.fetch_file_content("p.md") == ""
+        assert sync.fetch_file_content("p.md") is None
 
-    def test_returns_empty_on_request_exception(self, mocker):
-        """A connection error returns empty string rather than propagating."""
+    def test_returns_none_on_request_exception(self, mocker):
+        """A connection error returns None rather than propagating."""
         mocker.patch(
             "apps.owasp.parsers.board_activity.sync.requests.get",
             side_effect=RequestException("boom"),
         )
 
-        assert sync.fetch_file_content("p.md") == ""
+        assert sync.fetch_file_content("p.md") is None
 
 
 class TestSyncFile:
@@ -219,6 +230,24 @@ class TestSyncFile:
         result = sync.sync_file("p.md", "sha")
 
         assert result == sync.SyncStatus.SKIPPED
+        mock_openai.assert_not_called()
+
+    def test_fetch_failure_yields_errored(self, mocker):
+        """A failed fetch (None) yields ERRORED rather than SKIPPED."""
+        mock_qs = Mock()
+        mock_qs.first.return_value = None
+        mocker.patch(
+            "apps.owasp.models.board_meeting.BoardMeeting.objects.filter",
+            return_value=mock_qs,
+        )
+        mocker.patch(
+            "apps.owasp.parsers.board_activity.sync.fetch_file_content", return_value=None
+        )
+        mock_openai = mocker.patch("apps.owasp.parsers.board_activity.sync.OpenAi")
+
+        result = sync.sync_file("p.md", "sha")
+
+        assert result == sync.SyncStatus.ERRORED
         mock_openai.assert_not_called()
 
     def test_llm_failure_yields_errored(self, mocker):

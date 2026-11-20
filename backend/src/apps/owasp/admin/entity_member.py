@@ -35,6 +35,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ("member",)
     search_fields = (
+        "member_name",
         "member__login",
         "member__name",
         "description",

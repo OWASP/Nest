@@ -86,14 +86,7 @@ def delete_meeting_children(meeting: BoardMeeting) -> None:
         meeting (BoardMeeting): The meeting whose agenda should be cleared.
 
     """
-    actions = meeting.actions.all()
-    discussion_ids = list(actions.exclude(discussion=None).values_list("discussion_id", flat=True))
-    motion_ids = list(actions.exclude(motion=None).values_list("motion_id", flat=True))
-    outcome_ids = list(actions.exclude(outcome=None).values_list("outcome_id", flat=True))
-
-    BoardDiscussion.objects.filter(id__in=discussion_ids).delete()
-    BoardMotion.objects.filter(id__in=motion_ids).delete()
-    BoardOutcome.objects.filter(id__in=outcome_ids).delete()
+    meeting.clear_agenda()
 
 
 def build_person_resolver(
@@ -134,20 +127,13 @@ def resolve_person(
         EntityMember: The resolved entity member row.
 
     """
-    existing = EntityMember.objects.filter(
-        entity_id=board.id,
-        entity_type=board_content_type,
-        member_name=name,
-    ).first()
-    if existing:
-        return existing
-
-    return EntityMember.objects.create(
+    member, _ = EntityMember.objects.get_or_create(
         entity_id=board.id,
         entity_type=board_content_type,
         member_name=name,
         role=role,
     )
+    return member
 
 
 def create_discussion(discussion: ParsedDiscussion, resolve: PersonResolver) -> BoardDiscussion:

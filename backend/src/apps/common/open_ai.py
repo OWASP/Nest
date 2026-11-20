@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar
 
 import openai
 from django.conf import settings
-
-if TYPE_CHECKING:
-    from pydantic import BaseModel
+from pydantic import BaseModel
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-T = TypeVar("T", bound="BaseModel")
+T = TypeVar("T", bound=BaseModel)
 
 
 class OpenAi:
@@ -107,9 +105,11 @@ class OpenAi:
                 response_format=schema,
                 temperature=self.temperature,
             )
-            return response.choices[0].message.parsed
         except openai.AuthenticationError:
-            logger.exception("OpenAI authentication failed: invalid or missing API key. ")
+            logger.exception(
+                "OpenAI authentication failed: invalid or missing API key. "
+                "Verify DJANGO_OPEN_AI_SECRET_KEY is set and valid."
+            )
         except openai.RateLimitError as e:
             logger.warning(
                 "OpenAI rate limit exceeded: %s. Request may be retried with backoff.",
@@ -128,6 +128,11 @@ class OpenAi:
                 "Unexpected OpenAI API error: %s",
                 type(e).__name__,
             )
+        else:
+            message = response.choices[0].message
+            if message.parsed is None and getattr(message, "refusal", None):
+                logger.warning("OpenAI refused structured parse: %s", message.refusal)
+            return message.parsed
         return None
 
     def complete(self) -> str | None:

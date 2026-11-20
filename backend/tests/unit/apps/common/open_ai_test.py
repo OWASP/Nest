@@ -251,6 +251,29 @@ class TestOpenAi:
         assert response is None
         mock_logger.exception.assert_called_once_with(
             "OpenAI authentication failed: invalid or missing API key. "
+            "Verify DJANGO_OPEN_AI_SECRET_KEY is set and valid."
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_parse_logs_refusal(self, mock_openai, mock_logger):
+        """A model refusal with no parsed payload is logged before returning None."""
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.parsed = None
+        mock_response.choices[0].message.refusal = "I can't help with that."
+        mock_client.beta.chat.completions.parse.return_value = mock_response
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
+
+        assert response is None
+        mock_logger.warning.assert_called_once_with(
+            "OpenAI refused structured parse: %s",
+            "I can't help with that.",
         )
 
     @patch("apps.common.open_ai.logger")

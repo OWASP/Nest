@@ -1,6 +1,7 @@
 """Tests for BoardMeeting model."""
 
 from datetime import UTC, datetime
+from unittest.mock import Mock
 
 from apps.owasp.models.board_meeting import BoardMeeting
 
@@ -100,3 +101,23 @@ class TestBoardMeetingModel:
         """Test presence of TimestampedModel fields."""
         assert hasattr(BoardMeeting, "nest_created_at")
         assert hasattr(BoardMeeting, "nest_updated_at")
+
+    def test_clear_agenda_deletes_links_then_targets(self, mocker):
+        """clear_agenda removes action rows first, then exclusive target rows."""
+        action = Mock(discussion_id=1, motion_id=2, outcome_id=3)
+        delete_qs = Mock()
+        meeting = Mock()
+        meeting.actions.all.side_effect = [[action], delete_qs]
+
+        mock_discussion = mocker.patch(
+            "apps.owasp.models.board_discussion.BoardDiscussion.objects.filter"
+        )
+        mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
+        mock_outcome = mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
+
+        BoardMeeting.clear_agenda(meeting)
+
+        delete_qs.delete.assert_called_once()
+        mock_discussion.assert_called_once_with(id__in=[1])
+        mock_motion.assert_called_once_with(id__in=[2])
+        mock_outcome.assert_called_once_with(id__in=[3])

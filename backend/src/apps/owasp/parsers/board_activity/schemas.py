@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime  # noqa: TC003
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ActionKind(StrEnum):
@@ -112,6 +112,23 @@ class ParsedAction(BaseModel):
     motion: ParsedMotion | None = None
     discussion: ParsedDiscussion | None = None
     outcome: ParsedOutcome | None = None
+
+    @model_validator(mode="after")
+    def validate_matching_payload(self) -> ParsedAction:
+        """Require exactly the payload that matches ``kind``."""
+        payloads = {
+            ActionKind.DISCUSSION: self.discussion,
+            ActionKind.MOTION: self.motion,
+            ActionKind.OUTCOME: self.outcome,
+        }
+        matched = payloads[self.kind]
+        extras = [kind for kind, payload in payloads.items() if kind != self.kind and payload]
+        if matched is None or extras:
+            message = (
+                f"ParsedAction(kind={self.kind}) must include exactly its corresponding payload."
+            )
+            raise ValueError(message)
+        return self
 
 
 class ParsedMeeting(BaseModel):

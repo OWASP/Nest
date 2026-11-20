@@ -46,7 +46,7 @@ class BoardMeetingAction(TimestampedModel):
 
     order = models.PositiveIntegerField()
 
-    discussion = models.ForeignKey(
+    discussion = models.OneToOneField(
         BoardDiscussion,
         blank=True,
         null=True,
@@ -58,14 +58,14 @@ class BoardMeetingAction(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="actions",
     )
-    motion = models.ForeignKey(
+    motion = models.OneToOneField(
         BoardMotion,
         blank=True,
         null=True,
         on_delete=models.CASCADE,
         related_name="+",
     )
-    outcome = models.ForeignKey(
+    outcome = models.OneToOneField(
         BoardOutcome,
         blank=True,
         null=True,

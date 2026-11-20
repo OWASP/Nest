@@ -82,18 +82,18 @@ class BoardMeetingDetail(BoardMeetingBase):
 
     @staticmethod
     def resolve_absentees(obj: BoardMeetingModel) -> list[EntityMember]:
-        """Resolve absentee EntityMember rows."""
-        return list(obj.absentees.all())
+        """Resolve absentee EntityMember rows in stable order."""
+        return list(obj.absentees.select_related("member").order_by("member_name", "id"))
 
     @staticmethod
     def resolve_actions(obj: BoardMeetingModel) -> list[BoardMeetingActionModel]:
-        """Resolve ordered action rows for the meeting."""
-        return list(obj.actions.all())
+        """Resolve action rows in agenda order."""
+        return list(obj.actions.order_by("order"))
 
     @staticmethod
     def resolve_attendees(obj: BoardMeetingModel) -> list[EntityMember]:
-        """Resolve attendee EntityMember rows."""
-        return list(obj.attendees.all())
+        """Resolve attendee EntityMember rows in stable order."""
+        return list(obj.attendees.select_related("member").order_by("member_name", "id"))
 
     @staticmethod
     def resolve_board_year(obj: BoardMeetingModel) -> int:
@@ -170,10 +170,6 @@ def get_board_meeting(
     meeting = (
         BoardMeetingModel.objects.select_related("board")
         .prefetch_related(
-            "absentees",
-            "absentees__member",
-            "attendees",
-            "attendees__member",
             Prefetch(
                 "actions",
                 queryset=BoardMeetingActionModel.objects.order_by("order"),

@@ -40,12 +40,43 @@ class TestSyncBoardActivityCommand:
 
     def test_path_bypasses_year_month_validation(self, command, mocker):
         """--path takes precedence over --year/--month, so range checks are skipped."""
+        stats = SyncStats()
+        stats.record(SyncStatus.CREATED)
+        mock_run = mocker.patch(
+            "apps.owasp.management.commands.owasp_sync_board_activity.sync.run",
+            return_value=stats,
+        )
+
+        command.handle(
+            year=1,
+            month=99,
+            path="meetings-historical/2025/202508.md",
+            force=True,
+            dry_run=False,
+        )
+
+        mock_run.assert_called_once_with(
+            year=1,
+            month=99,
+            path="meetings-historical/2025/202508.md",
+            force=True,
+            dry_run=False,
+        )
+
+    def test_empty_path_raises(self, command):
+        """An empty --path is rejected instead of syncing the full tree."""
+        with pytest.raises(CommandError, match="non-empty"):
+            command.handle(year=None, month=None, path="")
+
+    def test_unmatched_path_raises(self, command, mocker):
+        """A --path that matches no eligible file exits with a CommandError."""
         mocker.patch(
             "apps.owasp.management.commands.owasp_sync_board_activity.sync.run",
             return_value=SyncStats(),
         )
 
-        command.handle(year=1, month=99, path="meetings-historical/2025/202508.md")
+        with pytest.raises(CommandError, match="No eligible meeting file"):
+            command.handle(year=None, month=None, path="missing.md", force=False, dry_run=False)
 
     def test_errored_count_raises_command_error(self, command, mocker):
         """A non-zero ERRORED count exits the command with a CommandError."""
@@ -56,7 +87,7 @@ class TestSyncBoardActivityCommand:
             return_value=stats,
         )
 
-        with pytest.raises(CommandError, match="errored"):
+        with pytest.raises(CommandError, match="error\\(s\\)"):
             command.handle(year=None, month=None, path=None, force=False, dry_run=False)
 
     def test_handle_delegates_to_sync_run(self, command, mocker):

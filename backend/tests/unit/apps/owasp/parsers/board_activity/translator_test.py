@@ -5,6 +5,7 @@ from datetime import UTC, date, datetime
 from unittest.mock import Mock
 
 import pytest
+from pydantic import ValidationError
 
 from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.parsers.board_activity import translator
@@ -40,12 +41,10 @@ class TestResolvePerson:
     """Tests for resolve_person."""
 
     def test_returns_existing_member(self, mocker):
-        """Existing EntityMember matched by (board, member_name) is returned as-is."""
+        """Existing EntityMember matched by board/name/role is returned as-is."""
         existing = Mock()
-        mock_qs = Mock()
-        mock_qs.first.return_value = existing
         mock_manager = mocker.patch("apps.owasp.models.entity_member.EntityMember.objects")
-        mock_manager.filter.return_value = mock_qs
+        mock_manager.get_or_create.return_value = (existing, False)
 
         board = Mock(id=42)
         ct = Mock()
@@ -53,19 +52,18 @@ class TestResolvePerson:
         result = translator.resolve_person(board, ct, "Ricardo Griffith", EntityMember.Role.MEMBER)
 
         assert result is existing
-        mock_manager.filter.assert_called_once_with(
-            entity_type=ct, entity_id=42, member_name="Ricardo Griffith"
+        mock_manager.get_or_create.assert_called_once_with(
+            entity_type=ct,
+            entity_id=42,
+            member_name="Ricardo Griffith",
+            role=EntityMember.Role.MEMBER,
         )
-        mock_manager.create.assert_not_called()
 
     def test_creates_new_member_when_missing(self, mocker):
         """Missing person triggers create with the supplied role."""
-        mock_qs = Mock()
-        mock_qs.first.return_value = None
         created = Mock()
         mock_manager = mocker.patch("apps.owasp.models.entity_member.EntityMember.objects")
-        mock_manager.filter.return_value = mock_qs
-        mock_manager.create.return_value = created
+        mock_manager.get_or_create.return_value = (created, True)
 
         board = Mock(id=7)
         ct = Mock()
@@ -73,7 +71,7 @@ class TestResolvePerson:
         result = translator.resolve_person(board, ct, "Guest Name", EntityMember.Role.MEMBER)
 
         assert result is created
-        mock_manager.create.assert_called_once_with(
+        mock_manager.get_or_create.assert_called_once_with(
             entity_type=ct,
             entity_id=7,
             member_name="Guest Name",
@@ -233,28 +231,13 @@ class TestCreateOutcome:
 class TestDeleteMeetingChildren:
     """Tests for delete_meeting_children."""
 
-    def test_deletes_discussions_motions_and_outcomes(self, mocker):
-        """Distinct child ids across the meeting's actions are collected and deleted per type."""
-        actions = Mock()
-        actions.exclude.side_effect = lambda **_: actions
-        actions.values_list.side_effect = [[1, 2], [3], [4, 5]]
+    def test_delegates_to_meeting_clear_agenda(self):
+        """delete_meeting_children clears agenda links before target rows."""
         meeting = Mock()
-        meeting.actions.all.return_value = actions
-
-        mock_discussion = mocker.patch(
-            "apps.owasp.models.board_discussion.BoardDiscussion.objects.filter"
-        )
-        mock_motion = mocker.patch("apps.owasp.models.board_motion.BoardMotion.objects.filter")
-        mock_outcome = mocker.patch("apps.owasp.models.board_outcome.BoardOutcome.objects.filter")
 
         translator.delete_meeting_children(meeting)
 
-        mock_discussion.assert_called_once_with(id__in=[1, 2])
-        mock_motion.assert_called_once_with(id__in=[3])
-        mock_outcome.assert_called_once_with(id__in=[4, 5])
-        mock_discussion.return_value.delete.assert_called_once()
-        mock_motion.return_value.delete.assert_called_once()
-        mock_outcome.return_value.delete.assert_called_once()
+        meeting.clear_agenda.assert_called_once_with()
 
 
 class TestCreateVote:
@@ -353,13 +336,9 @@ class TestCreateAction:
         mock_action_create.assert_called_once_with(meeting=meeting, order=3, outcome="o_row")
 
     def test_raises_when_payload_missing(self, mock_action_create):
-        """Malformed action (kind set but payload None) raises so upsert rolls back."""
-        action = ParsedAction(kind=ActionKind.MOTION, motion=None)
-        meeting = Mock()
-        resolve = Mock()
-
-        with pytest.raises(ValueError, match="has no matching payload"):
-            translator.create_action(meeting, 1, action, resolve)
+        """Malformed action (kind set but payload None) is rejected by the schema."""
+        with pytest.raises(ValidationError, match="corresponding payload"):
+            ParsedAction(kind=ActionKind.MOTION, motion=None)
 
         mock_action_create.assert_not_called()
 
@@ -417,6 +396,10 @@ class TestUpsert:
         )
 
         assert result is meeting
+        assert mock_update_or_create.call_args.kwargs["source_path"] == (
+            "meetings-historical/2025/202508.md"
+        )
+        assert mock_update_or_create.call_args.kwargs["defaults"]["source_checksum"] == "abc123"
         assert mock_update_or_create.call_args.kwargs["defaults"]["guests"] == ["Guest"]
         assert mock_update_or_create.call_args.kwargs["defaults"]["date"] == datetime(
             2025, 8, 26, 13, 0, 0, tzinfo=UTC
