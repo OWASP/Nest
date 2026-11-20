@@ -2,7 +2,7 @@ ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
 # Shared builder setup for Production/Staging (builder-backend) and video (builder-video) images.
-FROM python:3.13.16-alpine3.23@sha256:07b20c774a247152e74f622034c1482495d299e070eec620ddff13e01264290b AS builder-base
+FROM python:3.13.17-alpine3.23@sha256:df8241c52fff8aefebb789ce9e140fb20e9f1f1ff9e5bca28b2064831eb6ff04 AS builder-base
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -60,14 +60,14 @@ RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + &&
     (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
 
 # Runtime for Production/Staging backend.
-FROM python:3.13.16-alpine3.23@sha256:07b20c774a247152e74f622034c1482495d299e070eec620ddff13e01264290b AS backend
+FROM python:3.13.17-alpine3.23@sha256:df8241c52fff8aefebb789ce9e140fb20e9f1f1ff9e5bca28b2064831eb6ff04 AS backend
 
 ARG OWASP_GID
 ARG OWASP_UID
 
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add make postgresql16-client=16.15-r0 && \
+    apk --no-cache add make "postgresql16-client>=16.16-r0" && \
     rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
@@ -111,14 +111,14 @@ RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + &&
     (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
 
 # Runtime for video generation: ffmpeg for encoding and WeasyPrint libs for slide rendering.
-FROM python:3.13.16-alpine3.23@sha256:07b20c774a247152e74f622034c1482495d299e070eec620ddff13e01264290b AS video
+FROM python:3.13.17-alpine3.23@sha256:df8241c52fff8aefebb789ce9e140fb20e9f1f1ff9e5bca28b2064831eb6ff04 AS video
 
 ARG OWASP_GID
 ARG OWASP_UID
 
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add ffmpeg make postgresql16-client=16.15-r0 \
+    apk --no-cache add ffmpeg make "postgresql16-client>=16.16-r0" \
     # WeasyPrint dependencies: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
     so:libfontconfig.so.1 so:libgobject-2.0.so.0 so:libharfbuzz-subset.so.0 \
     so:libharfbuzz.so.0 so:libpango-1.0.so.0 so:libpangoft2-1.0.so.0 ttf-freefont && \
