@@ -23,7 +23,7 @@ The group-level target may omit the action, as in `infrastructure-test`.
 ## Files
 
 Use singular, goal-based filenames such as `maintenance.mk`, `security.mk`, and
-`test.mk`. Keep `infrastructure/Makefile` as a thin aggregator that includes
+`test.mk`. Keep `infrastructure/makefile` as a thin aggregator that includes
 these files.
 
 ## Compatibility

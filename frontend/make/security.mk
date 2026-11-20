@@ -1,17 +1,10 @@
-.PHONY: frontend-dependency-audit frontend-security-image-scan \
-	frontend-security-maybe-build-image
+.PHONY: frontend-dependency-audit frontend-security-image-scan
 
 frontend-dependency-audit:
 	@echo "Auditing frontend npm dependencies..."
 	@$(MAKE) code-checks CMD='cd frontend && pnpm audit --audit-level=moderate'
 
-# Keep $(MAKE) out of the scan recipe so `make -n` does not run docker under .ONESHELL.
-frontend-security-maybe-build-image:
-	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then
-		$(MAKE) frontend-image-build
-	fi
-
-frontend-security-image-scan: frontend-security-maybe-build-image
+frontend-security-image-scan: frontend-image-build-local
 	@echo "Scanning image: $(FRONTEND_IMAGE_NAME)..."
 	image="$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')"
 	args=(

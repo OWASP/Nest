@@ -19,7 +19,7 @@ jobs:
     name: CSpell
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -33,7 +33,7 @@ jobs:
           run_install: false
 
       - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           cache: pnpm
           cache-dependency-path: cspell/pnpm-lock.yaml
@@ -57,7 +57,7 @@ jobs:
     name: ESLint
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -81,7 +81,7 @@ jobs:
       TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -89,7 +89,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           cache: pip
           cache-dependency-path: tools/requirements/pre-commit.txt
@@ -110,13 +110,13 @@ jobs:
             mypy-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install pre-commit
-        run: python -m pip install --require-hashes --requirement tools/requirements/pre-commit.txt
+        run: 'python -m pip install --only-binary :all: --require-hashes --requirement tools/requirements/pre-commit.txt'
 
       - name: Setup Terraform environment
         uses: ./.github/actions/setup-terraform-environment
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@1cf010d3c7aef302051ccdb68c14c5dc2efa34ef  # v6.3.1
+        uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337  # v6.3.2
         env:
           RUNNER_OS: ${{ runner.os }}-${{ runner.arch }}
         with:
@@ -138,7 +138,7 @@ jobs:
     name: Prettier
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -160,7 +160,7 @@ jobs:
     if: inputs.check_docker_compose
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -168,14 +168,14 @@ jobs:
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           cache: pip
           cache-dependency-path: .github/requirements/scripts.txt
           python-version: '3.13'
 
       - name: Install GitHub script dependencies
-        run: python -m pip install --require-hashes --requirement .github/requirements/scripts.txt
+        run: 'python -m pip install --only-binary :all: --require-hashes --requirement .github/requirements/scripts.txt'
 
       - name: Check Docker Compose
         run: python .github/scripts/docker_compose_check.py
@@ -185,7 +185,7 @@ jobs:
     name: Repository
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -202,7 +202,7 @@ jobs:
     name: Semgrep
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1

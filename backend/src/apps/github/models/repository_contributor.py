@@ -159,11 +159,27 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             queryset = queryset.filter(user__name__regex=CONTRIBUTOR_FULL_NAME_REGEX)
 
         if project:
-            queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
+            from apps.owasp.models.project import Project  # noqa: PLC0415
+
+            matched = Project.get_by_key(project, active_only=False)
+            project_key = matched.key if matched is not None else project
+            queryset = queryset.filter(repository__project__key__iexact=project_key)
         elif chapter:
-            queryset = queryset.filter(repository__key__iexact=f"www-chapter-{chapter}")
+            from apps.owasp.models.chapter import Chapter  # noqa: PLC0415
+
+            matched = Chapter.get_by_key(chapter)
+            repository_id = matched.owasp_repository_id if matched is not None else None
+            queryset = (
+                queryset.filter(repository_id=repository_id) if repository_id else queryset.none()
+            )
         elif committee:
-            queryset = queryset.filter(repository__key__iexact=f"www-committee-{committee}")
+            from apps.owasp.models.committee import Committee  # noqa: PLC0415
+
+            matched = Committee.get_by_key(committee)
+            repository_id = matched.owasp_repository_id if matched is not None else None
+            queryset = (
+                queryset.filter(repository_id=repository_id) if repository_id else queryset.none()
+            )
 
         if organization:
             queryset = queryset.select_related(

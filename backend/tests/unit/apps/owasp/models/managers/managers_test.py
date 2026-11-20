@@ -11,18 +11,14 @@ class TestActiveChapterManager:
     """Test ActiveChapterManager."""
 
     def test_get_queryset(self, mocker):
-        """Test get_queryset filters for active chapters with non-empty repos."""
+        """Test get_queryset filters for active chapters."""
         mock_qs = MagicMock()
         mocker.patch("django.db.models.Manager.get_queryset", return_value=mock_qs)
         manager = ActiveChapterManager()
         manager.model = MagicMock()
         result = manager.get_queryset()
-        mock_qs.select_related.assert_called_with("owasp_repository")
-        mock_qs.select_related.return_value.filter.assert_called_with(
-            is_active=True,
-            owasp_repository__is_empty=False,
-        )
-        assert result == mock_qs.select_related.return_value.filter.return_value
+        mock_qs.filter.assert_called_with(is_active=True)
+        assert result == mock_qs.filter.return_value
 
     def test_without_geo_data(self, mocker):
         """Test without_geo_data property."""

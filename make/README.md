@@ -34,7 +34,7 @@ Use one singular, goal-based filename for each target group:
 - `terraform.mk`
 - `test.mk`
 
-Keep the root `Makefile` as a thin aggregator that includes these files.
+Keep the root `makefile` as a thin aggregator that includes these files.
 
 ## Help
 

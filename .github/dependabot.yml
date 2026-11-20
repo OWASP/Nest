@@ -19,7 +19,8 @@ updates:
         patterns:
           - '*'
     schedule:
-      interval: daily
+      day: thursday
+      interval: weekly
     target-branch: main
 
   - package-ecosystem: docker-compose
@@ -33,7 +34,8 @@ updates:
         patterns:
           - '*'
     schedule:
-      interval: daily
+      day: thursday
+      interval: weekly
     target-branch: main
 
   - package-ecosystem: github-actions
@@ -47,7 +49,8 @@ updates:
         patterns:
           - '*'
     schedule:
-      interval: daily
+      day: thursday
+      interval: weekly
     target-branch: main
 
   - package-ecosystem: npm
@@ -64,7 +67,8 @@ updates:
         patterns:
           - '*'
     schedule:
-      interval: daily
+      day: thursday
+      interval: weekly
     target-branch: main
 
   - package-ecosystem: pip
@@ -81,7 +85,8 @@ updates:
         patterns:
           - '*'
     schedule:
-      interval: daily
+      day: thursday
+      interval: weekly
     target-branch: main
 
   - package-ecosystem: pre-commit
@@ -95,7 +100,8 @@ updates:
         patterns:
           - '*'
     schedule:
-      interval: daily
+      day: thursday
+      interval: weekly
     target-branch: main
 
   - package-ecosystem: terraform
@@ -109,5 +115,6 @@ updates:
         patterns:
           - '*'
     schedule:
-      interval: daily
+      day: thursday
+      interval: weekly
     target-branch: main

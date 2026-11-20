@@ -56,6 +56,22 @@ export const formatDateRange = (startDate: string, endDate: string) => {
   }
 }
 
+/** Format a range compactly by showing only the end year across years (e.g., "Mar 24, 2025 — 2026"). */
+export const formatCompactDateRange = (startDate: string, endDate: string) => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return ''
+  }
+
+  if (start.getUTCFullYear() === end.getUTCFullYear()) {
+    return formatDateRange(startDate, endDate)
+  }
+
+  return `${formatDate(startDate)} — ${end.getUTCFullYear()}`
+}
+
 export const formatDateForInput = (input: string | null) => {
   if (!input) return ''
 
@@ -63,56 +79,4 @@ export const formatDateForInput = (input: string | null) => {
   if (Number.isNaN(date.getTime())) return ''
 
   return date.toISOString().slice(0, 10)
-}
-
-export interface DateRangeOptions {
-  years?: number
-  months?: number
-  days?: number
-}
-
-export interface DateRangeResult {
-  startDate: string
-  endDate: string
-}
-
-function calculateDaysToSubtract(dayOfWeek: number): number {
-  return dayOfWeek === 0 ? -1 : -(dayOfWeek + 1)
-}
-
-function adjustDateForYearOnly(today: Date, endDate: Date, startDate: Date): void {
-  const todayDayOfWeek = today.getUTCDay()
-  const daysToSubtract = calculateDaysToSubtract(todayDayOfWeek)
-
-  endDate.setUTCDate(endDate.getUTCDate() + daysToSubtract)
-  startDate.setTime(endDate.getTime())
-  startDate.setUTCDate(startDate.getUTCDate() - 363) // 364 days including start day
-}
-
-function calculateStartDate(today: Date, years: number, months: number, days: number): Date {
-  const startDate = new Date(today)
-  startDate.setUTCFullYear(today.getUTCFullYear() - years)
-  startDate.setUTCMonth(today.getUTCMonth() - months)
-  startDate.setUTCDate(today.getUTCDate() - days)
-  return startDate
-}
-
-export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
-  const { years = 0, months = 0, days = 0 } = options
-
-  const today = new Date()
-  today.setUTCHours(0, 0, 0, 0)
-
-  const endDate = new Date(today)
-  const startDate = calculateStartDate(today, years, months, days)
-
-  const isYearOnly = years > 0 && months === 0 && days === 0
-  if (isYearOnly) {
-    adjustDateForYearOnly(today, endDate, startDate)
-  }
-
-  return {
-    startDate: startDate.toISOString().split('T')[0],
-    endDate: endDate.toISOString().split('T')[0],
-  }
 }

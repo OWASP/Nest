@@ -1,0 +1,6 @@
+# actionlint 1.7.12 does not know the Ubuntu 26.04 runner labels yet
+# (rhysd/actionlint#683 is unreleased). Drop this file once a release includes them.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04
+    - ubuntu-26.04-arm

@@ -70,6 +70,7 @@ ignore = [
   "D103",   # https://docs.astral.sh/ruff/rules/undocumented-public-function/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
+  "ICN001", # https://docs.astral.sh/ruff/rules/unconventional-import-alias/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
 "backend/src/apps/api/rest/**/*.py" = [
@@ -95,5 +96,5 @@ ignore = [
 
 [lint.isort]
 detect-same-package = false
-known-first-party = ["apps", "docker_compose_check", "renew_security_txt", "scripts", "serve", "tests"]
+known-first-party = ["apps", "docker_compose_check", "docksec_scan", "renew_security_txt", "scripts", "serve", "tests"]
 known-third-party = ["github"]

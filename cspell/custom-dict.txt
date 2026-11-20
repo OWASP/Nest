@@ -33,6 +33,7 @@ Ghsas
 Golovanova
 Hackbright
 Héllo
+ICN
 Illia
 Ime
 Iyonsi
@@ -119,6 +120,7 @@ defectdojo
 demojize
 dismissable
 dkr
+docksec
 dsn
 dvo
 eddsa
@@ -164,6 +166,7 @@ libgobject
 libharfbuzz
 libpango
 libpangoft
+librsvg
 libx
 lighthouseci
 lighthouserc
@@ -183,7 +186,6 @@ mentees
 mern
 millify
 misconfig
-mkdocstrings
 mkv
 mpim
 navlink
@@ -271,6 +273,7 @@ xsser
 xzf
 zapconfig
 zaproxy
+zensical
 zizmor
 zsc
 éàëîôû

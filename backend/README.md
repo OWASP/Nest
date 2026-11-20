@@ -44,7 +44,7 @@ checkouts / PR work), edit `docker-compose/local/compose.override.yaml` and see
 [docker-compose/README.md](https://github.com/OWASP/Nest/blob/main/docker-compose/README.md). Merge queue (not PR CI)
 rejects non-canonical volume names before they reach `main`.
 
-For common tasks, use the provided `Makefile` targets:
+For common tasks, use the provided `makefile` targets:
 
 | Task                       | Command                 |
 | -------------------------- | ----------------------- |
@@ -54,7 +54,7 @@ For common tasks, use the provided `Makefile` targets:
 | Run backend tests          | `make test-backend`     |
 | Access Django shell        | `make shell-django`     |
 
-See the root `Makefile` and the local `Makefile` for more targets.
+See the root `makefile` and the local `makefile` for more targets.
 
 ## Key APIs
 

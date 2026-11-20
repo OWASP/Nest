@@ -71,7 +71,7 @@ Equivalent `pnpm` commands: `pnpm run lint:check` (verify) and `pnpm run lint` (
 | Build for production | `pnpm run build`     |
 | Run unit tests       | `pnpm run test:unit` |
 
-See the root and `frontend/` Makefiles for Docker-based convenience targets.
+See the root and `frontend/` makefiles for Docker-based convenience targets.
 
 ## GraphQL Codegen
 
