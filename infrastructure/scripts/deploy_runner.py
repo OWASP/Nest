@@ -74,7 +74,7 @@ class InfrastructureDeployRunner:
             f"-chdir={live_dir}",
             "apply",
             "-auto-approve",
-            "-input=false",
+            "-input=false",  # NOSONAR
             f"-var-file={LOCALSTACK_TFVARS}",
         ]
         for key, value in (var_overrides or {}).items():
@@ -102,7 +102,7 @@ class InfrastructureDeployRunner:
             "tflocal",
             f"-chdir={state_dir}",
             "init",
-            "-input=false",
+            "-input=false",  # NOSONAR
             "-reconfigure",
             check=False,
         )
@@ -115,7 +115,7 @@ class InfrastructureDeployRunner:
             f"-chdir={state_dir}",
             "apply",
             "-auto-approve",
-            "-input=false",
+            "-input=false",  # NOSONAR
             f"-var-file={LOCALSTACK_TFVARS}",
             check=False,
         )
@@ -163,7 +163,7 @@ class InfrastructureDeployRunner:
             f"-chdir={live_dir}",
             "init",
             f"-backend-config={LOCALSTACK_TFBACKEND}",
-            "-input=false",
+            "-input=false",  # NOSONAR
             "-reconfigure",
             check=False,
         )

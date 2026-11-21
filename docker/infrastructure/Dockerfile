@@ -44,9 +44,8 @@ FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212
 ARG OWASP_GID
 ARG OWASP_UID
 
-RUN apk --no-cache add docker-cli docker-cli-buildx
-
-RUN addgroup -S -g ${OWASP_GID} owasp && \
+RUN apk --no-cache add docker-cli docker-cli-buildx && \
+    addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     mkdir -p \
       /home/owasp/.cache/pycache \
