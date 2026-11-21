@@ -72,6 +72,17 @@ variable "redis_port" {
   }
 }
 
+variable "secret_recovery_window_in_days" {
+  description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.secret_recovery_window_in_days == 0 || (var.secret_recovery_window_in_days >= 7 && var.secret_recovery_window_in_days <= 30)
+    error_message = "secret_recovery_window_in_days must be 0 or between 7 and 30."
+  }
+}
+
 variable "security_group_ids" {
   description = "A list of security group IDs to associate with the Redis cache."
   type        = list(string)
