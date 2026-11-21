@@ -1,0 +1,7 @@
+{
+  "exclude": [
+    "backend/src/apps/slack/templates/commands/donate.jinja",
+    "backend/tests/unit/apps/slack/commands/donate_test.py"
+  ],
+  "licenses": ["Apache-2.0", "MIT", "OFL-1.1"]
+}

@@ -1,0 +1,1 @@
+FROM fossology/fossology:4.7.3-scanner@sha256:3bac755e70887e1235f4a3be94f3efbce39a19e661e9ee2075545c30e7227d4a
