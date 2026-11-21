@@ -305,7 +305,7 @@ class TestInfrastructureDeployRunner:
             images.push.assert_any_call(service, tag)
 
     @patch.dict(os.environ, {}, clear=True)
-    def test_refresh_pushes_images_applies_live_and_restarts_service_tasks(self) -> None:
+    def test_refresh_pushes_images_and_applies_live_inside_aws_env(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         localstack = MagicMock(spec=LocalStack)
         localstack.api_url = LOCALSTACK_ENDPOINT_URL
@@ -327,7 +327,6 @@ class TestInfrastructureDeployRunner:
                 return_value={"backend": tag, "frontend": tag},
             ) as mock_push,
             patch.object(runner, "apply_live", side_effect=record_live) as mock_live,
-            patch.object(runner, "restart_service_task") as mock_restart,
         ):
             runner.refresh()
 
@@ -339,149 +338,10 @@ class TestInfrastructureDeployRunner:
             refresh=False,
             var_overrides={"backend_image_tag": tag, "frontend_image_tag": tag},
         )
-        mock_restart.assert_any_call(
-            cluster="nest-production-backend-cluster",
-            service="nest-production-backend-service",
-        )
-        mock_restart.assert_any_call(
-            cluster="nest-production-frontend-cluster",
-            service="nest-production-frontend-service",
-        )
         assert captured["AWS_ACCESS_KEY_ID"] == FAKE_CREDENTIAL
         assert captured["AWS_SECRET_ACCESS_KEY"] == FAKE_CREDENTIAL
         assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
         assert_aws_env_unset()
-
-    def test_run_task_shells_out_to_awslocal_and_returns_arn(self) -> None:
-        commands = MagicMock(spec=CommandRunner)
-        commands.run.return_value = MagicMock(
-            returncode=0,
-            stdout="arn:aws:ecs:us-east-1:000000000000:task/cluster/abc-123\n",
-        )
-        runner = build_runner(commands, MagicMock(spec=LocalStack))
-
-        arn = runner.run_task(
-            cluster="c",
-            task_definition="td",
-            subnets=["sub-1", "sub-2"],
-            security_groups=["sg-1"],
-        )
-
-        commands.require.assert_called_once_with("awslocal")
-        commands.run.assert_called_once_with(
-            "awslocal",
-            "ecs",
-            "run-task",
-            "--cluster",
-            "c",
-            "--task-definition",
-            "td",
-            "--launch-type",
-            "FARGATE",
-            "--network-configuration",
-            "awsvpcConfiguration={subnets=[sub-1,sub-2],securityGroups=[sg-1],assignPublicIp=ENABLED}",
-            "--query",
-            "tasks[0].taskArn",
-            "--output",
-            "text",
-            capture_output=True,
-        )
-        assert arn == "arn:aws:ecs:us-east-1:000000000000:task/cluster/abc-123"
-
-    def test_run_task_raises_when_awslocal_fails(self) -> None:
-        commands = MagicMock(spec=CommandRunner)
-        commands.run.return_value = MagicMock(returncode=1, stderr="boom")
-        runner = build_runner(commands, MagicMock(spec=LocalStack))
-
-        with pytest.raises(RunnerError, match="awslocal ecs run-task failed"):
-            runner.run_task(
-                cluster="c",
-                task_definition="td",
-                subnets=["s"],
-                security_groups=["sg"],
-            )
-
-    def test_stop_cluster_tasks_lists_and_stops_each(self) -> None:
-        commands = MagicMock(spec=CommandRunner)
-        commands.run.side_effect = [
-            MagicMock(returncode=0, stdout="arn-1\tarn-2\n"),
-            MagicMock(returncode=0),
-            MagicMock(returncode=0),
-        ]
-        runner = build_runner(commands, MagicMock(spec=LocalStack))
-
-        runner.stop_cluster_tasks("c")
-
-        commands.require.assert_called_once_with("awslocal")
-        assert commands.run.call_args_list[0] == call(
-            "awslocal",
-            "ecs",
-            "list-tasks",
-            "--cluster",
-            "c",
-            "--desired-status",
-            "RUNNING",
-            "--query",
-            "taskArns",
-            "--output",
-            "text",
-            capture_output=True,
-        )
-        assert commands.run.call_args_list[1] == call(
-            "awslocal",
-            "ecs",
-            "stop-task",
-            "--cluster",
-            "c",
-            "--task",
-            "arn-1",
-            capture_output=True,
-        )
-        assert commands.run.call_args_list[2] == call(
-            "awslocal",
-            "ecs",
-            "stop-task",
-            "--cluster",
-            "c",
-            "--task",
-            "arn-2",
-            capture_output=True,
-        )
-
-    def test_stop_cluster_tasks_no_op_when_no_running_tasks(self) -> None:
-        commands = MagicMock(spec=CommandRunner)
-        commands.run.return_value = MagicMock(returncode=0, stdout="\n")
-        runner = build_runner(commands, MagicMock(spec=LocalStack))
-
-        runner.stop_cluster_tasks("c")
-
-        assert commands.run.call_count == 1
-
-    def test_restart_service_task_stops_then_runs_new_task(self) -> None:
-        commands = MagicMock(spec=CommandRunner)
-        runner = build_runner(commands, MagicMock(spec=LocalStack))
-
-        describe_json = (
-            '{"services":[{"taskDefinition":"td-arn",'
-            '"networkConfiguration":{"awsvpcConfiguration":'
-            '{"subnets":["sub-1"],"securityGroups":["sg-1"],"assignPublicIp":"DISABLED"}}}]}'
-        )
-        commands.run.return_value = MagicMock(returncode=0, stdout=describe_json)
-
-        with (
-            patch.object(runner, "stop_cluster_tasks") as mock_stop,
-            patch.object(runner, "run_task", return_value="new-arn") as mock_run,
-        ):
-            arn = runner.restart_service_task(cluster="c", service="s")
-
-        mock_stop.assert_called_once_with("c")
-        mock_run.assert_called_once_with(
-            cluster="c",
-            task_definition="td-arn",
-            subnets=["sub-1"],
-            security_groups=["sg-1"],
-        )
-        assert arn == "new-arn"
 
     def test_refresh_propagates_wait_ready_failure(self) -> None:
         commands = MagicMock(spec=CommandRunner)
