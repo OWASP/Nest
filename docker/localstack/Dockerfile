@@ -6,4 +6,4 @@ RUN . /opt/code/localstack/.venv/bin/activate && \
     python -m localstack.cli.lpm install redis && \
     python -m localstack.cli.lpm install postgres --version 16 && \
     chown -R localstack:localstack /usr/lib/localstack && \
-    chmod -R 777 /usr/lib/localstack  # NOSONAR
+    chmod -R 755 /usr/lib/localstack
