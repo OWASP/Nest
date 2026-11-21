@@ -1,0 +1,14 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
+    environment:
+      POSTGRES_DB: nest_db_unit
+      POSTGRES_PASSWORD: unit-test
+      POSTGRES_USER: nest_user_unit
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD-SHELL, pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost]
+      timeout: 5s
+    tmpfs:
+      - /var/lib/postgresql/data

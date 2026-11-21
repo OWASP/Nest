@@ -251,6 +251,7 @@ tfdata
 tftest
 tgz
 tiktok
+tmpfs
 trailofbits
 trgm
 trivyignores
