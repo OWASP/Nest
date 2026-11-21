@@ -57,21 +57,9 @@ class TestChapterHandler:
         assert len(blocks) == 1
         assert "No chapters found for" in blocks[0]["text"]["text"]
 
-    @pytest.mark.parametrize(
-        ("total_pages", "page", "expected_buttons"),
-        [
-            (1, 1, []),
-            (2, 1, [("Next", "2")]),
-            (2, 2, [("Previous", "1")]),
-            (3, 1, [("Next", "2")]),
-            (3, 2, [("Previous", "1"), ("Next", "3")]),
-            (3, 3, [("Previous", "2")]),
-        ],
-    )
-    def test_get_blocks_pagination(
-        self, setup_mocks, mock_chapter_data, total_pages, page, expected_buttons
-    ):
+    def test_get_blocks_pagination(self, setup_mocks, mock_chapter_data, pagination_case):
         """Keep every result page reachable without offering a page past the end."""
+        total_pages, page, expected_buttons = pagination_case
         mock_chapter_data["nbPages"] = total_pages
         setup_mocks["get_chapters"].return_value = mock_chapter_data
         presentation = EntityPresentation(include_pagination=True, include_feedback=False)

@@ -156,23 +156,13 @@ class TestGetUsersBlocks:
 
         assert any("Extended search over OWASP community users" in str(block) for block in blocks)
 
-    @pytest.mark.parametrize(
-        ("total_pages", "page", "expected_buttons"),
-        [
-            (1, 1, []),
-            (2, 1, [("Next", "2")]),
-            (2, 2, [("Previous", "1")]),
-            (3, 1, [("Next", "2")]),
-            (3, 2, [("Previous", "1"), ("Next", "3")]),
-            (3, 3, [("Previous", "2")]),
-        ],
-    )
-    def test_get_blocks_pagination(
-        self, mocker, mock_users_data, total_pages, page, expected_buttons
-    ):
+    def test_get_blocks_pagination(self, mocker, mock_users_data, pagination_case):
         """Keep every result page reachable without offering a page past the end."""
+        total_pages, page, expected_buttons = pagination_case
         mock_users_data["nbPages"] = total_pages
-        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_users_data)
+        get_users = mocker.patch(
+            "apps.github.index.search.user.get_users", return_value=mock_users_data
+        )
         presentation = EntityPresentation(include_pagination=True, include_feedback=False)
 
         blocks = get_blocks(page=page, presentation=presentation)
@@ -183,6 +173,7 @@ class TestGetUsersBlocks:
             if block.get("type") == "actions"
             for button in block["elements"]
         ]
+        get_users.assert_called_once_with("", attributes=mocker.ANY, limit=10, page=page)
         assert buttons == expected_buttons
 
     def test_get_blocks_no_search_query(self, mocker, mock_users_data):

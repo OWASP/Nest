@@ -163,21 +163,9 @@ class TestProjectHandler:
 
         assert "Leaders:" not in blocks[1]["text"]["text"]
 
-    @pytest.mark.parametrize(
-        ("total_pages", "page", "expected_buttons"),
-        [
-            (1, 1, []),
-            (2, 1, [("Next", "2")]),
-            (2, 2, [("Previous", "1")]),
-            (3, 1, [("Next", "2")]),
-            (3, 2, [("Previous", "1"), ("Next", "3")]),
-            (3, 3, [("Previous", "2")]),
-        ],
-    )
-    def test_get_blocks_pagination(
-        self, setup_mocks, mock_project_data, total_pages, page, expected_buttons
-    ):
+    def test_get_blocks_pagination(self, mocker, setup_mocks, mock_project_data, pagination_case):
         """Keep every result page reachable without offering a page past the end."""
+        total_pages, page, expected_buttons = pagination_case
         mock_project_data["nbPages"] = total_pages
         setup_mocks["get_projects"].return_value = mock_project_data
         presentation = EntityPresentation(include_pagination=True, include_feedback=False)
@@ -190,6 +178,9 @@ class TestProjectHandler:
             if block.get("type") == "actions"
             for button in block["elements"]
         ]
+        setup_mocks["get_projects"].assert_called_once_with(
+            "", attributes=mocker.ANY, limit=10, page=page
+        )
         assert buttons == expected_buttons
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_project_data):
