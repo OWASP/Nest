@@ -105,7 +105,7 @@ def get_blocks(
         pagination_block := get_pagination_buttons(
             "chapters",
             page,
-            total_pages - 1,
+            total_pages,
         )
     ):
         blocks.append(

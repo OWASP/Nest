@@ -99,7 +99,10 @@ class TestProjectHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        assert "Extended search over 42 OWASP projects" in blocks[-1]["text"]["text"]
+        assert any(
+            "Extended search over 42 OWASP projects" in block.get("text", {}).get("text", "")
+            for block in blocks
+        )
 
     def test_search_query_escaping(self, setup_mocks, mock_project_data):
         setup_mocks["get_projects"].return_value = mock_project_data
@@ -160,18 +163,25 @@ class TestProjectHandler:
 
         assert "Leaders:" not in blocks[1]["text"]["text"]
 
-    def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_project_data):
-        """Test that pagination buttons are added on page 2."""
+    def test_get_blocks_pagination(self, mocker, setup_mocks, mock_project_data, pagination_case):
+        """Keep every result page reachable without offering a page past the end."""
+        total_pages, page, expected_buttons = pagination_case
+        mock_project_data["nbPages"] = total_pages
         setup_mocks["get_projects"].return_value = mock_project_data
-        presentation = EntityPresentation(include_pagination=True)
+        presentation = EntityPresentation(include_pagination=True, include_feedback=False)
 
-        blocks = get_blocks(page=2, presentation=presentation)
+        blocks = get_blocks(page=page, presentation=presentation)
 
-        action_blocks = [block for block in blocks if block.get("type") == "actions"]
-        assert len(action_blocks) > 0
-        elements = action_blocks[0].get("elements", [])
-        assert len(elements) > 0
-        assert all(elem.get("type") == "button" for elem in elements)
+        buttons = [
+            (button["text"]["text"], button["value"])
+            for block in blocks
+            if block.get("type") == "actions"
+            for button in block["elements"]
+        ]
+        setup_mocks["get_projects"].assert_called_once_with(
+            "", attributes=mocker.ANY, limit=10, page=page
+        )
+        assert buttons == expected_buttons
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_project_data):
         """Test that no pagination buttons are added when include_pagination is disabled."""
