@@ -11,6 +11,15 @@ from apps.github.management.commands.github_update_owasp_organization import (
 
 
 class TestGithubUpdateOwaspOrganization:
+    @pytest.fixture(autouse=True)
+    def contribution_repositories(self, mocker):
+        selection = mocker.patch(
+            "apps.github.management.commands.github_update_owasp_organization"
+            ".get_contribution_repositories"
+        )
+        selection.return_value.values_list.return_value = []
+        return selection
+
     @pytest.fixture
     def command(self):
         return Command()

@@ -16,6 +16,7 @@ FUZZ_COMPOSE = docker compose --project-name nest-fuzz -f docker-compose/fuzz/co
 
 backend-test:
 	@$(MAKE) backend-test-unit
+	@$(MAKE) backend-test-contributions
 
 backend-test-unit:
 	@args=(
@@ -33,6 +34,7 @@ backend-test-unit:
 		'--rm'
 		nest-test-backend
 		pytest
+		tests/unit
 	)
 	docker run "$${args[@]}"
 
@@ -85,3 +87,22 @@ backend-test-run-fuzz:
 		db
 	)
 	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 $(FUZZ_COMPOSE) "$${up_args[@]}"
+
+.PHONY: backend-test-contributions
+backend-test-contributions: ## Run contribution regression tests against isolated PostgreSQL
+	@docker build -q -f docker/backend/Dockerfile.unit-tests -t nest-test-backend backend
+	@set -eu; \
+	name="nest-contribution-tests-$$$$"; \
+	trap 'docker rm -fv "$$name" >/dev/null 2>&1 || true' EXIT; \
+	docker run -d --name "$$name" -e POSTGRES_USER=nest_test -e POSTGRES_PASSWORD=integration-test -e POSTGRES_DB=nest_test pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b >/dev/null; \
+	ready=false; attempt=0; \
+	while [ "$$attempt" -lt 30 ]; do \
+		if docker exec "$$name" pg_isready -U nest_test >/dev/null 2>&1; then ready=true; break; fi; \
+			attempt=$$((attempt + 1)); sleep 1; \
+		done; \
+	if [ "$$ready" != true ]; then echo "PostgreSQL did not become ready" >&2; exit 1; fi; \
+		docker run --rm --network "container:$$name" --env-file backend/.env.unit-tests \
+		-e DJANGO_SETTINGS_MODULE=settings.test -e DJANGO_DB_HOST=localhost \
+		-e DJANGO_DB_PORT=5432 -e DJANGO_DB_NAME=nest_test -e DJANGO_DB_USER=nest_test \
+		-e DJANGO_DB_PASSWORD=integration-test nest-test-backend \
+		pytest -o addopts='' tests/integration/github -q
