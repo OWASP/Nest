@@ -2,6 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
+import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
 jest.mock('server/fetchAlgoliaData', () => ({
@@ -69,7 +70,14 @@ describe('useSearchPage', () => {
     const { result } = await renderSearchPage('page=3')
 
     expect(result.current.currentPage).toBe(3)
-    expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 3, undefined, [])
+    expect(mockFetchAlgoliaData).toHaveBeenCalledWith(
+      'projects',
+      '',
+      3,
+      undefined,
+      [],
+      expect.any(AbortSignal)
+    )
     expect(push).not.toHaveBeenCalled()
   })
 
@@ -77,7 +85,14 @@ describe('useSearchPage', () => {
     const { result } = await renderSearchPage('page=3', { wrapper: React.StrictMode })
 
     expect(result.current.currentPage).toBe(3)
-    expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 3, undefined, [])
+    expect(mockFetchAlgoliaData).toHaveBeenCalledWith(
+      'projects',
+      '',
+      3,
+      undefined,
+      [],
+      expect.any(AbortSignal)
+    )
     expect(push).not.toHaveBeenCalled()
   })
 
@@ -121,7 +136,14 @@ describe('useSearchPage', () => {
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true)
-      expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', 'owasp', 1, undefined, [])
+      expect(mockFetchAlgoliaData).toHaveBeenCalledWith(
+        'projects',
+        'owasp',
+        1,
+        undefined,
+        [],
+        expect.any(AbortSignal)
+      )
     })
   })
 
@@ -142,7 +164,8 @@ describe('useSearchPage', () => {
         '',
         1,
         undefined,
-        []
+        [],
+        expect.any(AbortSignal)
       )
     })
   })
@@ -167,7 +190,8 @@ describe('useSearchPage', () => {
         '',
         1,
         undefined,
-        []
+        [],
+        expect.any(AbortSignal)
       )
     })
   })
@@ -206,7 +230,14 @@ describe('useSearchPage', () => {
     const { result, rerender } = await renderSearchPage('page=abc')
 
     expect(result.current.currentPage).toBe(1)
-    expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 1, undefined, [])
+    expect(mockFetchAlgoliaData).toHaveBeenCalledWith(
+      'projects',
+      '',
+      1,
+      undefined,
+      [],
+      expect.any(AbortSignal)
+    )
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams('page=0'))
     rerender()
@@ -318,6 +349,164 @@ describe('useSearchPage', () => {
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith('?q=nest')
+    })
+  })
+
+  describe('request cancellation', () => {
+    type SearchResult = { hits: { objectID: string }[]; totalPages: number }
+
+    const createDeferred = () => {
+      let resolve!: (value: SearchResult) => void
+      let reject!: (reason: unknown) => void
+      const promise = new Promise<SearchResult>((res, rej) => {
+        resolve = res
+        reject = rej
+      })
+      return { promise, resolve, reject }
+    }
+
+    // Mimics fetch(): rejects with an AbortError as soon as the signal is aborted.
+    const abortable = (promise: Promise<SearchResult>, signal?: AbortSignal) =>
+      new Promise<SearchResult>((resolve, reject) => {
+        signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+        promise.then(resolve, reject)
+      })
+
+    const signalOfCall = (call: number) => mockFetchAlgoliaData.mock.calls[call][5] as AbortSignal
+
+    const renderPending = () => {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams(''))
+      return renderHook(() => useSearchPage<{ objectID: string }>(defaultOptions))
+    }
+
+    it('aborts the in-flight request when the query changes', async () => {
+      const first = createDeferred()
+      const second = createDeferred()
+      mockFetchAlgoliaData
+        .mockImplementationOnce((...args) => abortable(first.promise, args[5]))
+        .mockImplementationOnce((...args) => abortable(second.promise, args[5]))
+
+      const { result } = renderPending()
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1))
+
+      act(() => {
+        result.current.handleSearch('nest')
+      })
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(2))
+
+      expect(signalOfCall(0).aborted).toBe(true)
+      expect(signalOfCall(1).aborted).toBe(false)
+
+      await act(async () => {
+        second.resolve({ hits: [{ objectID: 'nest' }], totalPages: 1 })
+      })
+
+      await waitFor(() => expect(result.current.isLoaded).toBe(true))
+      expect(result.current.items).toEqual([{ objectID: 'nest' }])
+      expect(handleAppError).not.toHaveBeenCalled()
+    })
+
+    it('aborts the in-flight request when the page changes', async () => {
+      const first = createDeferred()
+      const second = createDeferred()
+      mockFetchAlgoliaData
+        .mockImplementationOnce((...args) => abortable(first.promise, args[5]))
+        .mockImplementationOnce((...args) => abortable(second.promise, args[5]))
+
+      const { result } = renderPending()
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1))
+
+      const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => {})
+      try {
+        act(() => {
+          result.current.handlePageChange(3)
+        })
+        await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(2))
+      } finally {
+        scrollTo.mockRestore()
+      }
+
+      expect(signalOfCall(0).aborted).toBe(true)
+      expect(signalOfCall(1).aborted).toBe(false)
+    })
+
+    it('keeps the latest results even if a stale request ignores the abort and settles last', async () => {
+      const stale = createDeferred()
+      const latest = createDeferred()
+      // These fakes deliberately ignore the signal, so only the post-await guard can protect state.
+      mockFetchAlgoliaData
+        .mockImplementationOnce(() => stale.promise)
+        .mockImplementationOnce(() => latest.promise)
+
+      const { result } = renderPending()
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1))
+
+      act(() => {
+        result.current.handleSearch('nest')
+      })
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(2))
+
+      await act(async () => {
+        latest.resolve({ hits: [{ objectID: 'nest' }], totalPages: 1 })
+      })
+      await waitFor(() => expect(result.current.isLoaded).toBe(true))
+
+      await act(async () => {
+        stale.resolve({ hits: [{ objectID: 'owasp' }], totalPages: 9 })
+      })
+
+      expect(result.current.items).toEqual([{ objectID: 'nest' }])
+      expect(result.current.totalPages).toBe(1)
+      expect(result.current.isLoaded).toBe(true)
+    })
+
+    it('does not mark the page as loaded while only a stale request has settled', async () => {
+      const stale = createDeferred()
+      const latest = createDeferred()
+      mockFetchAlgoliaData
+        .mockImplementationOnce(() => stale.promise)
+        .mockImplementationOnce(() => latest.promise)
+
+      const { result } = renderPending()
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1))
+
+      act(() => {
+        result.current.handleSearch('nest')
+      })
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(2))
+
+      await act(async () => {
+        stale.resolve({ hits: [{ objectID: 'owasp' }], totalPages: 9 })
+      })
+
+      expect(result.current.isLoaded).toBe(false)
+      expect(result.current.items).toEqual([])
+    })
+
+    it('does not report an error for an aborted request', async () => {
+      const first = createDeferred()
+      mockFetchAlgoliaData.mockImplementationOnce((...args) => abortable(first.promise, args[5]))
+
+      const { unmount } = renderPending()
+      await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1))
+
+      unmount()
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(signalOfCall(0).aborted).toBe(true)
+      expect(handleAppError).not.toHaveBeenCalled()
+    })
+
+    it('still reports an error from the latest request', async () => {
+      const failure = new Error('Search service error')
+      mockFetchAlgoliaData.mockRejectedValueOnce(failure)
+
+      const { result } = renderPending()
+
+      await waitFor(() => expect(result.current.isLoaded).toBe(true))
+      expect(handleAppError).toHaveBeenCalledWith(failure)
     })
   })
 })
