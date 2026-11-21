@@ -7,12 +7,6 @@ services:
       # https://docs.localstack.cloud/aws/services/ecr/#endpoint-strategy
       - ECR_ENDPOINT_STRATEGY=off
       - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
-    healthcheck:
-      interval: 5s
-      retries: 10
-      start_period: 15s
-      test: [CMD, curl, -f, http://localhost:4566/_localstack/info]
-      timeout: 5s
     networks:
       - infrastructure-nest
     ports:
