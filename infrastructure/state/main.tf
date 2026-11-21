@@ -19,6 +19,7 @@ locals {
     Project     = var.project_name
   }
   state_environments = toset(var.state_environments)
+  bucket_suffix      = var.append_random_resource_name_suffix ? "-${random_id.suffix.hex}" : ""
 }
 
 module "kms" {
@@ -92,7 +93,7 @@ data "aws_iam_policy_document" "state_https_only" {
 resource "aws_s3_bucket" "logs" { # NOSONAR
   for_each = local.state_environments
 
-  bucket = "${var.project_name}-${each.key}-terraform-state-logs-${random_id.suffix.hex}"
+  bucket = "${var.project_name}-${each.key}-terraform-state-logs${local.bucket_suffix}"
   tags = merge(local.common_tags, {
     Environment = each.key
     Name        = "${var.project_name}-${each.key}-terraform-state-logs"
@@ -166,7 +167,7 @@ resource "aws_s3_bucket_versioning" "logs" {
 resource "aws_s3_bucket" "state" { # NOSONAR
   for_each = local.state_environments
 
-  bucket              = "${var.project_name}-${each.key}-terraform-state-${random_id.suffix.hex}"
+  bucket              = "${var.project_name}-${each.key}-terraform-state${local.bucket_suffix}"
   object_lock_enabled = true
   tags = merge(local.common_tags, {
     Environment = each.key

@@ -44,6 +44,8 @@ FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212
 ARG OWASP_GID
 ARG OWASP_UID
 
+RUN apk --no-cache add docker-cli docker-cli-buildx
+
 RUN addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     mkdir -p \
@@ -70,6 +72,10 @@ USER owasp
 COPY --from=terraform --chmod=555 --chown=root:root /bin/terraform /usr/local/bin/terraform
 COPY --from=builder --chown=owasp:owasp /home/owasp /home/owasp
 
+# Infrastructure sources are copied (not mounted) so tflocal can write .terraform/
+# and LocalStack override files inside the container without polluting the host.
+# A read-only mount would fail those writes and a read-write mount would leak them
+# to the host. Copying keeps writes scoped to the container lifetime.
 COPY --chown=owasp:owasp infrastructure/bootstrap /home/owasp/infrastructure/bootstrap
 COPY --chown=owasp:owasp infrastructure/live      /home/owasp/infrastructure/live
 COPY --chown=owasp:owasp infrastructure/modules   /home/owasp/infrastructure/modules

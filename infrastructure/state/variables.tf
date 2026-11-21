@@ -4,6 +4,12 @@ variable "abort_incomplete_multipart_upload_days" {
   default     = 7
 }
 
+variable "append_random_resource_name_suffix" {
+  description = "Whether to append a random hex suffix to resource names."
+  type        = bool
+  default     = true
+}
+
 variable "aws_region" {
   description = "The AWS region to deploy resources in."
   type        = string
@@ -35,8 +41,8 @@ variable "state_environments" {
 
   validation {
     condition = alltrue([
-      for env in var.state_environments : contains(["bootstrap", "staging", "production"], env)
+      for env in var.state_environments : contains(["bootstrap", "localstack", "staging", "production"], env)
     ])
-    error_message = "Each environment must be 'bootstrap', 'staging' or 'production'."
+    error_message = "Each environment must be 'bootstrap', 'localstack', 'staging' or 'production'."
   }
 }

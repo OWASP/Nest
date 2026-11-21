@@ -35,6 +35,7 @@ class CommandRunner:
         *args: str,
         check: bool = False,
         capture_output: bool = False,
+        stdin_input: str | None = None,
     ) -> subprocess.CompletedProcess[str]:
         """Run a command.
 
@@ -44,6 +45,7 @@ class CommandRunner:
             check (bool): Whether to raise an exception if the command exits with a
                 non-zero status.
             capture_output (bool): Whether to capture stdout and stderr.
+            stdin_input (str, optional): String written to the command's stdin.
 
         Returns:
             subprocess.CompletedProcess[str]: The result of the executed command.
@@ -54,5 +56,6 @@ class CommandRunner:
             [executable, *args],
             check=check,
             capture_output=capture_output,
+            input=stdin_input,
             text=True,
         )

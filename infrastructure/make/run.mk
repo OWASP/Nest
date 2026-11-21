@@ -1,10 +1,13 @@
-.PHONY: infrastructure-up
+.PHONY: infrastructure-check-auth-token infrastructure-refresh infrastructure-up
+
+DOCKER_GID := $(shell stat -c '%g' /var/run/docker.sock 2>/dev/null || stat -f '%g' /var/run/docker.sock)
+export DOCKER_GID
 
 INFRASTRUCTURE_COMPOSE = docker compose \
 	--project-name nest-infrastructure \
 	-f docker-compose/infrastructure/compose.yaml
 
-infrastructure-up: ## Start LocalStack and deploy infrastructure
+infrastructure-check-auth-token:
 	@if [ -z "$$LOCALSTACK_AUTH_TOKEN" ]; then \
 		if [ -t 2 ]; then \
 			printf '\033[1;31mError:\033[0m LOCALSTACK_AUTH_TOKEN is not set.\n' >&2; \
@@ -12,9 +15,14 @@ infrastructure-up: ## Start LocalStack and deploy infrastructure
 			echo "Error: LOCALSTACK_AUTH_TOKEN is not set." >&2; \
 		fi; \
 		exit 1; \
-	fi; \
-	$(MAKE) infrastructure-image-build || exit $$?; \
-	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-		$(INFRASTRUCTURE_COMPOSE) \
-			-f docker-compose/infrastructure/compose.deploy.yaml \
-			up
+	fi
+
+infrastructure-refresh: infrastructure-check-auth-token ## Refresh an existing deployment on LocalStack
+	@$(MAKE) infrastructure-image-build || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) up --wait localstack || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_deploy --refresh
+
+infrastructure-up: infrastructure-check-auth-token ## Start LocalStack and deploy infrastructure
+	@$(MAKE) infrastructure-image-build || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) up --wait localstack || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_deploy

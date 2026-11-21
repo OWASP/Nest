@@ -135,6 +135,7 @@ Use the following inline permissions for the `nest-state` IAM User
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_abort_incomplete_multipart_upload_days"></a> [abort\_incomplete\_multipart\_upload\_days](#input\_abort\_incomplete\_multipart\_upload\_days) | The number of days after which an incomplete multipart upload is aborted. | `number` | `7` | no |
+| <a name="input_append_random_resource_name_suffix"></a> [append\_random\_resource\_name\_suffix](#input\_append\_random\_resource\_name\_suffix) | Whether to append a random hex suffix to resource names. | `bool` | `true` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | `"us-east-2"` | no |
 | <a name="input_expire_log_days"></a> [expire\_log\_days](#input\_expire\_log\_days) | The number of days to expire logs after. | `number` | `90` | no |
 | <a name="input_noncurrent_version_expiration_days"></a> [noncurrent\_version\_expiration\_days](#input\_noncurrent\_version\_expiration\_days) | The number of days an object is noncurrent before it is expired. | `number` | `30` | no |
