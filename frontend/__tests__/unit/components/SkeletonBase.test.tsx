@@ -193,6 +193,36 @@ describe('SkeletonBase', () => {
     })
   })
 
+  describe('Top spacing below search', () => {
+    it.each(['users', 'organizations'])(
+      'adds mobile-only top spacing to the %s grid',
+      (indexName) => {
+        render(<SkeletonBase indexName={indexName} loadingImageUrl="test.jpg" />)
+
+        const gridContainer = screen.getAllByTestId('user-card-skeleton')[0].parentElement
+        expect(gridContainer).toHaveClass('mt-4', 'md:mt-0')
+      }
+    )
+
+    it.each(['committees', 'issues', 'projects'])(
+      'adds top spacing on all viewports for %s, matching Card',
+      (indexName) => {
+        render(<SkeletonBase indexName={indexName} loadingImageUrl="test.jpg" />)
+
+        const listContainer = screen.getAllByTestId('card-skeleton')[0].parentElement
+        expect(listContainer).toHaveClass('mt-4')
+        expect(listContainer).not.toHaveClass('md:mt-0')
+      }
+    )
+
+    it('adds no top spacing for chapters, where the filter row provides it', () => {
+      render(<SkeletonBase indexName="chapters" loadingImageUrl="test.jpg" />)
+
+      const listContainer = screen.getByTestId('hero-skeleton').parentElement
+      expect(listContainer).not.toHaveClass('mt-4')
+    })
+  })
+
   describe('Prop-based Behaviour', () => {
     it('configures chapters skeleton correctly', () => {
       render(<SkeletonBase indexName="chapters" loadingImageUrl="test.jpg" />)

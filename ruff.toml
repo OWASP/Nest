@@ -70,6 +70,7 @@ ignore = [
   "D103",   # https://docs.astral.sh/ruff/rules/undocumented-public-function/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
+  "ICN001", # https://docs.astral.sh/ruff/rules/unconventional-import-alias/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
 "backend/src/apps/api/rest/**/*.py" = [
