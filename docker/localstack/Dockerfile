@@ -5,5 +5,8 @@ FROM localstack/localstack:2026.10.8@sha256:be800da7b2f20deeebb1a4fef113ff4fc7fa
 RUN . /opt/code/localstack/.venv/bin/activate && \
     python -m localstack.cli.lpm install redis && \
     python -m localstack.cli.lpm install postgres --version 16 && \
+    # Clear the LPM download cache to prevent large dangling volumes.
+    # Every container created from this image copies the cache into a fresh anonymous volume.
+    rm -rf /var/lib/localstack/cache && \
     chown -R localstack:localstack /usr/lib/localstack && \
     chmod -R 755 /usr/lib/localstack
