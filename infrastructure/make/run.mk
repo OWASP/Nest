@@ -1,4 +1,4 @@
-.PHONY: infrastructure-check-auth-token infrastructure-ensure-local-config infrastructure-refresh infrastructure-up
+.PHONY: infrastructure-check-auth-token infrastructure-refresh infrastructure-up
 
 DOCKER_GID := $(shell stat -c '%g' /var/run/docker.sock 2>/dev/null || stat -f '%g' /var/run/docker.sock 2>/dev/null)
 export DOCKER_GID
@@ -17,23 +17,12 @@ infrastructure-check-auth-token:
 		exit 1; \
 	fi
 
-infrastructure-ensure-local-config:
-	@[ -f infrastructure/state/terraform.localstack.tfvars ] || \
-		cp infrastructure/state/terraform.localstack.tfvars.example \
-		infrastructure/state/terraform.localstack.tfvars
-	@[ -f infrastructure/live/terraform.localstack.tfvars ] || \
-		cp infrastructure/live/terraform.localstack.tfvars.example \
-		infrastructure/live/terraform.localstack.tfvars
-	@[ -f infrastructure/live/terraform.localstack.tfbackend ] || \
-		cp infrastructure/live/terraform.localstack.tfbackend.example \
-		infrastructure/live/terraform.localstack.tfbackend
-
-infrastructure-refresh: infrastructure-check-auth-token infrastructure-ensure-local-config ## Refresh an existing deployment on LocalStack
+infrastructure-refresh: infrastructure-check-auth-token ## Refresh an existing deployment on LocalStack
 	@$(MAKE) infrastructure-image-build || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) up --build --wait localstack || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_deploy --refresh
 
-infrastructure-up: infrastructure-check-auth-token infrastructure-ensure-local-config ## Start LocalStack and deploy infrastructure
+infrastructure-up: infrastructure-check-auth-token ## Start LocalStack and deploy infrastructure
 	@$(MAKE) infrastructure-image-build || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) up --build --wait localstack || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_deploy
