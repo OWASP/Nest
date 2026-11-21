@@ -5,7 +5,6 @@ from pathlib import Path
 from scripts.commands import CommandRunner
 from scripts.constants import LIVE_DIR, SOURCE_REPO_DIR
 from scripts.errors import RunnerError
-from scripts.localstack import LocalStack
 
 IMAGE_CONFIG = {
     "backend": {"target": "backend", "buildargs": None},
@@ -21,19 +20,16 @@ class ImageManager:
         root_dir: Path | None = None,
         *,
         commands: CommandRunner | None = None,
-        localstack: LocalStack | None = None,
     ) -> None:
         """Initialize the ECR image manager.
 
         Args:
             root_dir (Path, optional): The root directory of the project.
             commands (CommandRunner, optional): Command runner instance.
-            localstack (LocalStack, optional): LocalStack manager instance.
 
         """
         self.root_dir = root_dir or Path(__file__).resolve().parent.parent.parent
         self.commands = commands or CommandRunner()
-        self.localstack = localstack or LocalStack(self.commands)
 
     def build(self, service: str, tag: str) -> None:
         """Build the Docker image for a service.

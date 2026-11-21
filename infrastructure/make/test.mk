@@ -44,6 +44,6 @@ infrastructure-test-integration:
 	$(MAKE) infrastructure-image-build || exit $$?; \
 	status=0; \
 	trap '$(INFRASTRUCTURE_COMPOSE) down --remove-orphans >/dev/null 2>&1 || true' EXIT; \
-	$(INFRASTRUCTURE_COMPOSE) up --wait localstack || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) up --build --wait localstack || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_tests --integration || status=$$?; \
 	exit $$status

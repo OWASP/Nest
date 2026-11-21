@@ -30,7 +30,7 @@ services:
       # OrbStack, colima, etc) proxy the socket through a Linux VM and it typically
       # shows up as root:root inside the container.
       - '0'
-      - ${DOCKER_GID}
+      - ${DOCKER_GID:-0}
     image: nest-infrastructure
     network_mode: service:localstack
     pull_policy: never

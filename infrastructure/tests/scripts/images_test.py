@@ -9,7 +9,6 @@ from scripts.commands import CommandRunner
 from scripts.constants import SOURCE_REPO_DIR
 from scripts.errors import RunnerError
 from scripts.images import IMAGE_CONFIG, ImageManager
-from scripts.localstack import LocalStack
 
 REGISTRY_HOST = "000000000000.dkr.ecr.us-east-1.amazonaws.com"
 BACKEND_REPO_URL = f"{REGISTRY_HOST}/nest-production-backend"
@@ -19,7 +18,6 @@ def build_manager(commands: MagicMock | None = None) -> ImageManager:
     return ImageManager(
         root_dir=Path("/repo-root"),
         commands=commands or MagicMock(spec=CommandRunner),
-        localstack=MagicMock(spec=LocalStack),
     )
 
 

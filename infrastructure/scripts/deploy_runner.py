@@ -47,7 +47,6 @@ class InfrastructureDeployRunner:
         self.images = images or ImageManager(
             self.root_dir,
             commands=self.commands,
-            localstack=self.localstack,
         )
 
     def apply_live(
