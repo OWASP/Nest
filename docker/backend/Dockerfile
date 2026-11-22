@@ -13,7 +13,8 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     OWASP_UID=${OWASP_UID} \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    VIRTUALENV_PIP=26.3
 
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
@@ -57,7 +58,10 @@ RUN ln -s . backend
 
 RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + && \
     find /home/owasp/.venv -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete && \
-    (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
+    (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true) && \
+    rm -rf /home/owasp/.venv/lib/python*/site-packages/pip \
+           /home/owasp/.venv/lib/python*/site-packages/pip-*.dist-info \
+           /home/owasp/.venv/bin/pip*
 
 # Runtime for Production/Staging backend.
 FROM python:3.13.17-alpine3.23@sha256:df8241c52fff8aefebb789ce9e140fb20e9f1f1ff9e5bca28b2064831eb6ff04 AS backend
@@ -68,7 +72,10 @@ ARG OWASP_UID
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
     apk --no-cache add make "postgresql16-client>=16.16-r0" && \
-    rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
+    rm -rf /usr/local/lib/python*/site-packages/pip \
+           /usr/local/lib/python*/site-packages/pip-*.dist-info \
+           /usr/local/bin/pip* \
+           /var/cache/apk/* /var/tmp/* /tmp/* && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
@@ -108,7 +115,10 @@ RUN ln -s . backend
 
 RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + && \
     find /home/owasp/.venv -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete && \
-    (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
+    (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true) && \
+    rm -rf /home/owasp/.venv/lib/python*/site-packages/pip \
+           /home/owasp/.venv/lib/python*/site-packages/pip-*.dist-info \
+           /home/owasp/.venv/bin/pip*
 
 # Runtime for video generation: ffmpeg for encoding and WeasyPrint libs for slide rendering.
 FROM python:3.13.17-alpine3.23@sha256:df8241c52fff8aefebb789ce9e140fb20e9f1f1ff9e5bca28b2064831eb6ff04 AS video
@@ -122,7 +132,10 @@ RUN apk --no-cache update && \
     # WeasyPrint dependencies: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
     so:libfontconfig.so.1 so:libgobject-2.0.so.0 so:libharfbuzz-subset.so.0 \
     so:libharfbuzz.so.0 so:libpango-1.0.so.0 so:libpangoft2-1.0.so.0 ttf-freefont && \
-    rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
+    rm -rf /usr/local/lib/python*/site-packages/pip \
+           /usr/local/lib/python*/site-packages/pip-*.dist-info \
+           /usr/local/bin/pip* \
+           /var/cache/apk/* /var/tmp/* /tmp/* && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
