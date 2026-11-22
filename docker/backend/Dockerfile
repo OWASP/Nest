@@ -13,8 +13,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     OWASP_UID=${OWASP_UID} \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
-    PYTHONUNBUFFERED=1 \
-    VIRTUALENV_PIP=26.3
+    PYTHONUNBUFFERED=1
 
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}

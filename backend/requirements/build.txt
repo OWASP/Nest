@@ -884,9 +884,9 @@ urllib3==2.8.0 \
     # via
     #   dulwich
     #   requests
-virtualenv==21.15.1 \
-    --hash=sha256:0d14a991689c67600316880eadc0a37b7690cb632e3b4ac67e2bc05b2b2e24a4 \
-    --hash=sha256:e79c90b8f601701599c25905e02839924fede2c798d52325670d24fbdaab74ee
+virtualenv==21.15.12 \
+    --hash=sha256:a3976f886eb6019fcb1d137b223d160adaeff524ab0ad785c729a43c31cc158c \
+    --hash=sha256:bbbf764388a18dee8c3532c77af7a29680cd8121911d6dcb3484335d76547323
     # via
     #   -r backend/requirements/build.in
     #   poetry
