@@ -1,3 +1,4 @@
+from .activity_event import ActivityEvent
 from .board_of_directors import BoardOfDirectors
 from .chapter import Chapter
 from .committee import Committee

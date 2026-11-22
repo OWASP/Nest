@@ -13,6 +13,29 @@ export type Scalars = {
   UUID: { input: unknown; output: unknown; }
 };
 
+export type ActivityEventNode = Node & {
+  __typename?: 'ActivityEventNode';
+  activityType: Scalars['String']['output'];
+  githubRepository: RepositoryNode;
+  githubUser?: Maybe<UserNode>;
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  number?: Maybe<Scalars['Int']['output']>;
+  occurredAt: Scalars['DateTime']['output'];
+  title: Scalars['String']['output'];
+  url: Scalars['String']['output'];
+};
+
+export type ActivityEventStatsNode = {
+  __typename?: 'ActivityEventStatsNode';
+  activeRepos: Scalars['Int']['output'];
+  contributors: Scalars['Int']['output'];
+  issues: Scalars['Int']['output'];
+  pullRequests: Scalars['Int']['output'];
+  releases: Scalars['Int']['output'];
+  totalActivities: Scalars['Int']['output'];
+};
+
 export type AdminNode = {
   __typename?: 'AdminNode';
   avatarUrl: Scalars['String']['output'];
@@ -549,6 +572,14 @@ export type OrganizationStatsNode = {
   totalStars: Scalars['Int']['output'];
 };
 
+export type PaginatedActivityEvents = {
+  __typename?: 'PaginatedActivityEvents';
+  currentPage: Scalars['Int']['output'];
+  events: Array<ActivityEventNode>;
+  totalCount: Scalars['Int']['output'];
+  totalPages: Scalars['Int']['output'];
+};
+
 export type PaginatedPrograms = {
   __typename?: 'PaginatedPrograms';
   currentPage: Scalars['Int']['output'];
@@ -728,6 +759,8 @@ export type PullRequestNode = Node & {
 export type Query = {
   __typename?: 'Query';
   activeApiKeyCount: Scalars['Int']['output'];
+  activityEventStats: ActivityEventStatsNode;
+  activityEvents: PaginatedActivityEvents;
   apiKeys: Array<ApiKeyNode>;
   boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
@@ -755,6 +788,7 @@ export type Query = {
   projectHealthMetrics: Array<ProjectHealthMetricsNode>;
   projectHealthMetricsDistinctLength: Scalars['Int']['output'];
   projectHealthStats: ProjectHealthStatsNode;
+  recentActivityEvents: Array<ActivityEventNode>;
   recentChapters: Array<ChapterNode>;
   recentIssues: Array<IssueNode>;
   recentMilestones: Array<MilestoneNode>;
@@ -764,6 +798,7 @@ export type Query = {
   recentReleases: Array<ReleaseNode>;
   repositories: Array<RepositoryNode>;
   repository?: Maybe<RepositoryNode>;
+  searchChapters: Array<ChapterNode>;
   searchProjects: Array<ProjectNode>;
   snapshot?: Maybe<SnapshotNode>;
   snapshots: Array<SnapshotNode>;
@@ -773,6 +808,19 @@ export type Query = {
   topContributors: Array<RepositoryContributorNode>;
   upcomingEvents: Array<EventNode>;
   user?: Maybe<UserNode>;
+};
+
+
+export type QueryActivityEventsArgs = {
+  activityType?: InputMaybe<Scalars['String']['input']>;
+  chapterKey?: InputMaybe<Scalars['String']['input']>;
+  githubUser?: InputMaybe<Scalars['String']['input']>;
+  includeBots?: Scalars['Boolean']['input'];
+  limit?: Scalars['Int']['input'];
+  order?: Scalars['String']['input'];
+  page?: Scalars['Int']['input'];
+  projectKey?: InputMaybe<Scalars['String']['input']>;
+  timeRange?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -905,6 +953,11 @@ export type QueryProjectHealthMetricsDistinctLengthArgs = {
 };
 
 
+export type QueryRecentActivityEventsArgs = {
+  limit?: Scalars['Int']['input'];
+};
+
+
 export type QueryRecentChaptersArgs = {
   limit?: Scalars['Int']['input'];
 };
@@ -964,6 +1017,11 @@ export type QueryRepositoriesArgs = {
 export type QueryRepositoryArgs = {
   organizationKey: Scalars['String']['input'];
   repositoryKey: Scalars['String']['input'];
+};
+
+
+export type QuerySearchChaptersArgs = {
+  query: Scalars['String']['input'];
 };
 
 

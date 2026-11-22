@@ -13,3 +13,8 @@ export const sortOptionsProject = [
   { label: 'Name', key: 'name' },
   { label: 'Stars', key: 'stars_count' },
 ]
+
+export const sortOptionsPulse = [
+  { label: 'Newest Event', key: 'desc' },
+  { label: 'Oldest Event', key: 'asc' },
+]
