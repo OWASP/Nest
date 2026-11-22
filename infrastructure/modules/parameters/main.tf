@@ -159,12 +159,28 @@ resource "aws_ssm_parameter" "django_open_ai_secret_key" {
   }
 }
 
+resource "aws_ssm_parameter" "django_redis_auth_enabled" {
+  description = "Whether Redis connections should authenticate with a password (Required by Django)."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_AUTH_ENABLED"
+  tags        = var.common_tags
+  type        = "String"
+  value       = tostring(var.django_redis_auth_enabled)
+}
+
 resource "aws_ssm_parameter" "django_redis_host" {
   description = "The hostname of the Redis cache."
   name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_HOST"
   tags        = var.common_tags
   type        = "String"
   value       = var.django_redis_host
+}
+
+resource "aws_ssm_parameter" "django_redis_port" {
+  description = "The port of the Redis cache (Required by Django)."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PORT"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.django_redis_port
 }
 
 resource "aws_ssm_parameter" "django_redis_use_tls" {

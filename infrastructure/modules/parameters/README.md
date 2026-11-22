@@ -35,7 +35,9 @@ No modules.
 | [aws_ssm_parameter.django_github_app_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_github_app_installation_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_open_ai_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.django_redis_auth_enabled](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_redis_host](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.django_redis_port](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_redis_use_tls](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_release_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -70,7 +72,9 @@ No modules.
 | <a name="input_django_db_name"></a> [django\_db\_name](#input\_django\_db\_name) | The name of the database. | `string` | n/a | yes |
 | <a name="input_django_db_port"></a> [django\_db\_port](#input\_django\_db\_port) | The port of the database. | `string` | n/a | yes |
 | <a name="input_django_db_user"></a> [django\_db\_user](#input\_django\_db\_user) | The user for the database. | `string` | n/a | yes |
+| <a name="input_django_redis_auth_enabled"></a> [django\_redis\_auth\_enabled](#input\_django\_redis\_auth\_enabled) | Whether Redis connections should authenticate with a password (Required by Django). | `bool` | `true` | no |
 | <a name="input_django_redis_host"></a> [django\_redis\_host](#input\_django\_redis\_host) | The hostname of the Redis cache. | `string` | n/a | yes |
+| <a name="input_django_redis_port"></a> [django\_redis\_port](#input\_django\_redis\_port) | The port of the Redis cache (Required by Django). | `string` | n/a | yes |
 | <a name="input_django_redis_use_tls"></a> [django\_redis\_use\_tls](#input\_django\_redis\_use\_tls) | Whether Redis connections should use TLS (required for ElastiCache with transit encryption). | `bool` | `true` | no |
 | <a name="input_django_release_version"></a> [django\_release\_version](#input\_django\_release\_version) | The Django release version. | `string` | n/a | yes |
 | <a name="input_django_settings_module"></a> [django\_settings\_module](#input\_django\_settings\_module) | The location of the Django settings module to use (e.g., settings.staging, settings.production). | `string` | n/a | yes |
