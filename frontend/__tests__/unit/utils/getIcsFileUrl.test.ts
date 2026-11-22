@@ -1,3 +1,4 @@
+// cspell:ignore DTEND
 import { createEvent } from 'ics'
 import getIcsFileUrl from 'utils/getIcsFileUrl'
 
@@ -50,7 +51,7 @@ describe('getIcsFileUrl', () => {
     expect(createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         start: [2025, 1, 1],
-        end: [2025, 1, 3],
+        end: [2025, 1, 4],
       }),
       expect.any(Function)
     )
@@ -70,7 +71,7 @@ describe('getIcsFileUrl', () => {
     expect(createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         start: [2025, 1, 1],
-        end: [2025, 1, 3],
+        end: [2025, 1, 4],
       }),
       expect.any(Function)
     )
@@ -114,7 +115,7 @@ describe('getIcsFileUrl', () => {
     expect(createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         start: [2025, 1, 1],
-        end: [2025, 1, 3],
+        end: [2025, 1, 4],
         title: mockEvent.title,
         description: mockEvent.description,
         location: mockEvent.location,
@@ -122,6 +123,39 @@ describe('getIcsFileUrl', () => {
         busyStatus: 'BUSY',
       }),
       expect.any(Function)
+    )
+  })
+
+  describe('generated calendar dates', () => {
+    beforeEach(() => {
+      ;(createEvent as jest.Mock).mockImplementation(
+        jest.requireActual<typeof import('ics')>('ics').createEvent
+      )
+    })
+
+    it.each<[string, string, string | undefined, string, string]>([
+      ['single-day', '2026-10-27', '2026-10-27', '20261027', '20261028'],
+      ['missing end date', '2026-10-27', undefined, '20261027', '20261028'],
+      ['multi-day', '2026-10-27', '2026-10-30', '20261027', '20261031'],
+      ['month boundary', '2026-10-30', '2026-11-02', '20261030', '20261103'],
+      ['year boundary', '2026-12-30', '2027-01-02', '20261230', '20270103'],
+      ['leap day', '2028-02-28', '2028-02-29', '20280228', '20280301'],
+    ])(
+      'includes the final day of a %s event',
+      async (_description, startDate, endDate, expectedStart, expectedEnd) => {
+        await getIcsFileUrl({ title: 'Conference', startDate, endDate })
+
+        const blob = (globalThis.URL.createObjectURL as jest.Mock).mock.calls[0][0] as Blob
+        const content = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = () => reject(reader.error)
+          reader.readAsText(blob)
+        })
+
+        expect(content).toContain(`DTSTART;VALUE=DATE:${expectedStart}`)
+        expect(content).toContain(`DTEND;VALUE=DATE:${expectedEnd}`)
+      }
     )
   })
 })

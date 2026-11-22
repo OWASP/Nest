@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.64.1-jammy@sha256:7e9f074b4b69f7c746865936ac7840733cf5dfc957f265a547f331e7b83922d7
+FROM mcr.microsoft.com/playwright:v1.65.1-jammy@sha256:b0ee5ce5e14ac42c394c0564a0a30adbda052153c611561bb2d31263593d6dd8
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
@@ -13,8 +13,12 @@ ENV NODE_PATH=/app/e2e/node_modules \
 WORKDIR /app/e2e
 
 COPY e2e/package.json e2e/pnpm-lock.yaml e2e/pnpm-workspace.yaml ./
+# Playwright 1.65 ships Node 26, which no longer bundles corepack. --force replaces
+# the image's yarn shims so corepack can install the pnpm version from package.json.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    corepack install && corepack enable pnpm && \
+    npm install -g corepack@0.36.0 --force && \
+    corepack enable pnpm && \
+    corepack install && \
     pnpm install --frozen-lockfile
 
 COPY e2e/ ./
