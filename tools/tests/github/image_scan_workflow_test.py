@@ -11,6 +11,8 @@ def test_release_image_scan_is_a_required_standalone_step():
     (scan,) = (step for step in steps if step.get("uses") == "./.github/actions/run-trivy-check")
     (sbom,) = (step for step in steps if step.get("name") == "Generate release image SBOMs")
     assert steps.index(scan) < steps.index(sbom)
+    assert "if" not in job
+    assert "if" not in scan
     assert not job.get("continue-on-error")
     assert not scan.get("continue-on-error")
     # A later command in the same shell can overwrite the scan's exit status.
