@@ -50,15 +50,21 @@ const resolveRoles = (failing: unknown[] = []) =>
       : Promise.resolve({ data: roleResponses.get(query) })
   )
 
+const NOW = 1_700_000_000_000
+const RETRY_INTERVAL_MS = 5 * 60 * 1000
+
 describe('NextAuth route jwt callback', () => {
   let warnSpy: jest.SpyInstance
+  let nowSpy: jest.SpyInstance
 
   beforeEach(() => {
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    nowSpy = jest.spyOn(Date, 'now').mockReturnValue(NOW)
   })
 
   afterEach(() => {
     warnSpy.mockRestore()
+    nowSpy.mockRestore()
     jest.clearAllMocks()
   })
 
@@ -95,7 +101,19 @@ describe('NextAuth route jwt callback', () => {
 
     expect(token.isLeader).toBe(true)
     expect(token.isChapterLeader).toBeUndefined()
+    expect(token.chapterLeaderRetryAt).toBe(NOW + RETRY_INTERVAL_MS)
     expect(warnSpy).toHaveBeenCalled()
+  })
+
+  it('does not schedule a retry when sign-in resolves the chapter leader flag', async () => {
+    resolveRoles()
+
+    const token = await jwt({
+      token: { chapterLeaderRetryAt: NOW - 1 },
+      profile: { login: 'testuser' } as unknown as JwtParams['profile'],
+    })
+
+    expect(token.chapterLeaderRetryAt).toBeUndefined()
   })
 
   it('still fails sign-in when another role lookup fails', async () => {
@@ -118,16 +136,37 @@ describe('NextAuth route jwt callback', () => {
     )
   })
 
-  it('leaves the flag unset when the retry fails', async () => {
+  it('leaves the flag unset and schedules the next retry when the retry fails', async () => {
     resolveRoles([IsChapterLeaderDocument])
 
     const token = await jwt({ token: { login: 'testuser' } })
 
     expect(token.isChapterLeader).toBeUndefined()
+    expect(token.chapterLeaderRetryAt).toBe(NOW + RETRY_INTERVAL_MS)
     expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to fetch chapter leader status; will retry on next session refresh:',
+      'Failed to fetch chapter leader status; will retry later:',
       expect.any(Error)
     )
+  })
+
+  it('does not retry before the scheduled retry time', async () => {
+    resolveRoles()
+
+    const token = await jwt({ token: { login: 'testuser', chapterLeaderRetryAt: NOW + 1 } })
+
+    expect(mockQuery).not.toHaveBeenCalled()
+    expect(token.isChapterLeader).toBeUndefined()
+    expect(token.chapterLeaderRetryAt).toBe(NOW + 1)
+  })
+
+  it('retries once the scheduled time has passed and clears the schedule', async () => {
+    resolveRoles()
+
+    const token = await jwt({ token: { login: 'testuser', chapterLeaderRetryAt: NOW } })
+
+    expect(mockQuery).toHaveBeenCalledTimes(1)
+    expect(token.isChapterLeader).toBe(true)
+    expect(token.chapterLeaderRetryAt).toBeUndefined()
   })
 
   it('does not query again once the flag is set', async () => {

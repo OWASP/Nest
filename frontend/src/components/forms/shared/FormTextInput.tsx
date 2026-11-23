@@ -74,7 +74,6 @@ export const FormTextInput = ({
       {showCounter && (
         <p
           id={counterId}
-          aria-live="polite"
           className={`mt-1 text-right text-xs font-medium transition-colors ${counterColorClass}`}
         >
           {charCount}/{maxLength} characters

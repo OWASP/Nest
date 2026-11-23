@@ -2,7 +2,7 @@
 
 import strawberry
 import strawberry_django
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 
 from apps.common.constants import (
     MAX_SEARCH_QUERY_LENGTH,
@@ -77,12 +77,11 @@ class UserQuery:
         ):
             return []
 
-        return list(
-            User.objects.filter(
-                Q(has_public_member_page=True),
-                Q(login__icontains=cleaned_query) | Q(name__icontains=cleaned_query),
-            ).order_by("login")[:SEARCH_LIMIT]
-        )
+        # Return the queryset so the optimizer can apply the selected fields' hints.
+        return User.objects.filter(
+            Q(has_public_member_page=True),
+            Q(login__icontains=cleaned_query) | Q(name__icontains=cleaned_query),
+        ).order_by("login")[:SEARCH_LIMIT]
 
     @strawberry_django.field(permission_classes=[IsAuthenticated])
     def entity_contributors(
@@ -109,6 +108,18 @@ class UserQuery:
                 project=clean_project_key or None,
             )
         ]
-        users = User.objects.filter(login__in=logins).prefetch_related(USER_BADGES_PREFETCH)
-        users_by_login = {user.login: user for user in users}
-        return [users_by_login[login] for login in logins if login in users_by_login]
+        if not logins:
+            return []
+
+        # Keep the contributor ranking in the database ordering and return a queryset so the
+        # optimizer can apply the selected fields' hints. Opted-out users are excluded, as in
+        # the other user resolvers.
+        contributor_rank = Case(
+            *(When(login=login, then=Value(rank)) for rank, login in enumerate(logins)),
+            output_field=IntegerField(),
+        )
+        return (
+            User.objects.filter(has_public_member_page=True, login__in=logins)
+            .annotate(contributor_rank=contributor_rank)
+            .order_by("contributor_rank")
+        )

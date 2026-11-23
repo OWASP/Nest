@@ -110,7 +110,8 @@ describe('FormTextInput', () => {
 
     const counter = screen.getByText(/5\/50 characters/)
     expect(counter).toHaveAttribute('id', 'test-input-char-count')
-    expect(counter).toHaveAttribute('aria-live', 'polite')
+    // No live region: announcing the count on every keystroke is noisy.
+    expect(counter).not.toHaveAttribute('aria-live')
     expect(screen.getByLabelText('Test Label')).toHaveAttribute(
       'aria-describedby',
       'test-input-char-count'

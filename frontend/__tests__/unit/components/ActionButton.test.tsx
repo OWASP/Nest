@@ -7,6 +7,35 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
+// Like next/link, run the caller's onClick first and record whether it prevented navigation.
+// The shared mock in jest.setup prevents every click up front, which would hide that.
+const mockLinkNavigationPrevented = jest.fn()
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({
+    children,
+    href,
+    onClick,
+    ...props
+  }: {
+    children: React.ReactNode
+    href: string
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
+  }) => (
+    <a
+      href={href}
+      {...props}
+      onClick={(e) => {
+        onClick?.(e)
+        mockLinkNavigationPrevented(e.defaultPrevented)
+        e.preventDefault()
+      }}
+    >
+      {children}
+    </a>
+  ),
+}))
+
 describe('ActionButton', () => {
   afterEach(() => {
     cleanup()
@@ -160,12 +189,26 @@ describe('ActionButton', () => {
       )
 
       const link = screen.getByRole('link')
-      const notPrevented = fireEvent.click(link)
+      fireEvent.click(link)
       fireEvent.keyDown(link, { key: 'Enter', code: 'Enter' })
 
-      expect(notPrevented).toBe(false)
+      expect(mockLinkNavigationPrevented).toHaveBeenCalledWith(true)
       expect(mockOnClick).not.toHaveBeenCalled()
       expect(mockOnKeyDown).not.toHaveBeenCalled()
+    })
+
+    it('does not prevent navigation when an enabled link is clicked', () => {
+      const mockOnClick = jest.fn()
+      render(
+        <ActionButton url="https://example.com" onClick={mockOnClick}>
+          Enabled Link Text
+        </ActionButton>
+      )
+
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockLinkNavigationPrevented).toHaveBeenCalledWith(false)
+      expect(mockOnClick).toHaveBeenCalledTimes(1)
     })
 
     it('triggers onKeyDown handler when key is pressed on link', () => {

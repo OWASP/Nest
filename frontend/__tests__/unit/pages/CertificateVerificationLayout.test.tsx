@@ -27,13 +27,15 @@ describe('CertificateVerificationLayout generateMetadata', () => {
     expect(metadata.alternates?.canonical).toBe('https://nest.owasp.org/certificates/F9DD2BJ9ZYXW')
   })
 
-  it('returns empty metadata for an unknown certificate ID', async () => {
+  it('marks an unknown certificate ID as noindex without a canonical URL', async () => {
     mockQuery.mockResolvedValue({ data: { certificate: null } })
 
-    await expect(generateMetadata({ params })).resolves.toEqual({})
+    await expect(generateMetadata({ params })).resolves.toEqual({
+      robots: { index: false, follow: false },
+    })
   })
 
-  it('returns empty metadata when the lookup fails', async () => {
+  it('returns empty metadata without noindex when the lookup fails', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     mockQuery.mockRejectedValue(new Error('Network error'))
 

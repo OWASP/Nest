@@ -116,15 +116,29 @@ describe('useDebouncedSuggestions', () => {
     expect(result.current.items).toEqual([{ id: 'fresh' }])
   })
 
-  it('clears items when the fetcher rejects', async () => {
-    const fetcher = jest.fn().mockRejectedValue(new Error('boom'))
+  it('clears previous suggestions when the next request rejects', async () => {
+    const fetcher = jest
+      .fn()
+      .mockResolvedValueOnce([{ id: 'previous' }])
+      .mockRejectedValueOnce(new Error('boom'))
 
-    const { result } = renderHook(() => useDebouncedSuggestions<Item>('nest', fetcher))
+    const { result, rerender } = renderHook(
+      ({ query }) => useDebouncedSuggestions<Item>(query, fetcher),
+      { initialProps: { query: 'nest' } }
+    )
+    act(() => {
+      jest.advanceTimersByTime(300)
+    })
+    await flushPromises()
+    expect(result.current.items).toEqual([{ id: 'previous' }])
+
+    rerender({ query: 'owasp' })
     act(() => {
       jest.advanceTimersByTime(300)
     })
     await flushPromises()
 
+    expect(fetcher).toHaveBeenLastCalledWith('owasp', mockApolloClient)
     expect(result.current).toEqual({ items: [], isLoading: false })
   })
 

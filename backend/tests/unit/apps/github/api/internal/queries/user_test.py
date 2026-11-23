@@ -107,16 +107,17 @@ class TestSearchUsers:
 
     def test_search_users_filters_and_slices(self):
         """Test search_users filters public members by login or name and limits results."""
-        users = [Mock(spec=User), Mock(spec=User)]
+        sliced = MagicMock()
 
         with patch("apps.github.models.user.User.objects.filter") as mock_filter:
             mock_ordered = MagicMock()
-            mock_ordered.__getitem__.return_value = users
+            mock_ordered.__getitem__.return_value = sliced
             mock_filter.return_value.order_by.return_value = mock_ordered
 
             result = UserQuery().search_users(query="  alice  ")
 
-        assert result == users
+        # The sliced queryset is returned as-is so the optimizer can apply field hints.
+        assert result is sliced
         mock_filter.assert_called_once_with(
             Q(has_public_member_page=True),
             Q(login__icontains="alice") | Q(name__icontains="alice"),
@@ -141,71 +142,90 @@ class TestEntityContributors:
             yield mock_filter
 
     @staticmethod
-    def _make_user(login):
-        user = Mock(spec=User)
-        user.login = login
-        return user
+    def _ordered(mock_user_filter):
+        return mock_user_filter.return_value.annotate.return_value.order_by.return_value
+
+    @staticmethod
+    def _ranks(mock_user_filter):
+        """Return the (condition, rank) pairs of the contributor_rank annotation."""
+        case = mock_user_filter.return_value.annotate.call_args.kwargs["contributor_rank"]
+        return [(when.condition, when.result.value) for when in case.cases]
 
     def test_chapter_key_uses_top_contributors_for_chapter(
         self, mock_get_top_contributors, mock_user_filter
     ):
         """Test the chapter key is stripped of its prefix and passed as chapter."""
-        user = self._make_user("alice")
         mock_get_top_contributors.return_value = [{"login": "alice"}]
-        mock_user_filter.return_value.prefetch_related.return_value = [user]
 
         result = UserQuery().entity_contributors(chapter_key="  www-chapter-london  ")
 
-        assert result == [user]
+        assert result == self._ordered(mock_user_filter)
         mock_get_top_contributors.assert_called_once_with(
             chapter="london",
             limit=15,
             project=None,
         )
-        mock_user_filter.assert_called_once_with(login__in=["alice"])
-        mock_user_filter.return_value.prefetch_related.assert_called_once_with(
-            USER_BADGES_PREFETCH
-        )
+        mock_user_filter.assert_called_once_with(has_public_member_page=True, login__in=["alice"])
 
     def test_project_key_uses_top_contributors_for_project(
         self, mock_get_top_contributors, mock_user_filter
     ):
         """Test the project key is stripped of its prefix and passed as project."""
-        user = self._make_user("bob")
         mock_get_top_contributors.return_value = [{"login": "bob"}]
-        mock_user_filter.return_value.prefetch_related.return_value = [user]
 
         result = UserQuery().entity_contributors(project_key="www-project-juice-shop", limit=5)
 
-        assert result == [user]
+        assert result == self._ordered(mock_user_filter)
         mock_get_top_contributors.assert_called_once_with(
             chapter=None,
             limit=5,
             project="juice-shop",
         )
 
-    def test_order_preserved_and_missing_users_skipped(
+    def test_excludes_users_without_public_member_page(
         self, mock_get_top_contributors, mock_user_filter
     ):
-        """Test users are returned in contributor order and unknown logins are skipped."""
-        alice = self._make_user("alice")
-        bob = self._make_user("bob")
+        """Test opted-out users are filtered out, as in the other user resolvers."""
+        mock_get_top_contributors.return_value = [{"login": "alice"}, {"login": "bob"}]
+
+        UserQuery().entity_contributors(project_key="juice-shop")
+
+        assert mock_user_filter.call_args.kwargs["has_public_member_page"] is True
+
+    def test_orders_users_by_contributor_rank(self, mock_get_top_contributors, mock_user_filter):
+        """Test users are ordered in the database by their contributor ranking."""
         mock_get_top_contributors.return_value = [
             {"login": "bob"},
             {"login": "ghost"},
             {"login": "alice"},
         ]
-        mock_user_filter.return_value.prefetch_related.return_value = [alice, bob]
+
+        UserQuery().entity_contributors(project_key="juice-shop")
+
+        mock_user_filter.assert_called_once_with(
+            has_public_member_page=True, login__in=["bob", "ghost", "alice"]
+        )
+        assert self._ranks(mock_user_filter) == [
+            (Q(login="bob"), 0),
+            (Q(login="ghost"), 1),
+            (Q(login="alice"), 2),
+        ]
+        mock_user_filter.return_value.annotate.return_value.order_by.assert_called_once_with(
+            "contributor_rank"
+        )
+
+    def test_no_contributors_returns_empty(self, mock_get_top_contributors, mock_user_filter):
+        """Test an entity without contributors returns [] without querying users."""
+        mock_get_top_contributors.return_value = []
 
         result = UserQuery().entity_contributors(project_key="juice-shop")
 
-        assert result == [bob, alice]
-        mock_user_filter.assert_called_once_with(login__in=["bob", "ghost", "alice"])
+        assert result == []
+        mock_user_filter.assert_not_called()
 
     def test_limit_is_capped(self, mock_get_top_contributors, mock_user_filter):
         """Test limits above MAX_LIMIT are capped."""
         mock_get_top_contributors.return_value = []
-        mock_user_filter.return_value.prefetch_related.return_value = []
 
         result = UserQuery().entity_contributors(project_key="juice-shop", limit=MAX_LIMIT + 1)
 

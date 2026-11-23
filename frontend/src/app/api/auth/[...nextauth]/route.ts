@@ -52,6 +52,9 @@ const checkIfChapterLeader = (login: string) =>
     'chapter leader'
   )
 
+// A failed chapter leader lookup is retried on later session reads, at most this often.
+const CHAPTER_LEADER_RETRY_INTERVAL_MS = 5 * 60 * 1000
+
 const checkIfMentor = (login: string) =>
   checkRole(IsMentorDocument, login, (data) => data?.isMentor ?? false, 'mentor')
 
@@ -113,15 +116,20 @@ const authOptions: AuthOptions = {
         token.isChapterLeader = isChapterLeader
         token.isMentor = isMentor
         token.isMentee = isMentee
-      } else if (token.login && typeof token.isChapterLeader !== 'boolean') {
+        token.chapterLeaderRetryAt =
+          isChapterLeader === undefined ? Date.now() + CHAPTER_LEADER_RETRY_INTERVAL_MS : undefined
+      } else if (
+        token.login &&
+        typeof token.isChapterLeader !== 'boolean' &&
+        Date.now() >= ((token.chapterLeaderRetryAt as number | undefined) ?? 0)
+      ) {
         try {
           token.isChapterLeader = await checkIfChapterLeader(token.login as string)
+          token.chapterLeaderRetryAt = undefined
         } catch (err) {
+          token.chapterLeaderRetryAt = Date.now() + CHAPTER_LEADER_RETRY_INTERVAL_MS
           // eslint-disable-next-line no-console
-          console.warn(
-            'Failed to fetch chapter leader status; will retry on next session refresh:',
-            err
-          )
+          console.warn('Failed to fetch chapter leader status; will retry later:', err)
         }
       }
 
