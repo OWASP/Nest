@@ -129,13 +129,13 @@ To do this locally:
 - Copy the contents from the template file into your new local terraform variables file:
 
     ```bash
-    cp terraform.tfvars.staging.example terraform.tfvars
+    cp terraform.staging.tfvars.example terraform.tfvars
     ```
 
 - Copy the contents from the template file into your new local terraform backend file:
 
     ```bash
-    cp terraform.tfbackend.staging.example terraform.tfbackend
+    cp terraform.staging.tfbackend.example terraform.tfbackend
     ```
 
   > [!NOTE]
@@ -236,7 +236,7 @@ Migrate and load data into the new database.
 
 1. **Shared bucket and `nest.dump`**
 
-- Terraform (`module.storage` → `shared_data_bucket` in `infrastructure/modules/storage`) provisions **`owasp-nest-shared-data`**. Public read of **`nest.dump`** at the bucket root (HTTPS) is for **local/CI** only. ECS **load-data** uses the **fixtures** bucket at **`databases/nest.dump`** per environment.
+- Terraform (`module.storage` → `shared_data_bucket` in `infrastructure/modules/storage`) provisions **`owasp-nest-shared-data`**. Public read of **`nest.dump`** at that bucket's root (HTTPS) is for **local/CI** only. ECS **load-data** reads **`nest.dump`** at the root of each environment's **fixtures** bucket.
 - **Dump:** `make dump-data` → `backend/data/nest.dump`. **Upload / fetch:** `make upload-nest-dump` / `make fetch-nest-dump` (host AWS credentials; optional **`SHARED_DATA_BUCKET`**).
 - **CLI** (after `cd infrastructure/live`):
 
