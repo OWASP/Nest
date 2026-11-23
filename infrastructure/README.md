@@ -278,7 +278,7 @@ aws ecs run-task \
   --region AWS_REGION
 ```
 
-1. Copy `nest.dump` into the root of this environment's fixtures bucket before load-data. The source can be any local dump you choose. From `infrastructure/live`:
+1. Copy a custom-format `nest.dump` (`pg_dump --format=custom`, the format produced by `make dump-data`) into the root of this environment's fixtures bucket before load-data. `pg_restore` cannot load a plain SQL file. From `infrastructure/live`:
 
 ```bash
 aws s3 cp ../../backend/data/nest.dump "s3://$(terraform output -raw fixtures_bucket_name)/nest.dump"
