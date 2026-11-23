@@ -164,6 +164,7 @@ class TestEntityContributors:
             chapter="london",
             limit=15,
             project=None,
+            public_members_only=True,
         )
         mock_user_filter.assert_called_once_with(has_public_member_page=True, login__in=["alice"])
 
@@ -180,6 +181,7 @@ class TestEntityContributors:
             chapter=None,
             limit=5,
             project="juice-shop",
+            public_members_only=True,
         )
 
     def test_excludes_users_without_public_member_page(
@@ -234,6 +236,7 @@ class TestEntityContributors:
             chapter=None,
             limit=MAX_LIMIT,
             project="juice-shop",
+            public_members_only=True,
         )
 
     @pytest.mark.parametrize(

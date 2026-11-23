@@ -241,9 +241,10 @@ class TestIssueCertificateMutation:
     ):
         """Model validator errors are surfaced without pydantic's "Value error, " prefix."""
         info = _make_info(is_project_leader=True)
+        input_data = _make_input(**overrides)
 
         with pytest.raises(GraphQLError) as exc_info:
-            mutation.issue_certificate(info, _make_input(**overrides))
+            mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "VALIDATION_ERROR"
         assert exc_info.value.message == expected_message

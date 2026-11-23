@@ -106,6 +106,9 @@ class UserQuery:
                 chapter=clean_chapter_key or None,
                 limit=normalized_limit,
                 project=clean_project_key or None,
+                # Filter opted-out users before the limit so they're replaced by the next
+                # eligible contributors instead of shrinking the result.
+                public_members_only=True,
             )
         ]
         if not logins:

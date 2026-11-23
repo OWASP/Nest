@@ -9,14 +9,14 @@ import apps.owasp.models.crp.certificate
 
 def seed_default_scoring_weights(apps, _schema_editor):
     """Seed default ScoringWeight rows."""
-    ScoringWeight = apps.get_model("owasp", "ScoringWeight")
+    scoring_weight_model = apps.get_model("owasp", "ScoringWeight")
     defaults = [
         {"event_type": "pr_merged", "score": 10, "daily_cap": None, "is_active": True},
         {"event_type": "pr_opened", "score": 5, "daily_cap": None, "is_active": True},
         {"event_type": "issue_completed", "score": 3, "daily_cap": None, "is_active": True},
     ]
     for row in defaults:
-        ScoringWeight.objects.update_or_create(event_type=row["event_type"], defaults=row)
+        scoring_weight_model.objects.update_or_create(event_type=row["event_type"], defaults=row)
 
 
 class Migration(migrations.Migration):
