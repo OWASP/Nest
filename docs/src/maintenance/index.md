@@ -98,8 +98,8 @@ and
 [`infrastructure/poetry.toml`](https://github.com/OWASP/Nest/blob/main/infrastructure/poetry.toml).
 Bump the package and refresh the lockfile. If the release is newer than 21 days,
 add the package **name** (not `name@version`) to `min-release-age-exclude` in
-the matching `poetry.toml`. Dependabot covers `backend` and `docs` only;
-infrastructure Poetry updates are manual.
+the matching `poetry.toml`. Dependabot covers `backend`, `docs`, and
+`infrastructure` Poetry updates.
 
 #### Other ecosystems
 
