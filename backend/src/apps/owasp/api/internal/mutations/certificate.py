@@ -7,7 +7,7 @@ import strawberry
 from django.db import transaction
 from django.db.models import Q
 from graphql import GraphQLError
-from pydantic import BaseModel, StringConstraints, ValidationError, model_validator
+from pydantic import BaseModel, Field, StringConstraints, ValidationError, model_validator
 
 from apps.github.models.user import User as GithubUser
 from apps.nest.api.internal.permissions import IsAuthenticated
@@ -19,6 +19,7 @@ from apps.owasp.models.project import Project
 logger = logging.getLogger(__name__)
 
 MAX_MESSAGE_LENGTH = 280
+MAX_RECIPIENTS = 100
 MAX_TITLE_LENGTH = 50
 
 
@@ -26,7 +27,7 @@ class IssueCertificateSchema(BaseModel):
     """Pydantic schema for validating certificate issuance input."""
 
     recipient_login: str | None = None
-    recipient_logins: list[str] | None = None
+    recipient_logins: Annotated[list[str], Field(max_length=MAX_RECIPIENTS)] | None = None
     title: Annotated[
         str, StringConstraints(min_length=1, max_length=MAX_TITLE_LENGTH, strip_whitespace=True)
     ]
@@ -97,7 +98,7 @@ class CertificateMutation:
     def issue_certificate(
         self, info: strawberry.Info, input_data: IssueCertificateInput
     ) -> list[CertificateNode]:
-        """Issue generic certificates to contributors (project or chapter leaders only)."""
+        """Issue generic certificates to contributors of a project or chapter the issuer leads."""
         user = info.context.request.user
         github_user = getattr(user, "github_user", None)
 
@@ -118,8 +119,11 @@ class CertificateMutation:
             )
         except ValidationError as exc:
             first_error = exc.errors()[0]
+            # Errors raised in validators carry the original exception in ctx; using it
+            # avoids pydantic's "Value error, " prefix in the client-facing message.
+            error_context = first_error.get("ctx") or {}
             raise GraphQLError(
-                first_error["msg"],
+                str(error_context["error"]) if "error" in error_context else first_error["msg"],
                 extensions={"code": "VALIDATION_ERROR"},
             ) from exc
 
@@ -127,24 +131,28 @@ class CertificateMutation:
         chapter = None
 
         if validated.project_key:
-            try:
-                project = Project.objects.get(key=f"www-project-{validated.project_key}")
-            except Project.DoesNotExist as err:
+            project = Project.get_by_key(validated.project_key)
+            if project is None:
                 msg = f"Project with key '{input_data.project_key}' not found."
                 raise GraphQLError(
                     msg,
                     extensions={"code": "NOT_FOUND", "field": "projectKey"},
-                ) from err
+                )
+            if not github_user.projects.filter(pk=project.pk).exists():
+                msg = "You can only issue certificates for projects you lead."
+                raise GraphQLError(msg, extensions={"code": "FORBIDDEN"})
 
         if validated.chapter_key:
-            try:
-                chapter = Chapter.objects.get(key=f"www-chapter-{validated.chapter_key}")
-            except Chapter.DoesNotExist as err:
+            chapter = Chapter.get_by_key(validated.chapter_key)
+            if chapter is None:
                 msg = f"Chapter with key '{input_data.chapter_key}' not found."
                 raise GraphQLError(
                     msg,
                     extensions={"code": "NOT_FOUND", "field": "chapterKey"},
-                ) from err
+                )
+            if not github_user.chapters.filter(pk=chapter.pk).exists():
+                msg = "You can only issue certificates for chapters you lead."
+                raise GraphQLError(msg, extensions={"code": "FORBIDDEN"})
 
         logins = validated.recipient_logins or []
         filter_q = Q()

@@ -22,6 +22,7 @@ class LeaderboardSnapshotAdmin(admin.ModelAdmin):
         "chapter",
     )
     list_filter = ("tier", "snapshot_date", "project", "chapter")
+    list_select_related = ("chapter", "github_user", "project")
     search_fields = ("github_user__login", "github_user__name", "project__name", "chapter__name")
     readonly_fields = ("nest_created_at", "nest_updated_at")
 

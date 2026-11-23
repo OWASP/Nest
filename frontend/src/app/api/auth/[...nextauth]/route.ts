@@ -99,7 +99,13 @@ const authOptions: AuthOptions = {
 
         const [isLeader, isChapterLeader, isMentor, isMentee] = await Promise.all([
           checkIfProjectLeader(login),
-          checkIfChapterLeader(login),
+          // A failed lookup leaves the flag unset so the next session refresh retries it
+          // instead of failing sign-in.
+          checkIfChapterLeader(login).catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to fetch chapter leader status during sign-in:', err)
+            return undefined
+          }),
           checkIfMentor(login),
           checkIfMentee(login),
         ])

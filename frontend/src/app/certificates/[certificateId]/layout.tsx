@@ -29,11 +29,8 @@ export async function generateMetadata({
     console.error('Error generating metadata for certificate verification:', error)
   }
 
-  return generateSeoMetadata({
-    canonicalPath: `/certificates/${certificateId}`,
-    description: 'Verify OWASP Contributor Recognition Certificate.',
-    title: 'Certificate Verification',
-  })
+  // Unknown IDs get no canonical URL so arbitrary certificate paths are not indexed.
+  return {}
 }
 
 export default function CertificateVerificationLayout({ children }: { children: React.ReactNode }) {

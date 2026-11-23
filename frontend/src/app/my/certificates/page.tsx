@@ -17,6 +17,7 @@ import {
   FaMap,
 } from 'react-icons/fa6'
 
+import { ErrorDisplay } from 'app/global-error'
 import { GetMyCertificateDocument } from 'types/__generated__/certificateQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -30,7 +31,7 @@ const MyCertificatePage: React.FC = () => {
   const router = useRouter()
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSavingPdf, setIsSavingPdf] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const { data, loading, error } = useQuery(GetMyCertificateDocument, {
@@ -68,6 +69,16 @@ const MyCertificatePage: React.FC = () => {
     return <LoadingSpinner />
   }
 
+  if (error && !data) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading certificates"
+        message="An error occurred while loading your certificates."
+      />
+    )
+  }
+
   const certificates = data?.myCertificates ?? []
 
   if (certificates.length === 0) {
@@ -87,6 +98,12 @@ const MyCertificatePage: React.FC = () => {
     )
   }
 
+  // Track the selection by ID so a refreshed list (e.g. a revoked certificate) never leaves
+  // the selection pointing past the end of the list.
+  const selectedIndex = Math.max(
+    0,
+    certificates.findIndex((cert) => cert.id === selectedId)
+  )
   const certificate = certificates[selectedIndex]
 
   const getCertificateImageDataUrl = async (pixelRatio = 2): Promise<string> => {
@@ -232,8 +249,9 @@ const MyCertificatePage: React.FC = () => {
       startTask: 'CERTIFICATION_NAME',
       name: 'OWASP Foundation Contributor Certificate',
       organizationId: '250673',
-      issueYear: String(issuedDate.getFullYear()),
-      issueMonth: String(issuedDate.getMonth() + 1),
+      // Use UTC to match the date shown on the certificate.
+      issueYear: String(issuedDate.getUTCFullYear()),
+      issueMonth: String(issuedDate.getUTCMonth() + 1),
       certUrl: certificateUrl,
       certId: certificate.id,
     })
@@ -244,8 +262,8 @@ const MyCertificatePage: React.FC = () => {
     )
   }
 
-  const handleSelectCertificate = (index: number) => {
-    setSelectedIndex(index)
+  const handleSelectCertificate = (id: string) => {
+    setSelectedId(id)
     globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -312,7 +330,7 @@ const MyCertificatePage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4">
-            {otherCertificates.map(({ cert, idx }) => {
+            {otherCertificates.map(({ cert }) => {
               const hasCustomTitle = Boolean(cert.title)
               const issuedByProject = Boolean(cert.project?.name)
               const issuedByChapter = Boolean(cert.chapter?.name)
@@ -324,7 +342,7 @@ const MyCertificatePage: React.FC = () => {
                 <button
                   key={cert.id}
                   type="button"
-                  onClick={() => handleSelectCertificate(idx)}
+                  onClick={() => handleSelectCertificate(cert.id)}
                   disabled={isDownloading || isSavingPdf}
                   className="group flex w-72 flex-col rounded-xl bg-white p-5 text-left shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
                 >

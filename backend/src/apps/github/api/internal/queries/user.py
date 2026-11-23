@@ -2,7 +2,7 @@
 
 import strawberry
 import strawberry_django
-from django.db.models import Q, Sum
+from django.db.models import Q
 
 from apps.common.constants import (
     MAX_SEARCH_QUERY_LENGTH,
@@ -91,7 +91,7 @@ class UserQuery:
         chapter_key: str | None = None,
         limit: int = 15,
     ) -> list[UserNode]:
-        """Fetch top contributors for a project or chapter in a single JOIN query."""
+        """Fetch top human contributors for a project or chapter."""
         clean_project_key = (project_key or "").strip().removeprefix("www-project-")
         clean_chapter_key = (chapter_key or "").strip().removeprefix("www-chapter-")
 
@@ -101,27 +101,14 @@ class UserQuery:
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        if clean_project_key:
-            logins = [
-                c["login"]
-                for c in RepositoryContributor.get_top_contributors(
-                    project=clean_project_key,
-                    limit=normalized_limit,
-                )
-            ]
-            users = User.objects.filter(login__in=logins).prefetch_related(USER_BADGES_PREFETCH)
-            users_by_login = {user.login: user for user in users}
-            return [users_by_login[login] for login in logins if login in users_by_login]
-
-        if clean_chapter_key:
-            filter_q = Q(
-                repositorycontributor__repository__key__iexact=f"www-chapter-{clean_chapter_key}"
+        logins = [
+            c["login"]
+            for c in RepositoryContributor.get_top_contributors(
+                chapter=clean_chapter_key or None,
+                limit=normalized_limit,
+                project=clean_project_key or None,
             )
-            return list(
-                User.objects.filter(filter_q)
-                .annotate(total_contributions=Sum("repositorycontributor__contributions_count"))
-                .prefetch_related(USER_BADGES_PREFETCH)
-                .order_by("-total_contributions")[:normalized_limit]
-            )
-
-        return []
+        ]
+        users = User.objects.filter(login__in=logins).prefetch_related(USER_BADGES_PREFETCH)
+        users_by_login = {user.login: user for user in users}
+        return [users_by_login[login] for login in logins if login in users_by_login]

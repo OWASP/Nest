@@ -13,7 +13,7 @@ def seed_default_scoring_weights(apps, _schema_editor):
     defaults = [
         {"event_type": "pr_merged", "score": 10, "daily_cap": None, "is_active": True},
         {"event_type": "pr_opened", "score": 5, "daily_cap": None, "is_active": True},
-        {"event_type": "issue_opened", "score": 3, "daily_cap": None, "is_active": True},
+        {"event_type": "issue_completed", "score": 3, "daily_cap": None, "is_active": True},
     ]
     for row in defaults:
         ScoringWeight.objects.update_or_create(event_type=row["event_type"], defaults=row)
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                         choices=[
                             ("pr_merged", "Pull Request Merged"),
                             ("pr_opened", "Pull Request Opened"),
-                            ("issue_opened", "Issue Opened"),
+                            ("issue_completed", "Issue Completed"),
                         ],
                         help_text="The type of contribution event",
                         max_length=20,
@@ -84,6 +84,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(
             seed_default_scoring_weights,
+            reverse_code=migrations.RunPython.noop,
         ),
         migrations.CreateModel(
             name="ContributionScore",
@@ -165,7 +166,9 @@ class Migration(migrations.Migration):
                 (
                     "project_rank",
                     models.PositiveIntegerField(
+                        blank=True,
                         help_text="Contributor's rank within a specific project",
+                        null=True,
                         validators=[django.core.validators.MinValueValidator(1)],
                         verbose_name="Project Rank",
                     ),
@@ -173,7 +176,9 @@ class Migration(migrations.Migration):
                 (
                     "chapter_rank",
                     models.PositiveIntegerField(
+                        blank=True,
                         help_text="Contributor's rank within a specific chapter",
+                        null=True,
                         validators=[django.core.validators.MinValueValidator(1)],
                         verbose_name="Chapter Rank",
                     ),
@@ -246,7 +251,13 @@ class Migration(migrations.Migration):
                         name="leaderboard_snapshot_rank_idx",
                     ),
                 ],
-                "unique_together": {("github_user", "project", "chapter", "snapshot_date")},
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("github_user", "project", "chapter", "snapshot_date"),
+                        name="unique_leaderboard_snapshot_per_scope",
+                        nulls_distinct=False,
+                    ),
+                ],
             },
         ),
         migrations.AlterModelTable(

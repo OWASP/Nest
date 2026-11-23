@@ -72,7 +72,17 @@ jest.mock('@heroui/react', () => ({
       </button>
     </div>
   ),
-  AutocompleteItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  AutocompleteItem: ({
+    children,
+    textValue,
+  }: {
+    children?: React.ReactNode
+    textValue?: string
+  }) => (
+    <div data-testid="autocomplete-item" data-text-value={textValue}>
+      {children}
+    </div>
+  ),
 }))
 
 jest.mock('next/image', () => ({
@@ -216,6 +226,10 @@ describe('UserSelectorInput', () => {
       await Promise.resolve()
       await Promise.resolve()
     })
+    expect(mockQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ variables: { query: 'none' } })
+    )
+    expect(screen.queryByText('Search')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByTestId('select-login'))
     expect(mockOnChange).toHaveBeenCalledWith(['alice'])
@@ -244,7 +258,7 @@ describe('UserSelectorInput', () => {
     fireEvent.keyDown(input, { key: 'Enter' })
 
     fireEvent.change(input, { target: { value: '@bob' } })
-    fireEvent.keyDown(input, { key: ' ' })
+    fireEvent.keyDown(input, { key: ',' })
     expect(mockOnChange).toHaveBeenCalledWith(['bob'])
 
     mockOnChange.mockClear()
@@ -271,6 +285,78 @@ describe('UserSelectorInput', () => {
     document.body.removeChild(activeOpt)
     fireEvent.keyDown(input, { key: 'Enter' })
     expect(mockOnChange).toHaveBeenCalledWith(['alice', 'charlie'])
+  })
+
+  it('does not commit a recipient on space so multi-word name searches work', async () => {
+    await act(async () => {
+      render(<UserSelectorInput logins={[]} onChange={mockOnChange} projectKey="nest" />)
+      await Promise.resolve()
+    })
+
+    const input = screen.getByTestId('autocomplete-input')
+    fireEvent.change(input, { target: { value: 'John' } })
+    const notPrevented = fireEvent.keyDown(input, { key: ' ' })
+
+    expect(notPrevented).toBe(true)
+    expect(mockOnChange).not.toHaveBeenCalled()
+    expect(input).toHaveValue('John')
+  })
+
+  it('keeps users matched by name visible to the client-side filter', async () => {
+    await act(async () => {
+      render(<UserSelectorInput logins={[]} onChange={mockOnChange} projectKey="nest" />)
+      await Promise.resolve()
+    })
+
+    const input = screen.getByTestId('autocomplete-input')
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'Search' } })
+      jest.advanceTimersByTime(350)
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    const items = screen.getAllByTestId('autocomplete-item')
+    expect(items).toHaveLength(1)
+    expect(items[0]).toHaveAttribute('data-text-value', 'searchuser Search')
+  })
+
+  it('ignores a stale contributor response after the entity changes', async () => {
+    let resolveStale: (v: unknown) => void
+    let resolveCurrent: (v: unknown) => void
+    mockQuery
+      .mockReturnValueOnce(
+        new Promise((r) => {
+          resolveStale = r
+        })
+      )
+      .mockReturnValueOnce(
+        new Promise((r) => {
+          resolveCurrent = r
+        })
+      )
+
+    const { rerender } = render(
+      <UserSelectorInput logins={[]} onChange={mockOnChange} projectKey="nest" />
+    )
+    rerender(<UserSelectorInput logins={[]} onChange={mockOnChange} chapterKey="london" />)
+
+    await act(async () => {
+      resolveCurrent({
+        data: { entityContributors: [{ id: 'id-carol', login: 'carol', name: '', avatarUrl: '' }] },
+      })
+      await Promise.resolve()
+    })
+    await act(async () => {
+      resolveStale({
+        data: { entityContributors: [{ id: 'id-dave', login: 'dave', name: '', avatarUrl: '' }] },
+      })
+      await Promise.resolve()
+    })
+
+    expect(screen.getByRole('button', { name: '@carol' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '@dave' })).not.toBeInTheDocument()
+    expect(screen.getByText('Suggested Contributors (1)')).toBeInTheDocument()
   })
 
   it('handles contributor list interactions and recipient badge removals', async () => {

@@ -145,6 +145,29 @@ describe('ActionButton', () => {
       expect(link).toHaveClass('opacity-50', 'cursor-not-allowed', 'pointer-events-none')
     })
 
+    it('does not run handlers or navigate when a disabled link is activated', () => {
+      const mockOnClick = jest.fn()
+      const mockOnKeyDown = jest.fn()
+      render(
+        <ActionButton
+          url="https://example.com"
+          isDisabled={true}
+          onClick={mockOnClick}
+          onKeyDown={mockOnKeyDown}
+        >
+          Disabled Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link')
+      const notPrevented = fireEvent.click(link)
+      fireEvent.keyDown(link, { key: 'Enter', code: 'Enter' })
+
+      expect(notPrevented).toBe(false)
+      expect(mockOnClick).not.toHaveBeenCalled()
+      expect(mockOnKeyDown).not.toHaveBeenCalled()
+    })
+
     it('triggers onKeyDown handler when key is pressed on link', () => {
       const mockOnKeyDown = jest.fn()
       render(

@@ -2,7 +2,7 @@
 
 import logging
 
-from django.contrib import admin
+from django.contrib import admin, messages
 
 from apps.owasp.exceptions import CertificateIssuanceError
 from apps.owasp.models.crp.contribution_score import ContributionScore
@@ -44,27 +44,43 @@ class ContributionScoreAdmin(admin.ModelAdmin):
         ),
     )
 
+    @admin.action(
+        description="Recalculate selected contributors' scores",
+        permissions=["change"],
+    )
     def recalculate(self, request, queryset):
         """Admin action to recalculate scores for selected users."""
         calculator = ContributionScoreCalculator()
         updated_count = 0
+        certificate_failed_count = 0
         failed_count = 0
 
-        for score in queryset:
+        for score in queryset.select_related("github_user"):
+            login = score.github_user.login
             try:
                 calculator.recalculate_user(score.github_user)
+            except CertificateIssuanceError:
+                # The score is saved before certificate issuance is attempted.
+                logger.exception("Failed to issue certificate for user %s", login)
                 updated_count += 1
-            except (CertificateIssuanceError, TypeError, ValueError):
-                logger.exception(
-                    "Failed to recalculate score for user %s",
-                    score.github_user.login,
-                )
+                certificate_failed_count += 1
+            except Exception:
+                logger.exception("Failed to recalculate score for user %s", login)
                 failed_count += 1
+            else:
+                updated_count += 1
+
+        message = (
+            f"Recalculated scores for {updated_count} contributor(s). "
+            f"Failed for {failed_count} contributor(s)."
+        )
+        if certificate_failed_count:
+            message += (
+                f" Certificate issuance failed for {certificate_failed_count} contributor(s)."
+            )
 
         self.message_user(
             request,
-            f"Recalculated scores for {updated_count} contributor(s). "
-            f"Failed for {failed_count} contributor(s).",
+            message,
+            level=messages.WARNING if failed_count or certificate_failed_count else messages.INFO,
         )
-
-    recalculate.short_description = "Recalculate selected contributors' scores"

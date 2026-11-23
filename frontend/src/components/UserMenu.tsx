@@ -29,8 +29,9 @@ export default function UserMenu({
   // Anyone involved in mentorship — as a leader, mentor, or mentee — gets the entry point.
   const canAccessMentorship = isProjectLeader || isMentor || isMentee
 
+  // Refresh on every open so certificates issued or revoked during the session show up.
   const [getMyCertificate, { data: certificateData }] = useLazyQuery(GetMyCertificateDocument, {
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
   })
   const hasCertificate =
     !!certificateData?.myCertificates && certificateData.myCertificates.length > 0

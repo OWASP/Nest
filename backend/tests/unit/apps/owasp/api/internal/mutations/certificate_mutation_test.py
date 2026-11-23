@@ -1,15 +1,19 @@
 """Tests for OWASP certificate GraphQL mutations."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
+from django.db.models import Q
 from graphql import GraphQLError
 from pydantic import ValidationError
 
 from apps.owasp.api.internal.mutations.certificate import (
+    MAX_RECIPIENTS,
     CertificateMutation,
     IssueCertificateSchema,
 )
+
+MUTATION_PATH = "apps.owasp.api.internal.mutations.certificate"
 
 
 @pytest.fixture(autouse=True)
@@ -27,8 +31,14 @@ def mutation():
     return CertificateMutation()
 
 
-def _make_info(*, is_project_leader=False, has_chapters=False):
-    """Return a mock strawberry Info with a configured user."""
+def _make_info(
+    *, is_project_leader=False, has_chapters=False, leads_project=True, leads_chapter=True
+):
+    """Return a mock strawberry Info with a configured user.
+
+    ``leads_project`` and ``leads_chapter`` control whether the issuer leads the specific
+    project or chapter targeted by the mutation.
+    """
     info = MagicMock()
     user = MagicMock()
     info.context.request.user = user
@@ -36,7 +46,9 @@ def _make_info(*, is_project_leader=False, has_chapters=False):
     gh.is_project_leader = is_project_leader
     chapters_qs = MagicMock()
     chapters_qs.exists.return_value = has_chapters
+    chapters_qs.filter.return_value.exists.return_value = leads_chapter
     gh.chapters = chapters_qs
+    gh.projects.filter.return_value.exists.return_value = leads_project
     user.github_user = gh
     return info
 
@@ -146,6 +158,31 @@ class TestIssueCertificateSchema:
                 title="Award",
             )
 
+    def test_max_recipients_accepted(self):
+        """Exactly MAX_RECIPIENTS logins must be accepted."""
+        logins = [f"user{i}" for i in range(MAX_RECIPIENTS)]
+
+        schema = IssueCertificateSchema(
+            recipient_logins=logins,
+            title="Award",
+            project_key="juice-shop",
+        )
+
+        assert schema.recipient_logins == logins
+
+    def test_too_many_recipients_raises_validation_error(self):
+        """More than MAX_RECIPIENTS logins must raise ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            IssueCertificateSchema(
+                recipient_logins=[f"user{i}" for i in range(MAX_RECIPIENTS + 1)],
+                title="Award",
+                project_key="juice-shop",
+            )
+
+        error = exc_info.value.errors()[0]
+        assert error["type"] == "too_long"
+        assert error["loc"] == ("recipient_logins",)
+
 
 class TestIssueCertificateMutation:
     """Tests for CertificateMutation.issue_certificate."""
@@ -180,12 +217,60 @@ class TestIssueCertificateMutation:
             mutation.issue_certificate(info, bad_input)
 
         assert exc_info.value.extensions["code"] == "VALIDATION_ERROR"
+        assert exc_info.value.message == "String should have at least 1 character"
 
-    @patch("apps.owasp.api.internal.mutations.certificate.Project")
+    @pytest.mark.parametrize(
+        ("overrides", "expected_message"),
+        [
+            (
+                {"project_key": None, "chapter_key": None},
+                "Either project or chapter must be provided.",
+            ),
+            (
+                {"project_key": "juice-shop", "chapter_key": "london"},
+                "Provide either project or chapter, not both.",
+            ),
+            (
+                {"recipient_login": "  ", "recipient_logins": None},
+                "Recipient login cannot be empty.",
+            ),
+        ],
+    )
+    def test_model_validator_error_message_has_no_value_error_prefix(
+        self, mutation, overrides, expected_message
+    ):
+        """Model validator errors are surfaced without pydantic's "Value error, " prefix."""
+        info = _make_info(is_project_leader=True)
+
+        with pytest.raises(GraphQLError) as exc_info:
+            mutation.issue_certificate(info, _make_input(**overrides))
+
+        assert exc_info.value.extensions["code"] == "VALIDATION_ERROR"
+        assert exc_info.value.message == expected_message
+        assert not exc_info.value.message.startswith("Value error, ")
+
+    @patch(f"{MUTATION_PATH}.Certificate")
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    def test_too_many_recipients_raises_validation_error(self, mock_gh_user, mock_cert, mutation):
+        """More than MAX_RECIPIENTS logins must be rejected before any lookup."""
+        info = _make_info(is_project_leader=True)
+        input_data = _make_input(
+            recipient_login=None,
+            recipient_logins=[f"user{i}" for i in range(MAX_RECIPIENTS + 1)],
+        )
+
+        with pytest.raises(GraphQLError) as exc_info:
+            mutation.issue_certificate(info, input_data)
+
+        assert exc_info.value.extensions["code"] == "VALIDATION_ERROR"
+        assert f"at most {MAX_RECIPIENTS} items" in exc_info.value.message
+        mock_gh_user.objects.filter.assert_not_called()
+        mock_cert.objects.create.assert_not_called()
+
+    @patch(f"{MUTATION_PATH}.Project")
     def test_project_not_found_raises_graphql_not_found(self, mock_project, mutation):
         """A missing project should raise GraphQLError with NOT_FOUND."""
-        mock_project.DoesNotExist = Exception
-        mock_project.objects.get.side_effect = mock_project.DoesNotExist("not found")
+        mock_project.get_by_key.return_value = None
 
         info = _make_info(is_project_leader=True)
         input_data = _make_input(project_key="www-project-missing", chapter_key=None)
@@ -193,14 +278,15 @@ class TestIssueCertificateMutation:
         with pytest.raises(GraphQLError) as exc_info:
             mutation.issue_certificate(info, input_data)
 
+        mock_project.get_by_key.assert_called_once_with("missing")
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
         assert exc_info.value.extensions["field"] == "projectKey"
+        assert exc_info.value.message == "Project with key 'www-project-missing' not found."
 
-    @patch("apps.owasp.api.internal.mutations.certificate.Chapter")
+    @patch(f"{MUTATION_PATH}.Chapter")
     def test_chapter_not_found_raises_graphql_not_found(self, mock_chapter, mutation):
         """A missing chapter should raise GraphQLError with NOT_FOUND."""
-        mock_chapter.DoesNotExist = Exception
-        mock_chapter.objects.get.side_effect = mock_chapter.DoesNotExist("not found")
+        mock_chapter.get_by_key.return_value = None
 
         info = _make_info(is_project_leader=True)
         input_data = _make_input(project_key=None, chapter_key="www-chapter-missing")
@@ -208,14 +294,62 @@ class TestIssueCertificateMutation:
         with pytest.raises(GraphQLError) as exc_info:
             mutation.issue_certificate(info, input_data)
 
+        mock_chapter.get_by_key.assert_called_once_with("missing")
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
         assert exc_info.value.extensions["field"] == "chapterKey"
+        assert exc_info.value.message == "Chapter with key 'www-chapter-missing' not found."
 
-    @patch("apps.owasp.api.internal.mutations.certificate.GithubUser")
-    @patch("apps.owasp.api.internal.mutations.certificate.Project")
+    @patch(f"{MUTATION_PATH}.Certificate")
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    @patch(f"{MUTATION_PATH}.Project")
+    def test_project_not_led_by_issuer_raises_forbidden(
+        self, mock_project, mock_gh_user, mock_cert, mutation
+    ):
+        """A project leader cannot issue certificates for a project they do not lead."""
+        mock_proj_obj = MagicMock()
+        mock_project.get_by_key.return_value = mock_proj_obj
+
+        info = _make_info(is_project_leader=True, leads_project=False)
+        input_data = _make_input(project_key="www-project-other", chapter_key=None)
+
+        with pytest.raises(GraphQLError) as exc_info:
+            mutation.issue_certificate(info, input_data)
+
+        github_user = info.context.request.user.github_user
+        github_user.projects.filter.assert_called_once_with(pk=mock_proj_obj.pk)
+        assert exc_info.value.extensions["code"] == "FORBIDDEN"
+        assert exc_info.value.message == "You can only issue certificates for projects you lead."
+        mock_gh_user.objects.filter.assert_not_called()
+        mock_cert.objects.create.assert_not_called()
+
+    @patch(f"{MUTATION_PATH}.Certificate")
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    @patch(f"{MUTATION_PATH}.Chapter")
+    def test_chapter_not_led_by_issuer_raises_forbidden(
+        self, mock_chapter, mock_gh_user, mock_cert, mutation
+    ):
+        """A chapter leader cannot issue certificates for a chapter they do not lead."""
+        mock_chap_obj = MagicMock()
+        mock_chapter.get_by_key.return_value = mock_chap_obj
+
+        info = _make_info(has_chapters=True, leads_chapter=False)
+        input_data = _make_input(project_key=None, chapter_key="www-chapter-other")
+
+        with pytest.raises(GraphQLError) as exc_info:
+            mutation.issue_certificate(info, input_data)
+
+        github_user = info.context.request.user.github_user
+        github_user.chapters.filter.assert_called_once_with(pk=mock_chap_obj.pk)
+        assert exc_info.value.extensions["code"] == "FORBIDDEN"
+        assert exc_info.value.message == "You can only issue certificates for chapters you lead."
+        mock_gh_user.objects.filter.assert_not_called()
+        mock_cert.objects.create.assert_not_called()
+
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    @patch(f"{MUTATION_PATH}.Project")
     def test_single_missing_recipient_raises_not_found(self, mock_project, mock_gh_user, mutation):
         """When a recipient login is not found, raise NOT_FOUND."""
-        mock_project.objects.get.return_value = MagicMock()
+        mock_project.get_by_key.return_value = MagicMock()
         mock_gh_user.objects.filter.return_value = []
 
         info = _make_info(is_project_leader=True)
@@ -226,15 +360,15 @@ class TestIssueCertificateMutation:
 
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
         assert exc_info.value.extensions["field"] == "recipientLogins"
-        assert "ghost" in exc_info.value.message
+        assert exc_info.value.message == "GitHub user 'ghost' not found."
 
-    @patch("apps.owasp.api.internal.mutations.certificate.GithubUser")
-    @patch("apps.owasp.api.internal.mutations.certificate.Project")
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    @patch(f"{MUTATION_PATH}.Project")
     def test_partial_recipients_missing_raises_not_found(
         self, mock_project, mock_gh_user, mutation
     ):
         """When only some recipients are missing the NOT_FOUND error still fires."""
-        mock_project.objects.get.return_value = MagicMock()
+        mock_project.get_by_key.return_value = MagicMock()
 
         found_user = MagicMock()
         found_user.login = "alice"
@@ -243,7 +377,7 @@ class TestIssueCertificateMutation:
         info = _make_info(is_project_leader=True)
         input_data = _make_input(
             recipient_login=None,
-            recipient_logins=["alice", "ghost"],
+            recipient_logins=["alice", "ghost", "phantom"],
             project_key="www-project-juice-shop",
         )
 
@@ -251,17 +385,17 @@ class TestIssueCertificateMutation:
             mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
-        assert "ghost" in exc_info.value.message
+        assert exc_info.value.message == "GitHub users not found: ghost, phantom."
 
-    @patch("apps.owasp.api.internal.mutations.certificate.Certificate")
-    @patch("apps.owasp.api.internal.mutations.certificate.GithubUser")
-    @patch("apps.owasp.api.internal.mutations.certificate.Project")
+    @patch(f"{MUTATION_PATH}.Certificate")
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    @patch(f"{MUTATION_PATH}.Project")
     def test_successful_certificate_issuance_with_project(
         self, mock_project, mock_gh_user, mock_cert, mutation
     ):
         """Happy path: issue a certificate linked to a project."""
         mock_proj_obj = MagicMock()
-        mock_project.objects.get.return_value = mock_proj_obj
+        mock_project.get_by_key.return_value = mock_proj_obj
 
         recipient = MagicMock()
         recipient.login = "alice"
@@ -282,25 +416,28 @@ class TestIssueCertificateMutation:
             ),
         )
 
+        github_user = info.context.request.user.github_user
+        mock_project.get_by_key.assert_called_once_with("juice-shop")
+        github_user.projects.filter.assert_called_once_with(pk=mock_proj_obj.pk)
         assert result == [cert]
         mock_cert.objects.create.assert_called_once_with(
             recipient=recipient,
-            issuer=info.context.request.user.github_user,
+            issuer=github_user,
             title="Contributor Award",
             message="Thank you!",
             project=mock_proj_obj,
             chapter=None,
         )
 
-    @patch("apps.owasp.api.internal.mutations.certificate.Certificate")
-    @patch("apps.owasp.api.internal.mutations.certificate.GithubUser")
-    @patch("apps.owasp.api.internal.mutations.certificate.Chapter")
+    @patch(f"{MUTATION_PATH}.Certificate")
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    @patch(f"{MUTATION_PATH}.Chapter")
     def test_successful_certificate_issuance_with_chapter(
         self, mock_chapter, mock_gh_user, mock_cert, mutation
     ):
         """Happy path: issue a certificate linked to a chapter."""
         mock_chap_obj = MagicMock()
-        mock_chapter.objects.get.return_value = mock_chap_obj
+        mock_chapter.get_by_key.return_value = mock_chap_obj
 
         recipient = MagicMock()
         recipient.login = "bob"
@@ -321,12 +458,72 @@ class TestIssueCertificateMutation:
             ),
         )
 
+        github_user = info.context.request.user.github_user
+        mock_chapter.get_by_key.assert_called_once_with("london")
+        github_user.chapters.filter.assert_called_once_with(pk=mock_chap_obj.pk)
         assert result == [cert]
         mock_cert.objects.create.assert_called_once_with(
             recipient=recipient,
-            issuer=info.context.request.user.github_user,
+            issuer=github_user,
             title="Chapter Leader Award",
             message="Thank you!",
             project=None,
             chapter=mock_chap_obj,
+        )
+
+    @patch(f"{MUTATION_PATH}.Certificate")
+    @patch(f"{MUTATION_PATH}.GithubUser")
+    @patch(f"{MUTATION_PATH}.Project")
+    def test_successful_certificate_issuance_to_multiple_recipients(
+        self, mock_project, mock_gh_user, mock_cert, mutation
+    ):
+        """Each resolved recipient gets exactly one certificate, in input order."""
+        mock_proj_obj = MagicMock()
+        mock_project.get_by_key.return_value = mock_proj_obj
+
+        alice = MagicMock()
+        alice.login = "alice"
+        bob = MagicMock()
+        bob.login = "bob"
+        carol = MagicMock()
+        carol.login = "Carol"
+        # The lookup returns users in database order, not input order.
+        mock_gh_user.objects.filter.return_value = [carol, alice, bob]
+
+        cert_alice = MagicMock()
+        cert_bob = MagicMock()
+        cert_carol = MagicMock()
+        mock_cert.objects.create.side_effect = [cert_bob, cert_alice, cert_carol]
+
+        info = _make_info(is_project_leader=True)
+        result = mutation.issue_certificate(
+            info,
+            _make_input(
+                recipient_login=None,
+                recipient_logins=["Bob", "alice", "bob", "carol"],
+                title="Contributor Award",
+                message="Thank you!",
+                project_key="www-project-juice-shop",
+                chapter_key=None,
+            ),
+        )
+
+        github_user = info.context.request.user.github_user
+        mock_gh_user.objects.filter.assert_called_once_with(
+            Q(login__iexact="Bob") | Q(login__iexact="alice") | Q(login__iexact="carol")
+        )
+        assert result == [cert_bob, cert_alice, cert_carol]
+        assert mock_cert.objects.create.call_count == 3
+        mock_cert.objects.create.assert_has_calls(
+            [
+                call(
+                    recipient=recipient,
+                    issuer=github_user,
+                    title="Contributor Award",
+                    message="Thank you!",
+                    project=mock_proj_obj,
+                    chapter=None,
+                )
+                for recipient in (bob, alice, carol)
+            ]
         )

@@ -117,7 +117,8 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === ',' || e.key === ' ') {
+    // Space is not a separator: the search matches display names, which can contain spaces.
+    if (e.key === ',') {
       if (inputValue.trim()) {
         e.preventDefault()
         addUser(inputValue)
@@ -182,7 +183,12 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
         }}
       >
         {displayItems.map((user) => (
-          <AutocompleteItem key={user.login} textValue={user.login}>
+          // The default client-side filter matches textValue, so include the name to keep
+          // users that the backend matched by name.
+          <AutocompleteItem
+            key={user.login}
+            textValue={user.name ? `${user.login} ${user.name}` : user.login}
+          >
             <div className="flex items-center gap-2.5 py-0.5">
               {user.avatarUrl ? (
                 <Image

@@ -88,7 +88,7 @@ const Recipient: React.FC<RecipientProps> = ({ name, login, avatarUrl }) => {
           <Image src={avatarUrl} alt={displayName} fill sizes="96px" className="object-cover" />
         </div>
         <div className="flex h-24 flex-col justify-center text-left">
-          <span className="block font-sans text-[32px] leading-none font-bold text-[#0B2545]">
+          <span className="block max-w-[520px] font-sans text-[32px] leading-none font-bold break-words text-[#0B2545]">
             {displayName}
           </span>
           <a

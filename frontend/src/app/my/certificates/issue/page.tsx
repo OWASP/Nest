@@ -40,6 +40,9 @@ const INITIAL_FORM: FormData = {
   chapterKey: '',
 }
 
+// The mutation tags unknown recipients, projects, and chapters with NOT_FOUND and a field.
+const FIELD_ERROR_CODES: ReadonlySet<string> = new Set(['VALIDATION_ERROR', 'NOT_FOUND'])
+
 const IssueCertificatePage: React.FC = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -51,6 +54,9 @@ const IssueCertificatePage: React.FC = () => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
   const [showBanner, setShowBanner] = useState(true)
+  // Remounts the selector inputs after a successful submit so unmatched text they hold
+  // internally is cleared along with the form values.
+  const [formResetKey, setFormResetKey] = useState(0)
 
   const [issueCertificate, { loading }] = useMutation(IssueCertificateDocument)
 
@@ -160,8 +166,9 @@ const IssueCertificatePage: React.FC = () => {
       setFormData(INITIAL_FORM)
       setTouched({})
       setBackendErrors({})
+      setFormResetKey((key) => key + 1)
     } catch (err) {
-      const { validationErrors, hasValidationErrors } = extractGraphQLErrors(err)
+      const { validationErrors, hasValidationErrors } = extractGraphQLErrors(err, FIELD_ERROR_CODES)
       if (hasValidationErrors) {
         setBackendErrors(validationErrors)
       } else {
@@ -200,11 +207,11 @@ const IssueCertificatePage: React.FC = () => {
           <div className="flex items-start gap-2.5">
             <FaCircleInfo className="mt-0.5 h-4 w-4 shrink-0 text-[#1D7BD7]" />
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              At least one of{' '}
+              Exactly one of{' '}
               <span className="font-semibold text-gray-800 dark:text-gray-100">Project Name</span>{' '}
               or{' '}
               <span className="font-semibold text-gray-800 dark:text-gray-100">Chapter Name</span>{' '}
-              should be provided to associate this certificate with an OWASP entity.
+              must be provided to associate this certificate with an OWASP entity.
             </p>
           </div>
           <button
@@ -250,42 +257,50 @@ const IssueCertificatePage: React.FC = () => {
       <section className="flex flex-col gap-3 text-gray-600 dark:text-gray-300">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <EntitySelectorInput
+            key={`project-${formResetKey}`}
             entityType="project"
             value={formData.projectKey}
             onChange={(key) => {
               if (key === formData.projectKey) return
               setFormData((prev) => ({ ...prev, projectKey: key, recipientLogins: [] }))
               setTouched((prev) => ({ ...prev, recipientLogins: false }))
-              setBackendErrors(({ recipientLogins: _, recipientLogin: __, ...rest }) => rest)
+              setBackendErrors(
+                ({ projectKey: _, recipientLogins: __, recipientLogin: ___, ...rest }) => rest
+              )
             }}
             error={
               formData.projectKey && formData.chapterKey
                 ? 'Only one of Project or Chapter can be selected.'
-                : undefined
+                : backendErrors.projectKey
             }
           />
           <EntitySelectorInput
+            key={`chapter-${formResetKey}`}
             entityType="chapter"
             value={formData.chapterKey}
             onChange={(key) => {
               if (key === formData.chapterKey) return
               setFormData((prev) => ({ ...prev, chapterKey: key, recipientLogins: [] }))
               setTouched((prev) => ({ ...prev, recipientLogins: false }))
-              setBackendErrors(({ recipientLogins: _, recipientLogin: __, ...rest }) => rest)
+              setBackendErrors(
+                ({ chapterKey: _, recipientLogins: __, recipientLogin: ___, ...rest }) => rest
+              )
             }}
             error={
               formData.projectKey && formData.chapterKey
                 ? 'Only one of Project or Chapter can be selected.'
-                : undefined
+                : backendErrors.chapterKey
             }
           />
         </div>
       </section>
 
       <UserSelectorInput
+        key={`recipients-${formResetKey}`}
         logins={formData.recipientLogins}
         onChange={(logins) => {
           setFormData((prev) => ({ ...prev, recipientLogins: logins }))
+          setBackendErrors(({ recipientLogins: _, recipientLogin: __, ...rest }) => rest)
           touch('recipientLogins')
         }}
         projectKey={formData.projectKey}

@@ -1038,5 +1038,72 @@ describe('UserMenu Component', () => {
 
       expect(screen.queryByText('My Certificates')).not.toBeInTheDocument()
     })
+
+    it('refreshes certificates from the network on each menu open', () => {
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      expect(useLazyQuery).toHaveBeenCalledWith(expect.anything(), {
+        fetchPolicy: 'cache-and-network',
+      })
+    })
+  })
+
+  describe('Issue Certificates link', () => {
+    const openMenuFor = async (user: Partial<NonNullable<ExtendedSession['user']>>) => {
+      mockUseSession.mockReturnValue({
+        session: { ...mockSession, user: { ...mockSession.user, ...user } },
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument()
+      })
+      return avatarButton
+    }
+
+    it('renders the link for a chapter leader', async () => {
+      await openMenuFor({ isLeader: false, isChapterLeader: true })
+
+      expect(screen.getByText('Issue Certificates')).toHaveAttribute(
+        'href',
+        '/my/certificates/issue'
+      )
+    })
+
+    it('renders the link for a project leader', async () => {
+      await openMenuFor({ isLeader: true, isChapterLeader: false })
+
+      expect(screen.getByText('Issue Certificates')).toHaveAttribute(
+        'href',
+        '/my/certificates/issue'
+      )
+    })
+
+    it('does not render the link for a member who leads nothing', async () => {
+      await openMenuFor({ isLeader: false, isChapterLeader: false })
+
+      expect(screen.queryByText('Issue Certificates')).not.toBeInTheDocument()
+    })
+
+    it('closes the dropdown when the link is clicked', async () => {
+      const avatarButton = await openMenuFor({ isLeader: false, isChapterLeader: true })
+
+      fireEvent.click(screen.getByText('Issue Certificates'))
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
   })
 })

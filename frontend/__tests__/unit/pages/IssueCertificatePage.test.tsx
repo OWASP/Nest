@@ -34,16 +34,21 @@ jest.mock('components/EntitySelectorInput', () => ({
     entityType,
     value,
     onChange,
+    error,
   }: {
     entityType: string
     value: string
     onChange: (v: string) => void
+    error?: string
   }) => (
-    <input
-      data-testid={`entity-input-${entityType}`}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
+    <>
+      <input
+        data-testid={`entity-input-${entityType}`}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {error && <span data-testid={`entity-error-${entityType}`}>{error}</span>}
+    </>
   ),
 }))
 jest.mock('components/UserSelectorInput', () => ({
@@ -86,10 +91,61 @@ describe('IssueCertificatePage', () => {
     rerender(<IssueCertificatePage />)
 
     expect(screen.getByRole('button', { name: 'Dismiss notice' })).toBeInTheDocument()
-    expect(screen.getByText(/At least one of/)).toBeInTheDocument()
+    expect(screen.getByText(/Exactly one of/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss notice' }))
     expect(screen.queryByRole('button', { name: 'Dismiss notice' })).not.toBeInTheDocument()
-    expect(screen.queryByText(/At least one of/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Exactly one of/)).not.toBeInTheDocument()
+  })
+
+  it('renders the form for a chapter leader who is not a project leader', () => {
+    mockUseSession.mockReturnValue({
+      data: { user: { isLeader: false, isChapterLeader: true } },
+      status: 'authenticated',
+    })
+
+    render(<IssueCertificatePage />)
+
+    expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Issue Certificates' })).toBeInTheDocument()
+  })
+
+  it('denies access to a user who leads neither a project nor a chapter', () => {
+    mockUseSession.mockReturnValue({
+      data: { user: { isLeader: false, isChapterLeader: false } },
+      status: 'authenticated',
+    })
+
+    render(<IssueCertificatePage />)
+
+    expect(screen.getByTestId('access-denied')).toBeInTheDocument()
+  })
+
+  it('shows field-tagged NOT_FOUND errors inline on the matching input', async () => {
+    mockIssueCertificate.mockRejectedValueOnce(new Error('Project not found'))
+    ;(extractGraphQLErrors as jest.Mock).mockReturnValueOnce({
+      validationErrors: { projectKey: "Project with key 'nest' not found." },
+      hasValidationErrors: true,
+    })
+
+    render(<IssueCertificatePage />)
+
+    fireEvent.change(screen.getByLabelText(/Certificate Title/), { target: { value: 'Title' } })
+    fireEvent.change(screen.getByTestId('entity-input-project'), { target: { value: 'nest' } })
+    fireEvent.click(screen.getByTestId('add-user-btn'))
+    fireEvent.click(screen.getByRole('button', { name: 'Issue Certificates' }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('entity-error-project')).toHaveTextContent(
+        "Project with key 'nest' not found."
+      )
+    })
+    const fieldErrorCodes = (extractGraphQLErrors as jest.Mock).mock.calls[0][1] as Set<string>
+    expect(fieldErrorCodes.has('NOT_FOUND')).toBe(true)
+    expect(fieldErrorCodes.has('VALIDATION_ERROR')).toBe(true)
+    expect(addToast).not.toHaveBeenCalled()
+
+    fireEvent.change(screen.getByTestId('entity-input-project'), { target: { value: 'other' } })
+    expect(screen.queryByTestId('entity-error-project')).not.toBeInTheDocument()
   })
 
   it('handles form validation, GraphQL errors, submission rejections, and successful issuance', async () => {
@@ -208,10 +264,15 @@ describe('IssueCertificatePage', () => {
       })
     })
 
+    // A successful submit remounts the selector inputs to clear their internal text.
+    await waitFor(() => expect(projectInput).not.toBeInTheDocument())
+    const newProjectInput = screen.getByTestId('entity-input-project')
+    expect(newProjectInput).toHaveValue('')
+
     fireEvent.change(titleInput, { target: { value: 'Chapter Title' } })
-    fireEvent.change(projectInput, { target: { value: '' } })
-    fireEvent.change(chapterInput, { target: { value: 'london' } })
-    fireEvent.click(addUserBtn)
+    fireEvent.change(newProjectInput, { target: { value: '' } })
+    fireEvent.change(screen.getByTestId('entity-input-chapter'), { target: { value: 'london' } })
+    fireEvent.click(screen.getByTestId('add-user-btn'))
 
     fireEvent.click(submitBtn)
     await waitFor(() => {

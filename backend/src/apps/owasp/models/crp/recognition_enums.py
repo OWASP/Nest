@@ -8,7 +8,7 @@ class EventTypeChoices(models.TextChoices):
 
     PR_MERGED = "pr_merged", "Pull Request Merged"
     PR_OPENED = "pr_opened", "Pull Request Opened"
-    ISSUE_OPENED = "issue_opened", "Issue Opened"
+    ISSUE_COMPLETED = "issue_completed", "Issue Completed"
 
 
 class TierChoices(models.TextChoices):

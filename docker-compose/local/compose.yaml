@@ -127,6 +127,5 @@ volumes:
   backend-venv:
   cache-data:
   db-data:
-  docs-venv:
   frontend-next:
   frontend-node-modules:

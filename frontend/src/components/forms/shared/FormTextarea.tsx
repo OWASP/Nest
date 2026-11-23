@@ -33,6 +33,8 @@ export const FormTextarea = ({
   const isNearLimit = maxLength !== undefined && charCount >= maxLength - 20
   const isAtLimit = maxLength !== undefined && charCount >= maxLength
   const hasError = touched && !!error
+  const showCounter = showCharCount && maxLength !== undefined
+  const counterId = `${id}-char-count`
   let counterColorClass = 'text-gray-400 dark:text-gray-500'
   if (isAtLimit) counterColorClass = 'text-red-500'
   else if (isNearLimit) counterColorClass = 'text-amber-500'
@@ -51,12 +53,17 @@ export const FormTextarea = ({
           rows={rows}
           required={required}
           maxLength={maxLength}
+          aria-describedby={showCounter ? counterId : undefined}
           className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
             hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
         />
-        {showCharCount && maxLength !== undefined && (
-          <p className={`text-right text-xs font-medium transition-colors ${counterColorClass}`}>
+        {showCounter && (
+          <p
+            id={counterId}
+            aria-live="polite"
+            className={`text-right text-xs font-medium transition-colors ${counterColorClass}`}
+          >
             {charCount}/{maxLength} characters
             {isAtLimit && <span className="ml-1 font-semibold">- limit reached</span>}
           </p>

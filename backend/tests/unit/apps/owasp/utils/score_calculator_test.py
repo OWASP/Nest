@@ -1,12 +1,12 @@
-from datetime import date
-from unittest.mock import MagicMock, patch
+from datetime import UTC, date, datetime
+from unittest.mock import ANY, MagicMock, call, patch
 
 import pytest
 
 from apps.github.models.user import User
 from apps.owasp.exceptions import CertificateIssuanceError
 from apps.owasp.models.crp.contribution_score import ContributionScore
-from apps.owasp.models.crp.recognition_enums import TierChoices
+from apps.owasp.models.crp.recognition_enums import EventTypeChoices, TierChoices
 from apps.owasp.utils.score_calculator import ContributionScoreCalculator
 
 CALCULATOR_PATH = "apps.owasp.utils.score_calculator"
@@ -124,11 +124,16 @@ class TestContributionScoreCalculator:
             repository__organization__is_owasp_related_organization=True,
         )
 
+        mock_qs.filter.assert_not_called()
+
         # With date range
         start = date(2026, 1, 1)
         end = date(2026, 2, 1)
         calc.count_merged_pull_requests(user, start_date=start, end_date=end)
-        assert mock_qs.filter.call_count == 2
+        assert mock_qs.filter.call_args_list == [
+            call(merged_at__date__gte=start),
+            call(merged_at__date__lte=end),
+        ]
 
     @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={})
     @patch(f"{CALCULATOR_PATH}.PullRequest")
@@ -145,12 +150,21 @@ class TestContributionScoreCalculator:
         # Without date range
         count = calc.count_opened_pull_requests(user)
         assert count == 3
+        mock_pr.objects.filter.assert_called_once_with(
+            author=user,
+            repository__is_fork=False,
+            repository__organization__is_owasp_related_organization=True,
+        )
+        mock_qs.filter.assert_not_called()
 
         # With date range
         start = date(2026, 1, 1)
         end = date(2026, 2, 1)
         calc.count_opened_pull_requests(user, start_date=start, end_date=end)
-        assert mock_qs.filter.call_count == 2
+        assert mock_qs.filter.call_args_list == [
+            call(created_at__date__gte=start),
+            call(created_at__date__lte=end),
+        ]
 
     @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={})
     @patch(f"{CALCULATOR_PATH}.Issue")
@@ -167,12 +181,52 @@ class TestContributionScoreCalculator:
         # Without date range
         count = calc.count_completed_issues(user)
         assert count == 4
+        mock_issue.objects.filter.assert_called_once_with(
+            author=user,
+            state_reason=mock_issue.StateReason.COMPLETED,
+            repository__is_fork=False,
+            repository__organization__is_owasp_related_organization=True,
+        )
+        mock_qs.filter.assert_not_called()
 
         # With date range
         start = date(2026, 1, 1)
         end = date(2026, 2, 1)
         calc.count_completed_issues(user, start_date=start, end_date=end)
-        assert mock_qs.filter.call_count == 2
+        assert mock_qs.filter.call_args_list == [
+            call(created_at__date__gte=start),
+            call(created_at__date__lte=end),
+        ]
+
+    @pytest.mark.parametrize(
+        ("method_name", "model_name", "date_field"),
+        [
+            ("count_merged_pull_requests", "PullRequest", "merged_at"),
+            ("count_opened_pull_requests", "PullRequest", "created_at"),
+            ("count_completed_issues", "Issue", "created_at"),
+        ],
+    )
+    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={})
+    def test_counters_apply_single_date_bound(
+        self, mock_load, method_name, model_name, date_field
+    ):
+        """Test each counter applies only the date bound that was supplied."""
+        user = User(login="test_user")
+        start = date(2026, 3, 1)
+        end = date(2026, 4, 1)
+
+        with patch(f"{CALCULATOR_PATH}.{model_name}") as mock_model:
+            mock_qs = MagicMock()
+            mock_model.objects.filter.return_value = mock_qs
+            mock_qs.filter.return_value = mock_qs
+
+            calc = ContributionScoreCalculator()
+            getattr(calc, method_name)(user, start_date=start)
+            mock_qs.filter.assert_called_once_with(**{f"{date_field}__date__gte": start})
+
+            mock_qs.filter.reset_mock()
+            getattr(calc, method_name)(user, end_date=end)
+            mock_qs.filter.assert_called_once_with(**{f"{date_field}__date__lte": end})
 
     @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={})
     @patch.object(ContributionScoreCalculator, "count_merged_pull_requests", return_value=2)
@@ -196,6 +250,20 @@ class TestContributionScoreCalculator:
         mock_calc_score.assert_called_once_with(
             {"pr_merged": 2, "pr_opened": 1, "issue_completed": 3}
         )
+
+    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={})
+    @patch.object(ContributionScoreCalculator, "count_merged_pull_requests", return_value=0)
+    @patch.object(ContributionScoreCalculator, "count_opened_pull_requests", return_value=0)
+    @patch.object(ContributionScoreCalculator, "count_completed_issues", return_value=0)
+    def test_contribution_breakdown_uses_event_type_choices(
+        self, mock_issues, mock_opened, mock_merged, mock_load
+    ):
+        """Test breakdown keys match the scoring weight event types."""
+        calc = ContributionScoreCalculator()
+
+        breakdown = calc.get_contribution_breakdown(User(login="test_user"))
+
+        assert set(breakdown) == set(EventTypeChoices.values)
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
@@ -227,16 +295,23 @@ class TestContributionScoreCalculator:
         user2 = User(login="user2")
 
         self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [user1, user2])
+        now = datetime(2026, 11, 1, tzinfo=UTC)
 
         calc = ContributionScoreCalculator()
-        res = calc.recalculate_all()
+        with patch(f"{CALCULATOR_PATH}.timezone.now", return_value=now):
+            res = calc.recalculate_all()
 
         assert res["total"] == 2
         assert res["created"] == 1
         assert res["updated"] == 1
         assert res["failed_count"] == 0
 
-        mock_bulk_save_model.bulk_save.assert_called_once()
+        users_filter = mock_user_class.objects.filter.call_args.args[0]
+        assert ("contribution_score__isnull", False) in users_filter.children
+        assert existing_score.nest_updated_at == now
+        mock_bulk_save_model.bulk_save.assert_called_once_with(
+            ContributionScore, ANY, fields=["value", "tier", "nest_updated_at"]
+        )
         assert mock_cert_class.issue_certificate.call_count == 2
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
@@ -274,7 +349,9 @@ class TestContributionScoreCalculator:
 
         assert res["total"] == 2
         assert res["created"] == 2
-        mock_bulk_save_model.bulk_save.assert_called_once()
+        mock_bulk_save_model.bulk_save.assert_called_once_with(
+            ContributionScore, ANY, fields=["value", "tier", "nest_updated_at"]
+        )
         assert mock_cert_class.issue_certificate.call_count == 2
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
@@ -319,6 +396,53 @@ class TestContributionScoreCalculator:
         assert res["failed_count"] == 2
         assert res["failures"][0][0] == "batch_fail1"
         assert res["failures"][1][0] == "batch_fail2"
+
+    @patch("django.db.transaction.Atomic.__enter__", return_value=None)
+    @patch("django.db.transaction.Atomic.__exit__", return_value=None)
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
+    @patch(f"{CALCULATOR_PATH}.Certificate")
+    @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
+    @patch(f"{CALCULATOR_PATH}.User")
+    @patch(f"{CALCULATOR_PATH}.Issue")
+    @patch(f"{CALCULATOR_PATH}.PullRequest")
+    def test_recalculate_all_final_batch_unexpected_certificate_error(
+        self,
+        mock_pr,
+        mock_issue,
+        mock_user_class,
+        mock_bulk_save_model,
+        mock_cert_class,
+        mock_load,
+        mock_exit,
+        mock_enter,
+    ):
+        """Test an unexpected error in the final partial batch is recorded, not raised."""
+        users = [User(login=f"partial_user{i}") for i in range(3)]
+
+        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, users)
+
+        unexpected_error = RuntimeError("Provider crashed")
+        mock_cert_class.issue_certificate.side_effect = [None, None, unexpected_error]
+
+        calc = ContributionScoreCalculator()
+        calc.BATCH_SIZE = 2
+        res = calc.recalculate_all()
+
+        # One full batch of two users followed by a final partial batch of one user.
+        assert mock_bulk_save_model.bulk_save.call_count == 2
+        assert mock_bulk_save_model.bulk_save.call_args_list == [
+            call(ContributionScore, ANY, fields=["value", "tier", "nest_updated_at"]),
+            call(ContributionScore, ANY, fields=["value", "tier", "nest_updated_at"]),
+        ]
+        assert mock_cert_class.issue_certificate.call_count == 3
+        assert res["total"] == 3
+        assert res["created"] == 3
+        assert res["failed_count"] == 1
+        assert res["failures"] == [("partial_user2", unexpected_error)]
 
     @patch.object(
         ContributionScoreCalculator,

@@ -38,6 +38,24 @@ class TestCertificateModel:
 
         assert str(cert) == "jane_doe - LEVEL_2 Certificate (Revoked)"
 
+    @pytest.mark.parametrize("score", [0, -5])
+    @patch("django.db.transaction.Atomic.__enter__", return_value=None)
+    @patch("django.db.transaction.Atomic.__exit__", return_value=None)
+    @patch(f"{MODEL_PATH}.Certificate.objects")
+    @patch(f"{MODEL_PATH}.CertificateProviderFactory")
+    @patch(f"{MODEL_PATH}.User.objects")
+    def test_issue_certificate_non_positive_score_returns_early(
+        self, mock_user_objects, mock_factory, mock_cert_objects, mock_exit, mock_enter, score
+    ):
+        """Test issue_certificate does nothing for zero or negative scores."""
+        user = User(id=1, login="john_doe")
+
+        Certificate.issue_certificate(user, score, TierChoices.LEVEL_1)
+
+        mock_user_objects.select_for_update.assert_not_called()
+        mock_cert_objects.filter.assert_not_called()
+        mock_factory.get_provider.assert_not_called()
+
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
     @patch(f"{MODEL_PATH}.Certificate.objects")

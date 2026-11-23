@@ -6,6 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import Count, Q
+from django.utils import timezone
 
 from apps.common.models import BulkSaveModel
 from apps.github.models.issue import Issue
@@ -225,9 +226,13 @@ class ContributionScoreCalculator:
             repository__organization__is_owasp_related_organization=True,
         ).values("author_id")
 
+        # Include existing score holders so scores of users without eligible
+        # contributions anymore are reset instead of left stale.
         users_with_contributions = (
             User.objects.filter(
-                Q(id__in=pr_authors) | Q(id__in=issue_authors),
+                Q(id__in=pr_authors)
+                | Q(id__in=issue_authors)
+                | Q(contribution_score__isnull=False),
             )
             .distinct()
             .prefetch_related("contribution_score")
@@ -271,8 +276,7 @@ class ContributionScoreCalculator:
             .values_list("author_id", "count")
         )
 
-        contribution_scores = []
-        pending_scores = []
+        contribution_scores: list[ContributionScore] = []
         failed_certificates: list[tuple[str, Exception]] = []
 
         for user in users_with_contributions:
@@ -288,65 +292,23 @@ class ContributionScoreCalculator:
                 score = user.contribution_score
                 score.value = total_score
                 score.tier = tier
-                contribution_scores.append(score)
+                score.nest_updated_at = timezone.now()
                 updated_count += 1
-
             except ContributionScore.DoesNotExist:
                 score = ContributionScore(
                     github_user=user,
                     value=total_score,
                     tier=tier,
                 )
-                contribution_scores.append(score)
                 created_count += 1
 
-            pending_scores.append(score)
+            contribution_scores.append(score)
 
             if len(contribution_scores) >= self.BATCH_SIZE:
-                BulkSaveModel.bulk_save(
-                    ContributionScore, contribution_scores, fields=["value", "tier"]
-                )
-                for pending_score in pending_scores:
-                    try:
-                        Certificate.issue_certificate(
-                            pending_score.github_user,
-                            pending_score.value,
-                            TierChoices(pending_score.tier),
-                        )
-                    except CertificateIssuanceError as e:
-                        logger.exception(
-                            "Failed to issue certificate for user %s",
-                            pending_score.github_user.login,
-                        )
-                        failed_certificates.append((pending_score.github_user.login, e))
-                    except Exception as e:
-                        logger.exception(
-                            "Unexpected certificate processing error for user %s",
-                            pending_score.github_user.login,
-                        )
-                        failed_certificates.append((pending_score.github_user.login, e))
-                pending_scores.clear()
-                contribution_scores.clear()
+                failed_certificates.extend(self._save_batch(contribution_scores))
 
         if contribution_scores:
-            BulkSaveModel.bulk_save(
-                ContributionScore, contribution_scores, fields=["value", "tier"]
-            )
-            for pending_score in pending_scores:
-                try:
-                    Certificate.issue_certificate(
-                        pending_score.github_user,
-                        pending_score.value,
-                        TierChoices(pending_score.tier),
-                    )
-                except CertificateIssuanceError as e:
-                    logger.exception(
-                        "Failed to issue certificate for user %s",
-                        pending_score.github_user.login,
-                    )
-                    failed_certificates.append((pending_score.github_user.login, e))
-            pending_scores.clear()
-            contribution_scores.clear()
+            failed_certificates.extend(self._save_batch(contribution_scores))
 
         logger.info(
             "Score recalculation complete. Created: %s, Updated: %s",
@@ -361,6 +323,45 @@ class ContributionScoreCalculator:
             "failed_count": len(failed_certificates),
             "failures": failed_certificates,
         }
+
+    def _save_batch(
+        self, contribution_scores: list[ContributionScore]
+    ) -> list[tuple[str, Exception]]:
+        """Save a batch of scores and issue tier certificates for them.
+
+        Args:
+            contribution_scores (list[ContributionScore]): The batch to save. The list is
+                cleared once the batch is processed.
+
+        Returns:
+            list[tuple[str, Exception]]: Logins and errors for failed certificate issuances.
+
+        """
+        pending_scores = list(contribution_scores)
+        BulkSaveModel.bulk_save(
+            ContributionScore,
+            contribution_scores,
+            fields=["value", "tier", "nest_updated_at"],
+        )
+
+        failed_certificates: list[tuple[str, Exception]] = []
+        for pending_score in pending_scores:
+            login = pending_score.github_user.login
+            try:
+                Certificate.issue_certificate(
+                    pending_score.github_user,
+                    pending_score.value,
+                    TierChoices(pending_score.tier),
+                )
+            except CertificateIssuanceError as e:
+                logger.exception("Failed to issue certificate for user %s", login)
+                failed_certificates.append((login, e))
+            except Exception as e:
+                logger.exception("Unexpected certificate processing error for user %s", login)
+                failed_certificates.append((login, e))
+
+        contribution_scores.clear()
+        return failed_certificates
 
     def recalculate_user(self, user: User) -> dict[str, str | int | bool]:
         """Recalculate score for a single user.

@@ -2,9 +2,9 @@
 
 import { useQuery } from '@apollo/client/react'
 import { useParams } from 'next/navigation'
-import React from 'react'
+import React, { useEffect } from 'react'
 
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetCertificateDocument } from 'types/__generated__/certificateQueries.generated'
 import { CertificateCard } from 'components/CertificateCard'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -18,6 +18,12 @@ const CertificateVerificationPage: React.FC = () => {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
+
+  useEffect(() => {
+    if (error) {
+      handleAppError(error)
+    }
+  }, [error])
 
   if (loading && !data) {
     return <LoadingSpinner />

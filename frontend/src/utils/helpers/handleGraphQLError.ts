@@ -30,7 +30,16 @@ function getGraphQLErrors(error: unknown): GraphQLErrorLike[] | null {
   return gqlErrors.length > 0 ? gqlErrors : null
 }
 
-export function extractGraphQLErrors(error: unknown): {
+const DEFAULT_FIELD_ERROR_CODES: ReadonlySet<string> = new Set(['VALIDATION_ERROR'])
+
+/**
+ * Split GraphQL errors into field errors (keyed by `extensions.field`) and the rest.
+ * Only errors whose `extensions.code` is in `fieldErrorCodes` are mapped to fields.
+ */
+export function extractGraphQLErrors(
+  error: unknown,
+  fieldErrorCodes: ReadonlySet<string> = DEFAULT_FIELD_ERROR_CODES
+): {
   validationErrors: ValidationErrors
   hasValidationErrors: boolean
   unmappedErrors: string[]
@@ -42,7 +51,11 @@ export function extractGraphQLErrors(error: unknown): {
   if (gqlErrors) {
     for (const gqlError of gqlErrors) {
       const extensions = gqlError.extensions as { code?: string; field?: unknown } | undefined
-      if (extensions?.code === 'VALIDATION_ERROR' && typeof extensions.field === 'string') {
+      if (
+        typeof extensions?.code === 'string' &&
+        fieldErrorCodes.has(extensions.code) &&
+        typeof extensions.field === 'string'
+      ) {
         validationErrors[extensions.field] = gqlError.message
       } else {
         unmappedErrors.push(gqlError.message)

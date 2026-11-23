@@ -151,7 +151,14 @@ describe('EntitySelectorInput', () => {
       fireEvent.change(input, { target: { value: 'none' } })
       jest.advanceTimersByTime(350)
     })
-    await waitFor(() => expect(mockQuery).toHaveBeenCalled())
+    await waitFor(() => {
+      expect(mockQuery).toHaveBeenLastCalledWith({
+        query: SearchProjectNamesDocument,
+        variables: { query: 'none' },
+        fetchPolicy: 'network-only',
+      })
+      expect(screen.queryByText('OWASP Nest')).not.toBeInTheDocument()
+    })
 
     mockQuery.mockResolvedValueOnce({ data: { searchChapters: null } })
     rerender(<EntitySelectorInput value="" onChange={mockOnChange} entityType="chapter" />)

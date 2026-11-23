@@ -50,6 +50,8 @@ export const FormTextInput = ({
   let counterColorClass = 'text-gray-400 dark:text-gray-500'
   if (isAtLimit) counterColorClass = 'text-red-500'
   else if (isNearLimit) counterColorClass = 'text-amber-500'
+  const showCounter = showCharCount && maxLength !== undefined
+  const counterId = `${id}-char-count`
   return (
     <div className={className || 'w-full min-w-0'} style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <Input
@@ -66,10 +68,15 @@ export const FormTextInput = ({
         errorMessage={touched ? error : undefined}
         min={min}
         maxLength={maxLength}
+        aria-describedby={showCounter ? counterId : undefined}
         classNames={COMMON_INPUT_CLASS_NAMES}
       />
-      {showCharCount && maxLength !== undefined && (
-        <p className={`mt-1 text-right text-xs font-medium transition-colors ${counterColorClass}`}>
+      {showCounter && (
+        <p
+          id={counterId}
+          aria-live="polite"
+          className={`mt-1 text-right text-xs font-medium transition-colors ${counterColorClass}`}
+        >
           {charCount}/{maxLength} characters
           {isAtLimit && <span className="ml-1 font-semibold">- limit reached</span>}
         </p>

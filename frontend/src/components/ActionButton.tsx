@@ -30,6 +30,16 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   const disabledStyles = isDisabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
   const combinedStyles = cn(baseStyles, disabledStyles, className)
 
+  // pointer-events-none and tabIndex=-1 do not stop assistive technology from activating the
+  // link, so a disabled link must also block navigation and skip the handlers.
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isDisabled) {
+      e.preventDefault()
+      return
+    }
+    onClick?.()
+  }
+
   return url ? (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
       <Link
@@ -39,8 +49,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
         className={combinedStyles}
         data-tooltip-id="button-tooltip"
         data-tooltip-content={tooltipLabel}
-        onClick={onClick}
-        onKeyDown={onKeyDown}
+        onClick={handleLinkClick}
+        onKeyDown={isDisabled ? undefined : onKeyDown}
         aria-label={tooltipLabel}
         aria-disabled={isDisabled}
         tabIndex={isDisabled ? -1 : undefined}

@@ -23,7 +23,6 @@ class LeaderboardSnapshot(TimestampedModel):
 
         db_table = "owasp_crp_leaderboard_snapshots"
         verbose_name_plural = "Leaderboard Snapshots"
-        unique_together = ("github_user", "project", "chapter", "snapshot_date")
         indexes = [
             models.Index(fields=["-snapshot_date"], name="leaderboard_snapshot_date_desc"),
             models.Index(fields=["global_rank"], name="leaderboard_global_rank_idx"),
@@ -32,6 +31,15 @@ class LeaderboardSnapshot(TimestampedModel):
             models.Index(fields=["tier"], name="leaderboard_tier_idx"),
             models.Index(
                 fields=["snapshot_date", "-global_rank"], name="leaderboard_snapshot_rank_idx"
+            ),
+        ]
+        constraints = [
+            # Global (no project/chapter) and single-scope snapshots store NULL scopes,
+            # so NULLs must compare as equal to keep one snapshot per scope and date.
+            models.UniqueConstraint(
+                fields=("github_user", "project", "chapter", "snapshot_date"),
+                name="unique_leaderboard_snapshot_per_scope",
+                nulls_distinct=False,
             ),
         ]
 
@@ -52,11 +60,15 @@ class LeaderboardSnapshot(TimestampedModel):
     )
     project_rank = models.PositiveIntegerField(
         verbose_name="Project Rank",
+        null=True,
+        blank=True,
         validators=[MinValueValidator(1)],
         help_text="Contributor's rank within a specific project",
     )
     chapter_rank = models.PositiveIntegerField(
         verbose_name="Chapter Rank",
+        null=True,
+        blank=True,
         validators=[MinValueValidator(1)],
         help_text="Contributor's rank within a specific chapter",
     )

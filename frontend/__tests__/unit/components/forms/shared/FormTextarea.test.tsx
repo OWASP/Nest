@@ -55,4 +55,19 @@ describe('FormTextarea', () => {
     fireEvent.change(textarea, { target: { value: 'New Value' } })
     expect(handleChange).toHaveBeenCalledTimes(1)
   })
+
+  it('links the character counter to the textarea for assistive technology', () => {
+    render(<FormTextarea {...defaultProps} value="Hello" maxLength={280} showCharCount />)
+    const textarea = screen.getByRole('textbox')
+    const counter = screen.getByText(/5\/280 characters/)
+
+    expect(counter).toHaveAttribute('id', 'test-textarea-char-count')
+    expect(counter).toHaveAttribute('aria-live', 'polite')
+    expect(textarea).toHaveAttribute('aria-describedby', 'test-textarea-char-count')
+  })
+
+  it('does not set aria-describedby when the counter is hidden', () => {
+    render(<FormTextarea {...defaultProps} value="Hello" maxLength={280} />)
+    expect(screen.getByRole('textbox')).not.toHaveAttribute('aria-describedby')
+  })
 })

@@ -51,11 +51,11 @@ describe('CERTIFICATE_LAYOUT', () => {
   })
 
   it('exports verify link position values', () => {
-    expect(CERTIFICATE_LAYOUT.verifyLink).toMatchObject({
-      x: expect.any(Number),
-      y: expect.any(Number),
-      width: expect.any(Number),
-      height: expect.any(Number),
+    expect(CERTIFICATE_LAYOUT.verifyLink).toEqual({
+      x: 560,
+      y: 530,
+      width: 260,
+      height: 40,
     })
   })
 })

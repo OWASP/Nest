@@ -7,6 +7,7 @@ import { screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import CertificateVerificationPage from 'app/certificates/[certificateId]/page'
+import { handleAppError } from 'app/global-error'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -65,6 +66,7 @@ jest.mock('components/PageLayout', () => {
 })
 
 jest.mock('app/global-error', () => ({
+  handleAppError: jest.fn(),
   ErrorDisplay: ({
     statusCode,
     title,
@@ -113,9 +115,37 @@ describe('CertificateVerificationPage', () => {
         expect(screen.queryByRole('status')).not.toBeInTheDocument()
       })
     })
+
+    it('renders cached certificate data while a refetch is still loading', () => {
+      mockUseQuery.mockReturnValue({ data: mockGetCertificateData, loading: true, error: null })
+
+      render(<CertificateVerificationPage />)
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+      expect(screen.getByTestId('certificate-card')).toBeInTheDocument()
+      expect(screen.getByTestId('cert-id')).toHaveTextContent('F9DD2BJ9ZYXW')
+    })
   })
 
   describe('Error State', () => {
+    it('reports query errors through handleAppError', async () => {
+      const error = new Error('GraphQL error')
+      mockUseQuery.mockReturnValue({ data: null, loading: false, error })
+
+      render(<CertificateVerificationPage />)
+
+      await waitFor(() => {
+        expect(handleAppError).toHaveBeenCalledWith(error)
+      })
+    })
+
+    it('does not report anything when the query succeeds', async () => {
+      render(<CertificateVerificationPage />)
+
+      await screen.findByTestId('certificate-card')
+      expect(handleAppError).not.toHaveBeenCalled()
+    })
+
     it('renders ErrorDisplay with 500 when query errors and no data', async () => {
       mockUseQuery.mockReturnValue({
         data: null,

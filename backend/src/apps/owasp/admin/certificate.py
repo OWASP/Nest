@@ -24,6 +24,7 @@ class CertificateAdmin(admin.ModelAdmin):
     )
     list_filter = ("is_revoked", "issued_at", "tier")
     list_display_links = ("id",)
+    list_select_related = ("chapter", "issuer", "project", "recipient")
     search_fields = (
         "chapter__key",
         "chapter__name",

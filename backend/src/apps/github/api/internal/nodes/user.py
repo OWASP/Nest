@@ -65,7 +65,9 @@ class UserNode:
         | None
     ):
         """Resolve the latest active certificate for the user."""
-        certs = getattr(root, "user_certificates", [])
+        certs = getattr(root, "user_certificates", None)
+        if certs is None:
+            return root.certificates.filter(is_revoked=False).order_by("-issued_at").first()
         return certs[0] if certs else None
 
     @strawberry_django.field(prefetch_related=[USER_BADGES_PREFETCH])

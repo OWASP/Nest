@@ -334,6 +334,21 @@ describe('MyCertificatePage', () => {
           color: 'danger',
         })
       })
+      expect(screen.getByText('Error loading certificates')).toBeInTheDocument()
+      expect(screen.queryByText('No Certificates Found')).not.toBeInTheDocument()
+    })
+
+    it('renders cached certificates instead of the error state when data exists', async () => {
+      mockUseQuery.mockReturnValue({
+        data: mockMyCertificatesData,
+        loading: false,
+        error: new Error('Network error'),
+      })
+
+      render(<MyCertificatePage />)
+
+      expect(await screen.findByTestId('certificate-card')).toBeInTheDocument()
+      expect(screen.queryByText('Error loading certificates')).not.toBeInTheDocument()
     })
   })
 
@@ -491,6 +506,24 @@ describe('MyCertificatePage', () => {
       )
       openSpy.mockRestore()
     })
+
+    it('sends the UTC issue month and year to LinkedIn', async () => {
+      const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
+      mockUseQuery.mockReturnValue({
+        data: { myCertificates: [{ ...mockCertificate, issuedAt: '2026-01-01T00:30:00.000Z' }] },
+        loading: false,
+        error: null,
+      })
+
+      render(<MyCertificatePage />)
+
+      fireEvent.click(await screen.findByText('Add to LinkedIn'))
+
+      const params = new URL(openSpy.mock.calls[0][0] as string).searchParams
+      expect(params.get('issueYear')).toBe('2026')
+      expect(params.get('issueMonth')).toBe('1')
+      openSpy.mockRestore()
+    })
   })
 
   describe('Multiple Certificates and Navigation', () => {
@@ -569,13 +602,45 @@ describe('MyCertificatePage', () => {
       const secondCertButton = secondCertText.closest('button')
       expect(secondCertButton).toBeDisabled()
 
-      if (resolveImg) {
-        await act(async () => {
-          ;(resolveImg as (v: string) => void)('data:image/png;base64,mockImageData')
-        })
-      }
+      // The page awaits the dynamic html-to-image import before calling toPng.
+      await waitFor(() => expect(resolveImg).not.toBeNull())
+      await act(async () => {
+        ;(resolveImg as unknown as (v: string) => void)('data:image/png;base64,mockImageData')
+      })
+
+      await waitFor(() => expect(secondCertButton).not.toBeDisabled())
+      expect(screen.getByText('Save as Image')).toBeInTheDocument()
 
       clickSpy.mockRestore()
+    })
+
+    it('falls back to the first certificate when the selected one leaves the list', async () => {
+      jest.spyOn(window, 'scrollTo').mockImplementation(() => {})
+      mockUseQuery.mockReturnValue({
+        data: mockMyCertificatesMultipleData,
+        loading: false,
+        error: null,
+      })
+
+      const { rerender } = render(<MyCertificatePage />)
+
+      const secondCertButton = (await screen.findByText('level 3')).closest('button')
+      fireEvent.click(secondCertButton as HTMLButtonElement)
+      await waitFor(() => {
+        expect(screen.getByTestId('cert-id')).toHaveTextContent('R2ST6YC1ZYXW')
+      })
+
+      // A refresh drops the selected (e.g. revoked) certificate.
+      mockUseQuery.mockReturnValue({
+        data: mockMyCertificatesData,
+        loading: false,
+        error: null,
+      })
+      rerender(<MyCertificatePage />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('cert-id')).toHaveTextContent(mockCertificate.id)
+      })
     })
   })
 })
