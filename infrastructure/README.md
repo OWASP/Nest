@@ -278,6 +278,12 @@ aws ecs run-task \
   --region AWS_REGION
 ```
 
+1. Copy `nest.dump` into the root of this environment's fixtures bucket before load-data. The source can be any local dump you choose. From `infrastructure/live`:
+
+```bash
+aws s3 cp ../../backend/data/nest.dump "s3://$(terraform output -raw fixtures_bucket_name)/nest.dump"
+```
+
 1. Run load-data task and wait for it to be complete:
 
 ```bash
