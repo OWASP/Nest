@@ -49,39 +49,6 @@ const Metadata = ({
         title={<AnchorTitle title={detailsTitle} />}
         className={`gap-2 ${hasStatistics ? 'md:col-span-5' : 'md:col-span-7'}`}
       >
-        {details?.map((detail) => {
-          if (detail.label === 'Leaders') {
-            return (
-              <div key={detail.label} className="flex flex-row gap-1 pb-1">
-                <strong>{detail.label}:</strong>{' '}
-                <LeadersList
-                  entityKey={`${entityKey}-${detail.label}`}
-                  leaders={String(detail.value ?? 'Unknown')}
-                />
-              </div>
-            )
-          }
-
-          if (detail.label === 'Channels') {
-            if (!detail.value) {
-              return null
-            }
-
-            return (
-              <div key={detail.label} className="flex flex-row items-start gap-1 pb-1">
-                <strong>{detail.label}:</strong>
-                <div className="pt-0.5">{detail.value}</div>
-              </div>
-            )
-          }
-
-          return (
-            <div key={detail.label} className="pb-1">
-              <strong>{detail.label}:</strong> {detail.value || 'Unknown'}
-            </div>
-          )
-        })}
-        {showSocialLinks && socialLinks && <SocialLinks urls={socialLinks} />}
         <div
           className={`flex ${hasContributionInfo ? 'flex-col sm:flex-row sm:gap-0' : 'flex-col'}`}
         >
