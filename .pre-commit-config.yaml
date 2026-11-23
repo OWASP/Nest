@@ -34,7 +34,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: 443ffdff1cc1663b701ae73e7459029fe883455a  # v1.109.3
+    rev: 4c4437d784e93cacb1f05f1d7bc28e4354fafd20  # v1.109.4
     hooks:
       - id: terraform_providers_lock
         args:
@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: 00629e48d7dcd22463abe05adc22725e0bd6ea69  # v1.47.1
+    rev: cfc993f84dc68bdb19e87192dd3c57486790f5c8  # v1.49.2
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -93,16 +93,16 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 2834ec6639549dd6796205c8f011dedcd587288b  # v2.4.0
+    rev: ad26ebfa797fcb9b8f83275937c1c1d6e126719c  # v2.4.1
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.338.0
+          - strawberry-graphql==0.339.1
           - strawberry-graphql-django==0.93.0
           - types-lxml==2026.2.16
-          - types-python-dateutil==2.9.0.20261021
-          - types-PyYAML==6.0.12.20260906
-          - types-requests==2.33.0.20261006
+          - types-python-dateutil==2.9.0.20261029
+          - types-PyYAML==6.0.12.20261030
+          - types-requests==2.33.0.20261030
         entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
