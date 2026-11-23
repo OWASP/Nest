@@ -58,7 +58,6 @@ USER owasp
 WORKDIR /home/owasp/nest
 
 COPY --chown=root:root .github/scripts .github/scripts
-COPY --chown=root:root .github/workflows/run-image-scan.yaml .github/workflows/run-image-scan.yaml
 COPY --chown=root:root frontend/public/.well-known frontend/public/.well-known
 COPY --chown=root:root tools/security tools/security
 COPY --chown=root:root tools/tests tools/tests
