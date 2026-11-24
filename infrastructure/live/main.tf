@@ -185,15 +185,20 @@ module "observability" {
     module.security.frontend_sg_id,
     module.security.tasks_sg_id,
   ]
-  assign_public_ip = false
-  aws_region       = var.aws_region
-  common_tags      = local.common_tags
-  environment      = var.environment
-  kms_key_arn      = module.kms.key_arn
-  project_name     = var.project_name
-  subnet_ids       = module.networking.private_subnet_ids
-  image            = local.observability_image
-  vpc_id           = module.networking.vpc_id
+  assign_public_ip                       = false
+  aws_region                             = var.aws_region
+  common_tags                            = local.common_tags
+  dashboard_admin_password_kms_key_arn   = var.observability_dashboard_admin_password_kms_key_arn
+  dashboard_admin_password_parameter_arn = var.observability_dashboard_admin_password_parameter_arn
+  dashboard_desired_count                = var.observability_dashboard_desired_count
+  dashboard_domain_name                  = var.observability_dashboard_domain_name
+  dashboard_image                        = var.observability_dashboard_image
+  environment                            = var.environment
+  image                                  = local.observability_image
+  kms_key_arn                            = module.kms.key_arn
+  project_name                           = var.project_name
+  subnet_ids                             = module.networking.private_subnet_ids
+  vpc_id                                 = module.networking.vpc_id
 }
 
 module "parameters" {

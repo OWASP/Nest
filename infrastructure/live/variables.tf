@@ -291,6 +291,36 @@ variable "frontend_use_fargate_spot" {
   default     = true
 }
 
+variable "observability_dashboard_admin_password_kms_key_arn" {
+  description = "Customer-managed KMS key ARN for the dashboard admin password parameter; null uses the AWS-managed SSM key."
+  type        = string
+  default     = null
+}
+
+variable "observability_dashboard_admin_password_parameter_arn" {
+  description = "Externally managed SSM SecureString ARN for the initial observability dashboard admin password."
+  type        = string
+  default     = null
+}
+
+variable "observability_dashboard_desired_count" {
+  description = "Observability dashboard task count; leave zero until credentials and access are configured."
+  type        = number
+  default     = 0
+}
+
+variable "observability_dashboard_domain_name" {
+  description = "Public observability dashboard hostname, without scheme or path; null leaves public URL configuration unset."
+  type        = string
+  default     = null
+}
+
+variable "observability_dashboard_image" {
+  description = "Digest-pinned observability dashboard image; null leaves the dashboard runtime disabled."
+  type        = string
+  default     = null
+}
+
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets."
   type        = list(string)

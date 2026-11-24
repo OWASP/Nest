@@ -74,4 +74,9 @@ run "observability_integration_apply" {
     condition     = can(aws_ecs_service.vm.id)
     error_message = "ECS service was not created."
   }
+
+  assert {
+    condition     = can(aws_service_discovery_service.vm.arn)
+    error_message = "The VictoriaMetrics service discovery service was not created."
+  }
 }
