@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ImgHTMLAttributes } from 'react'
 import type { Link } from 'types/link'
 import Header from 'components/Header'
@@ -84,5 +85,21 @@ describe('Header Navigation', () => {
 
     const logoLink = screen.getAllByRole('img', { name: 'OWASP Logo' })[0].closest('a')
     expect(logoLink).toHaveAttribute('href', '/')
+  })
+
+  test('mobile menu button has correct ARIA attributes and dynamic screen‑reader text', async () => {
+    render(<Header isGitHubAuthEnabled={false} />)
+
+    const button = screen.getByRole('button', { name: /open main menu/i })
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect(button).toHaveAttribute('aria-controls', 'mobile-menu')
+    expect(button).toHaveTextContent('Open main menu')
+
+    await userEvent.click(button)
+
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+    expect(button).toHaveTextContent('Close main menu')
+    // After opening, the accessible name should update
+    expect(screen.getByRole('button', { name: /close main menu/i })).toBeInTheDocument()
   })
 })
