@@ -69,19 +69,23 @@ test.describe('Header - Mobile (iPhone 13)', () => {
     ).toBeVisible()
   })
 
-  test('should have mobile menu button', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /menu/i })).toBeVisible()
+  test('should have mobile menu button with correct ARIA attributes', async ({ page }) => {
+    const menuButton = page.getByRole('button', { name: /open main menu/i })
+    await expect(menuButton).toBeVisible()
+    await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+    await expect(menuButton).toHaveAttribute('aria-controls', 'mobile-menu')
   })
 
-  test('should show button when menu clicked', async ({ page }) => {
-    const menuButton = page.getByRole('button', { name: /menu/i })
+  test('should show button when menu clicked and update ARIA', async ({ page }) => {
+    const menuButton = page.getByRole('button', { name: /open main menu/i })
     await menuButton.click()
+    await expect(menuButton).toHaveAttribute('aria-expanded', 'true')
     await expect(page.getByRole('link', { name: 'Star On Github' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Sponsor Us' })).toBeVisible()
   })
 
   test('should show navigation when menu clicked', async ({ page }) => {
-    const menuButton = page.getByRole('button', { name: /menu/i })
+    const menuButton = page.getByRole('button', { name: /open main menu/i })
     await menuButton.click()
 
     await expect(page.getByRole('banner').getByRole('link', { name: 'Community' })).toBeVisible()
