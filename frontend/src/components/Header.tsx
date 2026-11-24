@@ -133,7 +133,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               text="Sponsor"
             />
           </div>
-          <div className="hidden md:flex">
+          <div className="flex items-center gap-2">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
           <ModeToggle />
