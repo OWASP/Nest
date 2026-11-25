@@ -15,13 +15,21 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     parser = argparse.ArgumentParser(description="Infrastructure deployment runner")
-    parser.parse_args()
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="Refresh an existing deployment",
+    )
+    args = parser.parse_args()
 
     runner = InfrastructureDeployRunner()
     runner.configure_environment()
 
     try:
-        runner.deploy()
+        if args.refresh:
+            runner.refresh()
+        else:
+            runner.deploy()
     except RunnerError as exc:
         sys.stderr.write(f"Error: {exc}\n")
         sys.exit(1)

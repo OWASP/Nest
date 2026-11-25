@@ -1,3 +1,0 @@
-services:
-  runner:
-    command: [python, -m, scripts.run_tests, --integration]

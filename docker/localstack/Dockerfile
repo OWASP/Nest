@@ -1,1 +1,12 @@
-FROM localstack/localstack:2026.7.1@sha256:bdc261f58767dda5385800cfcefae7e8036f91428f26117b29c4572a7a9bbdc9
+FROM localstack/localstack:2026.10.8@sha256:be800da7b2f20deeebb1a4fef113ff4fc7fa28871cac4de5036a1ac69e22b6dc
+
+# LocalStack installs these dependencies at runtime.
+# Install them now to speed up deployment.
+RUN . /opt/code/localstack/.venv/bin/activate && \
+    python -m localstack.cli.lpm install redis && \
+    python -m localstack.cli.lpm install postgres --version 16 && \
+    # Clear the LPM download cache to prevent large dangling volumes.
+    # Every container created from this image copies the cache into a fresh anonymous volume.
+    rm -rf /var/lib/localstack/cache && \
+    chown -R localstack:localstack /usr/lib/localstack && \
+    chmod -R 755 /usr/lib/localstack

@@ -1,0 +1,2 @@
+append_random_resource_name_suffix  = false
+state_environments                  = ["localstack"]
