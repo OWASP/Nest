@@ -103,9 +103,14 @@ describe('ShareButtons', () => {
       <ShareButtons title="Test & Snapshot <2025>" url="https://nest.owasp.org/path?a=1&b=2" />
     )
 
-    const xLink = screen.getByLabelText('Share on X')
-    expect(xLink.getAttribute('href')).toContain('Test%20%26%20Snapshot%20%3C2025%3E')
-    expect(xLink.getAttribute('href')).toContain('url=')
+    expect(screen.getByLabelText('Share on X')).toHaveAttribute(
+      'href',
+      'https://x.com/intent/tweet?url=https%3A%2F%2Fnest.owasp.org%2Fpath%3Fa%3D1%26b%3D2&text=Test%20%26%20Snapshot%20%3C2025%3E'
+    )
+    expect(screen.getByLabelText('Share on LinkedIn')).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fnest.owasp.org%2Fpath%3Fa%3D1%26b%3D2'
+    )
   })
 
   it('has proper aria-labels for accessibility', () => {

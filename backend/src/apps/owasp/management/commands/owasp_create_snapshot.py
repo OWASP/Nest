@@ -94,17 +94,17 @@ class Command(BaseCommand):
         current = datetime.now(tz=UTC)
 
         if frequency == Snapshot.Frequency.WEEKLY:
-            # Last week: Monday 00:00:00 to Sunday 23:59:59
+            # Last week: Monday 00:00:00 to Sunday 23:59:59.999999
             days_since_monday = current.weekday()
             last_monday = current - timedelta(days=days_since_monday + 7)
             start_at = last_monday.replace(hour=0, minute=0, second=0, microsecond=0)
-            end_at = start_at + timedelta(days=6, hours=23, minutes=59, seconds=59)
+            end_at = start_at + timedelta(weeks=1) - timedelta(microseconds=1)
         else:
-            # Last month: 1st 00:00:00 to last day 23:59:59
+            # Last month: 1st 00:00:00 to last day 23:59:59.999999
             first_of_current_month = current.replace(
                 day=1, hour=0, minute=0, second=0, microsecond=0
             )
-            end_at = first_of_current_month - timedelta(seconds=1)
+            end_at = first_of_current_month - timedelta(microseconds=1)
             start_at = end_at.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
         return start_at, end_at

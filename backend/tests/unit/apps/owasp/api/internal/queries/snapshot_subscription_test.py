@@ -54,6 +54,7 @@ class TestSnapshotSubscriptionQuery:
             result = self.query.my_snapshot_subscriptions(info=info)
             assert result == [mock_sub1, mock_sub2]
             mock_objects.filter.assert_called_once_with(user=info.context.request.user)
+            mock_qs.order_by.assert_called_once_with("created_at")
 
     def _resolve_subscription_by_token(self, token):
         """Invoke the underlying resolver for subscription_by_token."""
@@ -73,19 +74,25 @@ class TestSnapshotSubscriptionQuery:
     def test_subscription_by_token_not_found(self, mock_objects):
         """Test subscription_by_token returns None when token doesn't match."""
         mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
-        result = self._resolve_subscription_by_token("nonexistent-token")
+        token = "nonexistent-token"  # noqa: S105
+        result = self._resolve_subscription_by_token(token)
         assert result is None
+        mock_objects.get.assert_called_once_with(unsubscribe_token=token)
 
     @patch("apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects")
     def test_subscription_by_token_invalid_uuid(self, mock_objects):
         """Test subscription_by_token returns None for invalid UUID."""
         mock_objects.get.side_effect = ValueError("invalid UUID")
-        result = self._resolve_subscription_by_token("not-a-uuid")
+        token = "not-a-uuid"  # noqa: S105
+        result = self._resolve_subscription_by_token(token)
         assert result is None
+        mock_objects.get.assert_called_once_with(unsubscribe_token=token)
 
     @patch("apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects")
     def test_subscription_by_token_validation_error(self, mock_objects):
         """Test subscription_by_token returns None when ValidationError is raised."""
         mock_objects.get.side_effect = ValidationError("Invalid UUID")
-        result = self._resolve_subscription_by_token("not-a-valid-uuid")
+        token = "not-a-valid-uuid"  # noqa: S105
+        result = self._resolve_subscription_by_token(token)
         assert result is None
+        mock_objects.get.assert_called_once_with(unsubscribe_token=token)

@@ -432,17 +432,34 @@ describe('GlobalSearch', () => {
     })
   })
 
-  test('handles empty search query properly', async () => {
+  test('clears suggestions when search query becomes empty', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'test-project', name: 'Test Project' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
 
     const input = screen.getByPlaceholderText('Search the OWASP community...')
     await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+
     await userEvent.clear(input)
 
     await waitFor(() => {
-      expect(screen.queryByRole('listitem')).not.toBeInTheDocument()
+      expect(screen.getByText(EMPTY_STATE_EXAMPLES)).toBeInTheDocument()
     })
+    expect(screen.queryByText('Test Project')).not.toBeInTheDocument()
+    expect(screen.queryByRole('listitem')).not.toBeInTheDocument()
   })
 
   test('navigates to organization page when clicking an organization suggestion', async () => {
@@ -515,31 +532,61 @@ describe('GlobalSearch', () => {
   })
 
   test('focus trap works correctly within the modal', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'proj-1', name: 'Project 1' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
 
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
     await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeInTheDocument()
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
     })
 
-    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    const algoliaLink = screen.getByLabelText('Search by Algolia (opens in a new tab)')
+    expect(algoliaLink).not.toBe(input)
 
     input.focus()
     expect(document.activeElement).toBe(input)
 
-    fireEvent.keyDown(document, { key: 'Tab' })
-    expect(document.activeElement).toBeTruthy()
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(algoliaLink)
 
+    fireEvent.keyDown(document, { key: 'Tab' })
     expect(document.activeElement).toBe(input)
   })
 
   test('focus trap handles multiple tab events to loop focus', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [
+            { key: 'proj-1', name: 'Project 1' },
+            { key: 'proj-2', name: 'Project 2' },
+          ],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
 
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
     await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeInTheDocument()
+      expect(screen.getByText('Project 2')).toBeInTheDocument()
     })
 
     const dialog = screen.getByRole('dialog')
@@ -547,18 +594,26 @@ describe('GlobalSearch', () => {
       dialog.querySelectorAll<HTMLElement>('input, button, a, [tabindex]:not([tabindex="-1"])')
     ).filter((el) => el.getAttribute('tabindex') !== '-1')
 
-    expect(focusable.length).toBeGreaterThan(0)
+    expect(focusable.length).toBeGreaterThanOrEqual(3)
 
     const first = focusable[0]
+    const middle = focusable[1]
     const last = focusable.at(-1)!
+    expect(first).not.toBe(last)
 
     first.focus()
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
     expect(document.activeElement).toBe(last)
 
-    last.focus()
     fireEvent.keyDown(document, { key: 'Tab' })
     expect(document.activeElement).toBe(first)
+
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(last)
+
+    middle.focus()
+    expect(fireEvent.keyDown(document, { key: 'Tab' })).toBe(true)
+    expect(document.activeElement).toBe(middle)
   })
 
   test('handles suggestion keyboard events (Space / Enter)', async () => {

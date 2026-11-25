@@ -137,6 +137,27 @@ class TestSnapshotSubscriptionClean:
         )
         sub.clean()
 
+    @pytest.mark.parametrize("relation", ["projects", "chapters", "committees"])
+    def test_clean_passes_with_entities_and_all_toggles_off(self, relation):
+        """Test that clean passes when a saved subscription only follows specific entities."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.pk = 42
+        sub.is_active = False
+        sub.include_chapters = False
+        sub.include_events = False
+        sub.include_issues = False
+        sub.include_posts = False
+        sub.include_projects = False
+        sub.include_pull_requests = False
+        sub.include_releases = False
+        sub.include_users = False
+        for name in ("projects", "chapters", "committees"):
+            getattr(sub, name).exists.return_value = name == relation
+
+        SnapshotSubscription.clean(sub)
+
+        getattr(sub, relation).exists.assert_called_once_with()
+
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_clean_raises_when_max_subscriptions_reached(self, mock_objects):
         """Test that clean raises ValidationError when max subscriptions reached."""
@@ -192,6 +213,9 @@ class TestSnapshotSubscriptionCreate:
 
         assert result == mock_sub
         mock_objects.create.assert_called_once()
+        mock_user_objects.select_for_update.assert_called_once_with()
+        mock_user_objects.select_for_update.return_value.filter.assert_called_once_with(pk=1)
+        mock_select_qs.exists.assert_called_once_with()
 
     @patch("apps.owasp.models.snapshot_subscription.User.objects")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
@@ -208,6 +232,11 @@ class TestSnapshotSubscriptionCreate:
                 user=user,
                 frequency="weekly",
             )
+
+        mock_user_objects.select_for_update.assert_called_once_with()
+        mock_user_objects.select_for_update.return_value.filter.assert_called_once_with(pk=1)
+        mock_select_qs.exists.assert_called_once_with()
+        mock_objects.create.assert_not_called()
 
     @patch("apps.owasp.models.snapshot_subscription.User.objects")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
@@ -421,6 +450,7 @@ class TestSetM2mFields:
         """Test setting subscribed projects."""
         sub = MagicMock(spec=SnapshotSubscription)
         mock_qs = MagicMock()
+        mock_qs.__len__.return_value = 2
         mock_project_objects.filter.return_value = mock_qs
 
         SnapshotSubscription.set_m2m_fields(sub, project_ids=[1, 2])
@@ -433,6 +463,7 @@ class TestSetM2mFields:
         """Test setting subscribed chapters."""
         sub = MagicMock(spec=SnapshotSubscription)
         mock_qs = MagicMock()
+        mock_qs.__len__.return_value = 2
         mock_chapter_objects.filter.return_value = mock_qs
 
         SnapshotSubscription.set_m2m_fields(sub, chapter_ids=[3, 4])
@@ -445,6 +476,7 @@ class TestSetM2mFields:
         """Test setting subscribed committees."""
         sub = MagicMock(spec=SnapshotSubscription)
         mock_qs = MagicMock()
+        mock_qs.__len__.return_value = 1
         mock_committee_objects.filter.return_value = mock_qs
 
         SnapshotSubscription.set_m2m_fields(sub, committee_ids=[5])
@@ -461,6 +493,59 @@ class TestSetM2mFields:
         sub.projects.set.assert_not_called()
         sub.chapters.set.assert_not_called()
         sub.committees.set.assert_not_called()
+
+    @patch("apps.owasp.models.snapshot_subscription.Project.objects")
+    def test_ignores_duplicate_ids(self, mock_project_objects):
+        """Test repeated IDs are not treated as missing entities."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        mock_qs = MagicMock()
+        mock_qs.__len__.return_value = 1
+        mock_project_objects.filter.return_value = mock_qs
+
+        SnapshotSubscription.set_m2m_fields(sub, project_ids=[1, 1])
+
+        sub.projects.set.assert_called_once_with(mock_qs)
+
+    @pytest.mark.parametrize(
+        ("model_name", "kwarg", "label"),
+        [
+            ("Project", "project_ids", "projects"),
+            ("Chapter", "chapter_ids", "chapters"),
+            ("Committee", "committee_ids", "committees"),
+        ],
+    )
+    def test_raises_for_unknown_ids(self, model_name, kwarg, label):
+        """Test unknown entity IDs are rejected instead of silently dropped."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        with patch(f"apps.owasp.models.snapshot_subscription.{model_name}.objects") as mock_obj:
+            mock_qs = MagicMock()
+            mock_qs.__len__.return_value = 1
+            mock_obj.filter.return_value = mock_qs
+
+            with pytest.raises(ValidationError, match=f"selected {label} could not be found"):
+                SnapshotSubscription.set_m2m_fields(sub, **{kwarg: [1, 999]})
+
+        sub.projects.set.assert_not_called()
+        sub.chapters.set.assert_not_called()
+        sub.committees.set.assert_not_called()
+
+    @patch("apps.owasp.models.snapshot_subscription.Chapter.objects")
+    @patch("apps.owasp.models.snapshot_subscription.Project.objects")
+    def test_validates_all_ids_before_setting(self, mock_project_objects, mock_chapter_objects):
+        """Test no relation is changed when any of the provided IDs is unknown."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        mock_project_qs = MagicMock()
+        mock_project_qs.__len__.return_value = 1
+        mock_project_objects.filter.return_value = mock_project_qs
+        mock_chapter_qs = MagicMock()
+        mock_chapter_qs.__len__.return_value = 0
+        mock_chapter_objects.filter.return_value = mock_chapter_qs
+
+        with pytest.raises(ValidationError, match="selected chapters could not be found"):
+            SnapshotSubscription.set_m2m_fields(sub, project_ids=[1], chapter_ids=[999])
+
+        sub.projects.set.assert_not_called()
+        sub.chapters.set.assert_not_called()
 
 
 class TestCheckDuplicateSetup:
@@ -525,6 +610,46 @@ class TestCheckDuplicateSetup:
         )
 
         assert result is True
+
+    @pytest.mark.parametrize(
+        "entity_ids",
+        [
+            {"projects": [11], "chapters": [20], "committees": [30]},
+            {"projects": [10], "chapters": [21], "committees": [30]},
+            {"projects": [10], "chapters": [20], "committees": [31]},
+        ],
+    )
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_returns_false_when_entity_ids_differ(self, mock_objects, entity_ids):
+        """Test returns False when another sub differs by a single M2M entity ID."""
+        other = MagicMock()
+        other.projects.all.return_value = [MagicMock(pk=10)]
+        other.chapters.all.return_value = [MagicMock(pk=20)]
+        other.committees.all.return_value = [MagicMock(pk=30)]
+
+        mock_qs = MagicMock()
+        mock_qs.exclude.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = mock_qs
+        mock_qs.exists.return_value = True
+        mock_qs.__iter__ = MagicMock(return_value=iter([other]))
+        mock_objects.filter.return_value = mock_qs
+
+        result = SnapshotSubscription.check_duplicate_setup(
+            user=MagicMock(),
+            frequency="weekly",
+            include_chapters=True,
+            include_events=True,
+            include_issues=True,
+            include_posts=True,
+            include_projects=True,
+            include_pull_requests=True,
+            include_releases=True,
+            include_users=True,
+            entity_ids=entity_ids,
+            exclude_pk=1,
+        )
+
+        assert result is False
 
 
 class TestHasDuplicateSetup:

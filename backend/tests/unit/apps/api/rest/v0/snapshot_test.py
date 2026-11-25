@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
@@ -57,7 +57,14 @@ class TestSnapshotSchema:
         ],
     )
     def test_snapshot_detail_schema(self, snapshot_data):
-        snapshot = SnapshotDetail(**snapshot_data)
+        """Test the detail schema keeps the public new_*_count keys."""
+
+        class MockSnapshot:
+            def __init__(self, data):
+                for key, value in data.items():
+                    setattr(self, key, value)
+
+        snapshot = SnapshotDetail.from_orm(MockSnapshot(snapshot_data))
 
         assert snapshot.created_at == datetime.fromisoformat(snapshot_data["created_at"])
         assert snapshot.end_at == datetime.fromisoformat(snapshot_data["end_at"])
@@ -65,11 +72,35 @@ class TestSnapshotSchema:
         assert snapshot.start_at == datetime.fromisoformat(snapshot_data["start_at"])
         assert snapshot.title == snapshot_data["title"]
         assert snapshot.updated_at == datetime.fromisoformat(snapshot_data["updated_at"])
-        assert snapshot.chapters_count == snapshot_data["chapters_count"]
-        assert snapshot.issues_count == snapshot_data["issues_count"]
-        assert snapshot.projects_count == snapshot_data["projects_count"]
-        assert snapshot.releases_count == snapshot_data["releases_count"]
-        assert snapshot.users_count == snapshot_data["users_count"]
+        assert snapshot.new_chapters_count == snapshot_data["chapters_count"]
+        assert snapshot.new_issues_count == snapshot_data["issues_count"]
+        assert snapshot.new_projects_count == snapshot_data["projects_count"]
+        assert snapshot.new_releases_count == snapshot_data["releases_count"]
+        assert snapshot.new_users_count == snapshot_data["users_count"]
+
+    def test_snapshot_detail_serialized_keys(self):
+        """Test the serialized response uses the keys main's API returns."""
+
+        class MockSnapshot:
+            created_at = end_at = start_at = updated_at = datetime(2025, 2, 1, tzinfo=UTC)
+            key = "2025-02"
+            title = "February 2025 Snapshot"
+            chapters_count = 1
+            issues_count = 2
+            projects_count = 3
+            releases_count = 4
+            users_count = 5
+
+        data = SnapshotDetail.from_orm(MockSnapshot()).model_dump()
+
+        assert {
+            "new_chapters_count": 1,
+            "new_issues_count": 2,
+            "new_projects_count": 3,
+            "new_releases_count": 4,
+            "new_users_count": 5,
+        }.items() <= data.items()
+        assert "chapters_count" not in data
 
 
 class TestSnapshotAPI:

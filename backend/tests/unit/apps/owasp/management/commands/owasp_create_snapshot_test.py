@@ -116,13 +116,13 @@ class TestCreateSnapshot:
             pytest.param(
                 datetime(2026, 6, 15, 12, 0, 0, tzinfo=UTC),
                 datetime(2026, 6, 8, 0, 0, 0, tzinfo=UTC),
-                datetime(2026, 6, 14, 23, 59, 59, tzinfo=UTC),
+                datetime(2026, 6, 14, 23, 59, 59, 999999, tzinfo=UTC),
                 id="monday-calculates-last-week",
             ),
             pytest.param(
                 datetime(2026, 6, 11, 12, 0, 0, tzinfo=UTC),
                 datetime(2026, 6, 1, 0, 0, 0, tzinfo=UTC),
-                datetime(2026, 6, 7, 23, 59, 59, tzinfo=UTC),
+                datetime(2026, 6, 7, 23, 59, 59, 999999, tzinfo=UTC),
                 id="thursday-calculates-last-week",
             ),
         ],
@@ -151,7 +151,7 @@ class TestCreateSnapshot:
             start_at, end_at = Command.calculate_date_range("monthly")
 
         assert start_at == datetime(2026, 5, 1, 0, 0, 0, tzinfo=UTC)
-        assert end_at == datetime(2026, 5, 31, 23, 59, 59, tzinfo=UTC)
+        assert end_at == datetime(2026, 5, 31, 23, 59, 59, 999999, tzinfo=UTC)
 
     def test_generate_key_weekly(self):
         """Test key generation for weekly snapshots."""

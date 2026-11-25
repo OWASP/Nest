@@ -19,11 +19,13 @@ const PaginationButtons = ({
 }: PaginationButtonsProps) => {
   if (!showMore && !showLess) return null
 
+  const expanded = isExpanded ?? showLess
+
   return (
     <div className="mt-4 flex justify-start gap-4">
       {showMore && (
         <button
-          aria-expanded={isExpanded ?? false}
+          aria-expanded={expanded}
           disabled={isLoading}
           onClick={onShowMore}
           type="button"
@@ -35,7 +37,7 @@ const PaginationButtons = ({
       )}
       {showLess && (
         <button
-          aria-expanded={isExpanded ?? showLess}
+          aria-expanded={expanded}
           disabled={isLoading}
           onClick={onShowLess}
           type="button"

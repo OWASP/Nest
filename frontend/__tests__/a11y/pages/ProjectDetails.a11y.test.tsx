@@ -13,7 +13,7 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
-  useMutation: jest.fn(() => [jest.fn()]),
+  useMutation: jest.fn(() => [jest.fn(), { loading: false }]),
 }))
 
 jest.mock('react-apexcharts', () => {
@@ -22,12 +22,6 @@ jest.mock('react-apexcharts', () => {
     default: () => {
       return <div data-testid="mock-apexcharts">Mock ApexChart</div>
     },
-  }
-})
-
-jest.mock('components/SubscribeButton', () => {
-  return function MockSubscribeButton() {
-    return <button data-testid="subscribe-button">Subscribe</button>
   }
 })
 
@@ -41,7 +35,10 @@ describe.each([
   })
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockProjectDetailsData,
+      data: {
+        ...mockProjectDetailsData,
+        project: { ...mockProjectDetailsData.project, id: btoa('ProjectNode:1') },
+      },
       loading: false,
       error: null,
     })
@@ -51,6 +48,8 @@ describe.each([
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
     })
+    // The real SubscribeButton (authenticated session from jest.setup) is part of the axe scan.
+    expect(screen.getByRole('button', { name: 'Subscribe to Test Project' })).toBeInTheDocument()
 
     const results = await axe(container)
     expect(results).toHaveNoViolations()

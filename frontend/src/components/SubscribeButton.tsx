@@ -13,7 +13,7 @@ import {
   GET_MY_SNAPSHOT_SUBSCRIPTIONS,
   UPDATE_SNAPSHOT_SUBSCRIPTION,
 } from 'server/queries/subscriptionQueries'
-import { decodeRelayId } from 'utils/decodeRelayId'
+import { tryDecodeRelayId } from 'utils/decodeRelayId'
 import ActionButton from 'components/ActionButton'
 
 const MAX_SUBSCRIPTIONS = 5
@@ -75,7 +75,7 @@ export default function SubscribeButton({
     [data?.mySnapshotSubscriptions]
   )
   const activeSubscriptions = subscriptions.filter((s) => s.isActive)
-  const decodedEntityId = decodeRelayId(entityId)
+  const decodedEntityId = tryDecodeRelayId(entityId)
 
   // Check if entity is already in any subscription
   const m2mField = M2M_FIELD_MAP[entityType]
@@ -143,12 +143,18 @@ export default function SubscribeButton({
     const sub = subscriptions.find((s) => s.id === selectedSubId)
     if (!sub) return
 
+    const subscriptionId = tryDecodeRelayId(selectedSubId)
+    if (subscriptionId === null) {
+      addToast({ title: 'Error', description: 'Failed to update subscription.', color: 'danger' })
+      return
+    }
+
     const existingIds = (sub[m2mField] as SubscribedEntity[]).map((e) => e.id)
     const inputField = M2M_INPUT_MAP[entityType]
 
     updateSubscription({
       variables: {
-        subscriptionId: decodeRelayId(selectedSubId),
+        subscriptionId,
         inputData: {
           [inputField]: [...existingIds, decodedEntityId],
         },
@@ -178,7 +184,7 @@ export default function SubscribeButton({
     setModalView(activeSubscriptions.length > 0 ? 'list' : 'create')
   }
 
-  if (status !== 'authenticated') return null
+  if (status !== 'authenticated' || decodedEntityId === null) return null
 
   const renderButton = () => {
     if (isSubscribed) {

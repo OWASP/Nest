@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.db import models
 
 from apps.owasp.models.snapshot_feedback import MAX_RATING, MIN_RATING, SnapshotFeedback
 
@@ -59,6 +60,17 @@ class TestSnapshotFeedback:
 
         assert MIN_RATING in limits
         assert MAX_RATING in limits
+
+    def test_rating_check_constraint(self):
+        """Test the database enforces the 1-5 rating range."""
+        constraint = next(
+            c
+            for c in SnapshotFeedback._meta.constraints
+            if c.name == "valid_feedback_rating_range"
+        )
+
+        assert isinstance(constraint, models.CheckConstraint)
+        assert constraint.condition == models.Q(rating__gte=MIN_RATING, rating__lte=MAX_RATING)
 
     def test_related_names(self):
         """Test reverse accessors used by the API and node resolvers."""

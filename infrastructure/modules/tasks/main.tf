@@ -223,8 +223,7 @@ resource "aws_iam_role_policy_attachment" "event_bridge_policy_attachment" {
 module "owasp_create_snapshot_task" {
   source = "./modules/task"
 
-  assign_public_ip = var.assign_public_ip
-  aws_region       = var.aws_region
+  aws_region = var.aws_region
   command = [
     "/bin/sh",
     "-c",
@@ -244,10 +243,10 @@ module "owasp_create_snapshot_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.create_snapshot_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = local.create_snapshot_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-create-snapshot"
   use_fargate_spot             = var.use_fargate_spot
 }

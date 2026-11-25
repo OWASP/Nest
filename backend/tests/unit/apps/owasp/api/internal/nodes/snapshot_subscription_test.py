@@ -1,8 +1,9 @@
 """Test cases for SnapshotSubscriptionNode."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from apps.owasp.api.internal.nodes.snapshot_subscription import (
+    ENTITY_ITEMS_LIMIT,
     EntitySectionNode,
     SnapshotSubscriptionNode,
     SubscribedEntityNode,
@@ -99,14 +100,9 @@ class TestSnapshotSubscriptionNodeResolvers:
         """Set up PR, issue, and release querysets on mock_snapshot."""
         for attr in ("pull_requests", "issues", "releases"):
             qs = MagicMock()
-            items = (items_map or {}).get(attr, [])
             qs_prefetch = qs.filter.return_value.order_by.return_value.prefetch_related
-            if attr == "releases":
-                qs_prefetch.return_value = items
-            elif items:
-                qs_prefetch.return_value.__getitem__ = lambda _, _s, i=items: i
-            else:
-                qs_prefetch.return_value = []
+            # A real list respects the resolver's slice, so limits are exercised.
+            qs_prefetch.return_value = list((items_map or {}).get(attr, []))
             setattr(mock_snapshot, attr, qs)
 
     def test_projects(self):
@@ -115,13 +111,19 @@ class TestSnapshotSubscriptionNodeResolvers:
         mock_sub = MagicMock()
         mock_p = MagicMock()
         mock_p.pk = 1
+        mock_p.key = "www-project-zap"
         mock_p.name = "Project 1"
+        mock_repository = MagicMock()
+        mock_repository.name = "zaproxy"
+        mock_p.repositories.all.return_value = [mock_repository]
         mock_sub.projects.all.return_value = [mock_p]
 
         result = resolver(None, mock_sub)
         assert len(result) == 1
         assert result[0].id == 1
+        assert result[0].key == "www-project-zap"
         assert result[0].name == "Project 1"
+        assert result[0].repository_names == ["zaproxy"]
 
     def test_chapters(self):
         """Test chapters resolver."""
@@ -129,12 +131,14 @@ class TestSnapshotSubscriptionNodeResolvers:
         mock_sub = MagicMock()
         mock_c = MagicMock()
         mock_c.pk = 2
+        mock_c.key = "www-chapter-london"
         mock_c.name = "Chapter 1"
         mock_sub.chapters.all.return_value = [mock_c]
 
         result = resolver(None, mock_sub)
         assert len(result) == 1
         assert result[0].id == 2
+        assert result[0].key == "www-chapter-london"
         assert result[0].name == "Chapter 1"
 
     def test_committees(self):
@@ -143,26 +147,32 @@ class TestSnapshotSubscriptionNodeResolvers:
         mock_sub = MagicMock()
         mock_c = MagicMock()
         mock_c.pk = 3
+        mock_c.key = "www-committee-test"
         mock_c.name = "Committee 1"
         mock_sub.committees.all.return_value = [mock_c]
 
         result = resolver(None, mock_sub)
         assert len(result) == 1
         assert result[0].id == 3
+        assert result[0].key == "www-committee-test"
         assert result[0].name == "Committee 1"
 
     @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
     def test_entity_sections_with_valid_snapshot(self, mock_snapshot_model):
         """Test entity_sections resolver returns sections for subscribed entities."""
         resolver = self._get_resolver("entity_sections")
+        mock_repository = MagicMock()
+        mock_repository.pk = 101
+        mock_repository.name = "zaproxy"
         mock_project = MagicMock()
         mock_project.key = "www-project-zap"
         mock_project.name = "OWASP ZAP"
-        mock_project.repositories.all.return_value = [MagicMock(name="zaproxy")]
+        mock_project.repositories.all.return_value = [mock_repository]
 
         mock_pr = MagicMock()
         mock_issue = MagicMock()
         mock_snapshot, mock_sub = self._make_entity_mocks(projects=[mock_project])
+        mock_snapshot_model.Status = Snapshot.Status
         mock_snapshot_model.objects.get.return_value = mock_snapshot
         self._make_snapshot_qs(
             mock_snapshot,
@@ -170,12 +180,38 @@ class TestSnapshotSubscriptionNodeResolvers:
         )
 
         result = resolver(None, mock_sub, snapshot_key="2025")
+        mock_snapshot_model.objects.get.assert_called_once_with(
+            key="2025", status=Snapshot.Status.COMPLETED
+        )
+        for attr in ("pull_requests", "issues", "releases"):
+            getattr(mock_snapshot, attr).filter.assert_called_once_with(repository_id__in=[101])
         assert len(result) == 1
         assert result[0].entity_key == "www-project-zap"
         assert result[0].entity_name == "OWASP ZAP"
         assert result[0].entity_type == "Project"
         assert result[0].pull_requests == [mock_pr]
         assert result[0].issues == [mock_issue]
+
+    @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
+    def test_entity_sections_limits_pull_requests_and_issues(self, mock_snapshot_model):
+        """Test entity_sections caps PRs and issues at ENTITY_ITEMS_LIMIT per entity."""
+        resolver = self._get_resolver("entity_sections")
+        mock_project = MagicMock()
+        mock_project.repositories.all.return_value = [MagicMock(pk=101)]
+
+        mock_prs = [MagicMock() for _ in range(ENTITY_ITEMS_LIMIT + 2)]
+        mock_issues = [MagicMock() for _ in range(ENTITY_ITEMS_LIMIT + 2)]
+        mock_snapshot, mock_sub = self._make_entity_mocks(projects=[mock_project])
+        mock_snapshot_model.objects.get.return_value = mock_snapshot
+        self._make_snapshot_qs(
+            mock_snapshot,
+            items_map={"pull_requests": mock_prs, "issues": mock_issues},
+        )
+
+        result = resolver(None, mock_sub, snapshot_key="2025")
+        assert len(result) == 1
+        assert result[0].pull_requests == mock_prs[:ENTITY_ITEMS_LIMIT]
+        assert result[0].issues == mock_issues[:ENTITY_ITEMS_LIMIT]
 
     @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
     def test_entity_sections_includes_prs_regardless_of_flag(self, mock_snapshot_model):
@@ -294,30 +330,24 @@ class TestSnapshotSubscriptionNodeResolvers:
         mock_chapter = MagicMock()
         mock_chapter.key = "www-chapter-london"
         mock_chapter.name = "OWASP London"
-        mock_chapter.owasp_repository = MagicMock()
-        mock_chapter.owasp_repository.name = "www-chapter-london"
+        mock_chapter.owasp_repository_id = 201
         mock_sub.chapters.all.return_value = [mock_chapter]
 
         mock_committee = MagicMock()
         mock_committee.key = "www-committee-test"
         mock_committee.name = "Women in AppSec"
-        mock_committee.owasp_repository = MagicMock()
-        mock_committee.owasp_repository.name = "www-committee-test"
+        mock_committee.owasp_repository_id = 202
         mock_sub.committees.all.return_value = [mock_committee]
 
         mock_release = MagicMock()
-        for attr in ("pull_requests", "issues"):
-            qs = MagicMock()
-            qs_prefetch = qs.filter.return_value.order_by.return_value.prefetch_related
-            qs_prefetch.return_value.__getitem__ = lambda _, _s: []
-            setattr(mock_snapshot, attr, qs)
-
-        release_qs = MagicMock()
-        release_prefetch = release_qs.filter.return_value.order_by.return_value.prefetch_related
-        release_prefetch.return_value = [mock_release]
-        mock_snapshot.releases = release_qs
+        self._make_snapshot_qs(mock_snapshot, items_map={"releases": [mock_release]})
 
         result = resolver(None, mock_sub, snapshot_key="2025")
+        for attr in ("pull_requests", "issues", "releases"):
+            assert getattr(mock_snapshot, attr).filter.call_args_list == [
+                call(repository_id__in=[201]),
+                call(repository_id__in=[202]),
+            ]
         assert len(result) == 2
         assert result[0].entity_key == "www-chapter-london"
         assert result[0].entity_type == "Chapter"

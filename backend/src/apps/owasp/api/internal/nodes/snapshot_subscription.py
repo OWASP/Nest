@@ -83,8 +83,8 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
     @strawberry_django.field(
         prefetch_related=[
             "projects__repositories",
-            "chapters__owasp_repository",
-            "committees__owasp_repository",
+            "chapters",
+            "committees",
         ]
     )
     def entity_sections(
@@ -110,15 +110,15 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
 
         entities = []
         for p in root.projects.all():
-            repo_names = [r.name for r in p.repositories.all()]
-            entities.append(("Project", p.key, p.name, repo_names))
+            repository_ids = [r.pk for r in p.repositories.all()]
+            entities.append(("Project", p.key, p.name, repository_ids))
 
         entities.extend(
             (
                 "Chapter",
                 c.key,
                 c.name,
-                [c.owasp_repository.name] if c.owasp_repository else [],
+                [c.owasp_repository_id] if c.owasp_repository_id else [],
             )
             for c in root.chapters.all()
         )
@@ -128,7 +128,7 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
                 "Committee",
                 c.key,
                 c.name,
-                [c.owasp_repository.name] if c.owasp_repository else [],
+                [c.owasp_repository_id] if c.owasp_repository_id else [],
             )
             for c in root.committees.all()
         )
@@ -137,21 +137,21 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
             return []
 
         sections = []
-        for entity_type, key, name, repo_names in entities:
+        for entity_type, key, name, repository_ids in entities:
             prs = list(
-                snapshot.pull_requests.filter(repository__name__in=repo_names)
+                snapshot.pull_requests.filter(repository_id__in=repository_ids)
                 .order_by("-created_at")
                 .prefetch_related("author", "repository__organization")[:ENTITY_ITEMS_LIMIT]
             )
             issues = list(
-                snapshot.issues.filter(repository__name__in=repo_names)
+                snapshot.issues.filter(repository_id__in=repository_ids)
                 .order_by("-created_at")
                 .prefetch_related(
                     MERGED_PULL_REQUESTS_PREFETCH, "author", "repository__organization"
                 )[:ENTITY_ITEMS_LIMIT]
             )
             releases = list(
-                snapshot.releases.filter(repository__name__in=repo_names)
+                snapshot.releases.filter(repository_id__in=repository_ids)
                 .order_by("-published_at")
                 .prefetch_related("author", "repository__organization", "repository__project_set")
             )

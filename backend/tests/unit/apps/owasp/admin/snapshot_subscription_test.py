@@ -95,10 +95,18 @@ class TestSnapshotSubscriptionAdminForm:
         form = SnapshotSubscriptionAdminForm()
         form.instance = MagicMock()
         form.instance.pk = None
+        user = MagicMock()
         form.cleaned_data = {
-            "user": MagicMock(),
+            "user": user,
             "frequency": "weekly",
             "include_chapters": True,
+            "include_events": False,
+            "include_issues": True,
+            "include_posts": False,
+            "include_projects": True,
+            "include_pull_requests": False,
+            "include_releases": True,
+            "include_users": False,
             "projects": [],
             "chapters": [],
             "committees": [],
@@ -108,25 +116,63 @@ class TestSnapshotSubscriptionAdminForm:
 
         result = form.clean()
         assert result == form.cleaned_data
+        mock_check_duplicate_setup.assert_called_once_with(
+            entity_ids={"chapters": [], "committees": [], "projects": []},
+            exclude_pk=None,
+            frequency="weekly",
+            include_chapters=True,
+            include_events=False,
+            include_issues=True,
+            include_posts=False,
+            include_projects=True,
+            include_pull_requests=False,
+            include_releases=True,
+            include_users=False,
+            user=user,
+        )
 
     @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
     def test_clean_raises_when_exact_duplicate(self, mock_check_duplicate_setup):
         """Test clean raises ValidationError when exact duplicate exists."""
         form = SnapshotSubscriptionAdminForm()
         form.instance = MagicMock()
-        form.instance.pk = None
+        form.instance.pk = 42
+        user = MagicMock()
         form.cleaned_data = {
-            "user": MagicMock(),
-            "frequency": "weekly",
+            "user": user,
+            "frequency": "monthly",
+            "include_chapters": False,
+            "include_events": True,
+            "include_issues": False,
+            "include_posts": True,
+            "include_projects": False,
+            "include_pull_requests": True,
+            "include_releases": False,
+            "include_users": True,
             "projects": [MagicMock(pk=1)],
-            "chapters": [],
-            "committees": [],
+            "chapters": [MagicMock(pk=2), MagicMock(pk=3)],
+            "committees": [MagicMock(pk=4)],
         }
 
         mock_check_duplicate_setup.return_value = True
 
         with pytest.raises(ValidationError, match="same configuration"):
             form.clean()
+
+        mock_check_duplicate_setup.assert_called_once_with(
+            entity_ids={"chapters": [2, 3], "committees": [4], "projects": [1]},
+            exclude_pk=42,
+            frequency="monthly",
+            include_chapters=False,
+            include_events=True,
+            include_issues=False,
+            include_posts=True,
+            include_projects=False,
+            include_pull_requests=True,
+            include_releases=False,
+            include_users=True,
+            user=user,
+        )
 
     @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
     def test_clean_raises_when_empty_subscription(self, mock_check_duplicate_setup):

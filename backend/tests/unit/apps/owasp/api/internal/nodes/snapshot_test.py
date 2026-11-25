@@ -2,9 +2,13 @@
 
 from unittest.mock import MagicMock
 
+import pytest
+
 from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH
-from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
+from apps.owasp.api.internal.nodes.snapshot import MAX_LIMIT, SnapshotNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+
+PAGINATED_FIELDS = ("events", "feedback", "issues", "posts", "pull_requests", "users")
 
 
 class TestSnapshotNode(GraphQLNodeBaseTest):
@@ -48,6 +52,51 @@ class TestSnapshotNodeResolvers:
             if field.name == field_name:
                 return field.base_resolver.wrapped_func if field.base_resolver else None
         return None
+
+    def _make_snapshot_with_ordered_items(self, field_name, items):
+        """Return a snapshot mock whose ordered queryset for field_name is items."""
+        mock_snapshot = MagicMock()
+        manager = getattr(mock_snapshot, field_name)
+        if field_name == "feedback":
+            manager = manager.select_related.return_value
+        elif field_name == "issues":
+            manager = manager.prefetch_related.return_value
+        manager.order_by.return_value = items
+        return mock_snapshot
+
+    @pytest.mark.parametrize("field_name", PAGINATED_FIELDS)
+    def test_paginated_resolver_applies_limit_and_offset(self, field_name):
+        """Test paginated resolvers return only the requested window."""
+        resolver = self._get_resolver(field_name)
+        mock_snapshot = self._make_snapshot_with_ordered_items(field_name, list(range(10)))
+
+        assert resolver(None, mock_snapshot, limit=3, offset=2) == [2, 3, 4]
+
+    @pytest.mark.parametrize("field_name", PAGINATED_FIELDS)
+    def test_paginated_resolver_clamps_negative_offset(self, field_name):
+        """Test paginated resolvers treat a negative offset as zero."""
+        resolver = self._get_resolver(field_name)
+        mock_snapshot = self._make_snapshot_with_ordered_items(field_name, list(range(10)))
+
+        assert resolver(None, mock_snapshot, limit=2, offset=-5) == [0, 1]
+
+    @pytest.mark.parametrize("field_name", PAGINATED_FIELDS)
+    def test_paginated_resolver_caps_limit(self, field_name):
+        """Test paginated resolvers cap the limit at MAX_LIMIT."""
+        resolver = self._get_resolver(field_name)
+        items = list(range(MAX_LIMIT + 5))
+        mock_snapshot = self._make_snapshot_with_ordered_items(field_name, items)
+
+        assert resolver(None, mock_snapshot, limit=MAX_LIMIT + 5) == items[:MAX_LIMIT]
+
+    @pytest.mark.parametrize("limit", [0, -1])
+    @pytest.mark.parametrize("field_name", PAGINATED_FIELDS)
+    def test_paginated_resolver_invalid_limit(self, field_name, limit):
+        """Test paginated resolvers return an empty list for a non-positive limit."""
+        resolver = self._get_resolver(field_name)
+        mock_snapshot = self._make_snapshot_with_ordered_items(field_name, list(range(10)))
+
+        assert resolver(None, mock_snapshot, limit=limit) == []
 
     def test_key_resolver(self):
         """Test key resolver returns snapshot key."""

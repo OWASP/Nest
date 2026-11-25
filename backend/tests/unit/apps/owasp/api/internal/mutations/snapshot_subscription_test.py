@@ -158,6 +158,27 @@ class TestCreateSnapshotSubscription:
         assert not result.ok
         assert "same setup" in result.message
 
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_unknown_entity_ids(self, mock_create, mutations):
+        """Test create fails when selected entity IDs do not exist."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(frequency="weekly", project_ids=[999])
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.set_m2m_fields.side_effect = ValidationError(
+            "One or more selected projects could not be found."
+        )
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.message == "One or more selected projects could not be found."
+        mock_sub.set_m2m_fields.assert_called_once_with(
+            project_ids=[999], chapter_ids=None, committee_ids=None
+        )
+        mock_sub.clean.assert_not_called()
+
     def test_name_too_long(self, mutations):
         """Test create fails when name exceeds 100 characters via Pydantic validation."""
         info = mock_info()
@@ -238,6 +259,7 @@ class TestUpdateSnapshotSubscription:
             )
             assert not result.ok
             assert result.message == "Subscription not found."
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
 
     def test_clean_validation_error(self, mutations):
         """Test update fails when clean() rejects the state."""
@@ -277,6 +299,7 @@ class TestUpdateSnapshotSubscription:
             )
             assert result.ok
             assert result.message == "Subscription updated successfully."
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
             mock_sub.update.assert_called_once()
             mock_sub.set_m2m_fields.assert_called_once()
             mock_sub.clean.assert_called_once()
@@ -298,6 +321,26 @@ class TestUpdateSnapshotSubscription:
             )
             assert not result.ok
             assert "same setup" in result.message
+
+    def test_unknown_entity_ids(self, mutations):
+        """Test update fails when selected entity IDs do not exist."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(chapter_ids=[999])
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.set_m2m_fields.side_effect = ValidationError(
+            "One or more selected chapters could not be found."
+        )
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert result.code == "VALIDATION_ERROR"
+            assert result.message == "One or more selected chapters could not be found."
+            mock_sub.clean.assert_not_called()
 
     def test_name_too_long(self, mutations):
         """Test update fails when name exceeds 100 characters via Pydantic."""
@@ -379,6 +422,7 @@ class TestDeleteSnapshotSubscription:
             result = mutations.delete_snapshot_subscription(info, subscription_id=1)
             assert not result.ok
             assert result.message == "Subscription not found."
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
 
     def test_success(self, mutations):
         """Test successful subscription deletion."""
@@ -390,6 +434,7 @@ class TestDeleteSnapshotSubscription:
             mock_objects.get.return_value = mock_sub
             result = mutations.delete_snapshot_subscription(info, subscription_id=1)
             assert result.ok
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
             mock_sub.delete.assert_called_once()
 
 

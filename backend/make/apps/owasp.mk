@@ -1,14 +1,11 @@
 .PHONY: owasp-add-project-custom-tags owasp-aggregate-entity-contributions \
 	owasp-aggregate-member-contributions owasp-aggregate-projects owasp-create-project-metadata-file \
-	owasp-crp-recalculate-scores owasp-enrich-chapters owasp-enrich-committees owasp-enrich-events \
-	owasp-enrich-chapters owasp-enrich-committees owasp-enrich-events owasp-enrich-projects \
-	owasp-enrich-projects owasp-generate-community-snapshot-video owasp-process-snapshots \
-	owasp-generate-community-snapshot-video owasp-process-snapshots owasp-send-snapshot-emails \
-	owasp-sync-board-activity owasp-sync-chapters owasp-sync-committees owasp-sync-posts \
-	owasp-sync-chapters owasp-sync-committees owasp-sync-posts owasp-sync-projects \
-	owasp-sync-projects owasp-update-events owasp-update-leaders owasp-update-project-health-metrics \
-	owasp-update-events owasp-update-leaders owasp-update-project-health-metrics \
-	owasp-update-project-health-requirements owasp-update-project-health-scores owasp-update-sponsors
+	owasp-create-snapshot owasp-crp-recalculate-scores owasp-enrich-chapters owasp-enrich-committees \
+	owasp-enrich-events owasp-enrich-projects owasp-generate-community-snapshot-video \
+	owasp-process-snapshots owasp-send-snapshot-emails owasp-sync-board-activity owasp-sync-chapters \
+	owasp-sync-committees owasp-sync-posts owasp-sync-projects owasp-update-events \
+	owasp-update-leaders owasp-update-project-health-metrics owasp-update-project-health-requirements \
+	owasp-update-project-health-scores owasp-update-sponsors
 
 owasp-add-project-custom-tags:
 	@echo "Adding project custom tags from $(FILE)"

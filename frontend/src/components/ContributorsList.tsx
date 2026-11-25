@@ -1,6 +1,6 @@
 import upperFirst from 'lodash/upperFirst'
 import Image from 'next/image'
-
+import Link from 'next/link'
 import { useState } from 'react'
 import type { IconType } from 'react-icons'
 import type { Contributor } from 'types/contributor'
@@ -75,11 +75,9 @@ const ContributorsList = ({
               <span className="text-xs text-gray-500 dark:text-gray-400">@{item.login}</span>
             </a>
           ) : (
-            <a
+            <Link
               key={item.login}
               href={getUrl(item.login)}
-              target="_blank"
-              rel="noopener noreferrer"
               className="overflow-hidden rounded-lg bg-gray-200 p-4 transition-opacity hover:opacity-80 dark:bg-gray-700"
               data-testid="contributor-link"
               title={item?.name || item?.login}
@@ -100,7 +98,7 @@ const ContributorsList = ({
                   {upperFirst(item.name) || upperFirst(item.login)}
                 </span>
               </div>
-            </a>
+            </Link>
           )
         )}
       </div>

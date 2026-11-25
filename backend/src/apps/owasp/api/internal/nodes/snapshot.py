@@ -62,7 +62,7 @@ class SnapshotNode(strawberry.relay.Node):
         count = getattr(root, "_feedback_count", None)
         return count if count is not None else root.feedback.count()
 
-    @strawberry_django.field(prefetch_related=["feedback"])
+    @strawberry_django.field
     def feedback(
         self, root: Snapshot, limit: int = 10, offset: int = 0
     ) -> list[SnapshotFeedbackNode]:
@@ -78,12 +78,12 @@ class SnapshotNode(strawberry.relay.Node):
             return None
         return root.feedback.filter(user=user).first()
 
-    @strawberry_django.field(prefetch_related=["events"])
+    @strawberry_django.field
     def events(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[EventNode]:
         """Resolve events."""
         return SnapshotNode._slice_related(root.events.order_by("-start_date"), limit, offset)
 
-    @strawberry_django.field(prefetch_related=["issues"])
+    @strawberry_django.field
     def issues(
         self,
         root: Snapshot,
@@ -99,17 +99,17 @@ class SnapshotNode(strawberry.relay.Node):
             queryset = queryset.filter(repository__name__in=repository_names)
         return SnapshotNode._slice_related(queryset, limit, offset)
 
-    @strawberry_django.field(prefetch_related=["posts"])
+    @strawberry_django.field
     def posts(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[PostNode]:
         """Resolve posts."""
         return SnapshotNode._slice_related(root.posts.order_by("-published_at"), limit, offset)
 
-    @strawberry_django.field(prefetch_related=["projects"])
+    @strawberry_django.field
     def projects(self, root: Snapshot) -> list[ProjectNode]:
         """Resolve projects."""
         return root.projects.order_by("-created_at")
 
-    @strawberry_django.field(prefetch_related=["pull_requests"])
+    @strawberry_django.field
     def pull_requests(
         self,
         root: Snapshot,
@@ -123,12 +123,12 @@ class SnapshotNode(strawberry.relay.Node):
             queryset = queryset.filter(repository__name__in=repository_names)
         return SnapshotNode._slice_related(queryset, limit, offset)
 
-    @strawberry_django.field(prefetch_related=["releases"])
+    @strawberry_django.field
     def releases(self, root: Snapshot) -> list[ReleaseNode]:
         """Resolve releases."""
         return root.releases.order_by("-published_at")
 
-    @strawberry_django.field(prefetch_related=["users"])
+    @strawberry_django.field
     def users(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[UserNode]:
         """Resolve users."""
         return SnapshotNode._slice_related(root.users.order_by("-created_at"), limit, offset)

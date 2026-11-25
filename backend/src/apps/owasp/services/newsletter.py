@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from django.db import transaction
 from django.template import TemplateDoesNotExist, TemplateSyntaxError
 from django.template.loader import render_to_string
 from django_rq import job
@@ -401,11 +402,15 @@ class SnapshotDigestService:
 
 
 @job("emails")
+@transaction.atomic
 def send_digest_email(snapshot_id: int, subscription_id: int, expected_frequency: str = ""):
     """Send a single snapshot digest email. Called by the RQ worker.
 
     This is the RQ job function enqueued by owasp_send_snapshot_emails.
     Performs an idempotency check before sending to handle retries safely.
+    The subscription row stays locked until the email log is saved, so
+    concurrent jobs for the same subscription run one after another and
+    a later job sees the SENT log instead of sending a duplicate email.
 
     Args:
         snapshot_id: The primary key of the Snapshot to send.
@@ -416,7 +421,8 @@ def send_digest_email(snapshot_id: int, subscription_id: int, expected_frequency
     try:
         snapshot = Snapshot.objects.get(id=snapshot_id)
         subscription = (
-            SnapshotSubscription.objects.select_related("user")
+            SnapshotSubscription.objects.select_for_update(of=("self",))
+            .select_related("user")
             .prefetch_related(
                 "projects",
                 "chapters",

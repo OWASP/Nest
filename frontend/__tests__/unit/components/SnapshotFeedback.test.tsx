@@ -42,6 +42,7 @@ describe('SnapshotFeedback', () => {
   const mockUseMutation = useMutation as unknown as jest.Mock
   const mockAddToast = addToast as jest.Mock
   const mockRefetch = jest.fn()
+  const mockFetchMore = jest.fn()
   const mockSubmit = jest.fn()
   const mockDelete = jest.fn()
 
@@ -73,6 +74,7 @@ describe('SnapshotFeedback', () => {
       data: { snapshot },
       loading: false,
       error: null,
+      fetchMore: mockFetchMore,
       refetch: mockRefetch,
     })
 
@@ -181,7 +183,7 @@ describe('SnapshotFeedback', () => {
       render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
 
       expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
-      expect(screen.queryByRole('group', { name: 'Your rating' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('radiogroup', { name: 'Your rating' })).not.toBeInTheDocument()
       expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
     })
 
@@ -239,7 +241,7 @@ describe('SnapshotFeedback', () => {
       setupMocks()
       render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
 
-      fireEvent.click(screen.getByRole('button', { name: '4 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '4 stars' }))
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Great work' } })
       fireEvent.click(screen.getByText('Submit Feedback'))
 
@@ -256,7 +258,7 @@ describe('SnapshotFeedback', () => {
       setupMocks()
       render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
 
-      fireEvent.click(screen.getByRole('button', { name: '3 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '3 stars' }))
       fireEvent.click(screen.getByText('Submit Feedback'))
 
       await waitFor(() => {
@@ -270,7 +272,7 @@ describe('SnapshotFeedback', () => {
       setupMocks()
       render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
 
-      fireEvent.click(screen.getByRole('button', { name: '5 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '5 stars' }))
       fireEvent.click(screen.getByText('Submit Feedback'))
 
       await waitFor(() => {
@@ -289,7 +291,7 @@ describe('SnapshotFeedback', () => {
       })
       render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
 
-      fireEvent.click(screen.getByRole('button', { name: '2 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '2 stars' }))
       fireEvent.click(screen.getByText('Submit Feedback'))
 
       await waitFor(() => {
@@ -338,10 +340,7 @@ describe('SnapshotFeedback', () => {
 
       expect(screen.getByText('Update your feedback')).toBeInTheDocument()
       expect(screen.getByRole('textbox')).toHaveValue('Really useful digest.')
-      expect(screen.getByRole('button', { name: '5 stars' })).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      )
+      expect(screen.getByRole('radio', { name: '5 stars' })).toBeChecked()
     })
 
     it('offers update and remove actions', () => {
@@ -356,7 +355,7 @@ describe('SnapshotFeedback', () => {
       setupMocks({ snapshot: withMyFeedback })
       render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
 
-      fireEvent.click(screen.getByRole('button', { name: '2 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '2 stars' }))
       fireEvent.click(screen.getByText('Update Feedback'))
 
       await waitFor(() => {
@@ -385,6 +384,10 @@ describe('SnapshotFeedback', () => {
         expect.objectContaining({ title: 'Removed', color: 'success' })
       )
       expect(mockRefetch).toHaveBeenCalled()
+      expect(screen.getByRole('textbox')).toHaveValue('')
+      for (const star of screen.getAllByRole('radio')) {
+        expect(star).not.toBeChecked()
+      }
     })
 
     it('surfaces a failed delete', async () => {
@@ -418,7 +421,7 @@ describe('SnapshotFeedback', () => {
 
       expect(screen.getByText('Saving...')).toBeInTheDocument()
       expect(screen.getByRole('textbox')).toBeDisabled()
-      expect(screen.getByRole('button', { name: '3 stars' })).toBeDisabled()
+      expect(screen.getByRole('radio', { name: '3 stars' })).toBeDisabled()
     })
   })
 
@@ -514,13 +517,151 @@ describe('SnapshotFeedback', () => {
     })
   })
 
+  describe('feedback pagination', () => {
+    const makeEntries = (count: number, start = 0) =>
+      Array.from({ length: count }, (_, index) => ({
+        ...feedbackEntry,
+        id: `feedback-${start + index}`,
+        username: `user-${start + index}`,
+      }))
+
+    const pagedSnapshot = (loaded: number, total: number) => ({
+      id: 'snapshot-1',
+      averageRating: 4,
+      feedbackCount: total,
+      myFeedback: null,
+      feedback: makeEntries(loaded),
+    })
+
+    it('requests the first page of feedback', () => {
+      setupMocks()
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ variables: { key: SNAPSHOT_KEY, limit: 10, offset: 0 } })
+      )
+    })
+
+    it('hides Show more when every entry fits on the first page', () => {
+      setupMocks({ snapshot: pagedSnapshot(10, 10) })
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(10)
+      expect(screen.queryByRole('button', { name: /show more/i })).not.toBeInTheDocument()
+    })
+
+    it('fetches and shows the remaining entries when Show more is clicked', async () => {
+      const snapshot = pagedSnapshot(10, 12)
+      setupMocks({ snapshot })
+      mockFetchMore.mockImplementation(async ({ updateQuery, variables }) => {
+        const fetchMoreResult = { snapshot: { ...snapshot, feedback: makeEntries(2, 10) } }
+        const merged = updateQuery({ snapshot }, { fetchMoreResult, variables })
+        mockUseQuery.mockReturnValue({
+          data: merged,
+          fetchMore: mockFetchMore,
+          refetch: mockRefetch,
+        })
+        return { data: fetchMoreResult }
+      })
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(10)
+      fireEvent.click(screen.getByRole('button', { name: /show more/i }))
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(12)
+      })
+      expect(mockFetchMore).toHaveBeenCalledWith(
+        expect.objectContaining({ variables: { offset: 10, limit: 2 } })
+      )
+      expect(screen.getByText('user-11')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /show less/i }))
+
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(10)
+    })
+
+    it('expands without fetching when every entry is already loaded', () => {
+      setupMocks({ snapshot: pagedSnapshot(12, 12) })
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(10)
+      fireEvent.click(screen.getByRole('button', { name: /show more/i }))
+
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(12)
+      expect(mockFetchMore).not.toHaveBeenCalled()
+    })
+
+    it('ignores repeated clicks while the next page is loading', () => {
+      setupMocks({ snapshot: pagedSnapshot(10, 12) })
+      mockFetchMore.mockReturnValue(new Promise(() => {}))
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      fireEvent.click(screen.getByRole('button', { name: /show more/i }))
+      fireEvent.click(screen.getByRole('button', { name: /show more/i }))
+
+      expect(mockFetchMore).toHaveBeenCalledTimes(1)
+    })
+
+    it('toasts and stays collapsed when loading more fails', async () => {
+      setupMocks({ snapshot: pagedSnapshot(10, 12) })
+      mockFetchMore.mockRejectedValue(new Error('Network error'))
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      fireEvent.click(screen.getByRole('button', { name: /show more/i }))
+
+      await waitFor(() => {
+        expect(mockAddToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            description: 'Failed to load more feedback.',
+            color: 'danger',
+          })
+        )
+      })
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(10)
+      expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
+    })
+
+    it('keeps the cached result when the next page is missing', async () => {
+      const snapshot = pagedSnapshot(10, 12)
+      setupMocks({ snapshot })
+      mockFetchMore.mockResolvedValue({ data: null })
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      fireEvent.click(screen.getByRole('button', { name: /show more/i }))
+
+      await waitFor(() => expect(mockFetchMore).toHaveBeenCalled())
+      const { updateQuery } = mockFetchMore.mock.calls[0][0]
+      const prev = { snapshot }
+      const missing = { snapshot: null }
+      expect(updateQuery(prev, { fetchMoreResult: missing })).toBe(prev)
+      expect(updateQuery(missing, { fetchMoreResult: prev })).toBe(missing)
+    })
+
+    it('collapses the list when feedback is refetched after a submit', async () => {
+      setupMocks({ snapshot: pagedSnapshot(12, 12) })
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      fireEvent.click(screen.getByRole('button', { name: /show more/i }))
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(12)
+
+      fireEvent.click(screen.getByRole('radio', { name: '4 stars' }))
+      fireEvent.click(screen.getByText('Submit Feedback'))
+
+      await waitFor(() => expect(mockRefetch).toHaveBeenCalled())
+      expect(screen.getAllByTestId('snapshot-feedback-entry')).toHaveLength(10)
+    })
+  })
+
   describe('mutation error handling', () => {
     it('shows a danger toast when submit fails with a network error', async () => {
       setupMocks()
       mockSubmit.mockRejectedValue(new Error('Network error'))
       render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
 
-      fireEvent.click(screen.getByRole('button', { name: '4 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '4 stars' }))
       fireEvent.click(screen.getByText('Submit Feedback'))
 
       await waitFor(() => {

@@ -8,7 +8,7 @@ import { addToast } from '@heroui/toast'
 import { Tooltip } from '@heroui/tooltip'
 import debounce from 'lodash/debounce'
 import { useSession } from 'next-auth/react'
-import { Key, useCallback, useEffect, useState } from 'react'
+import { Key, useCallback, useEffect, useRef, useState } from 'react'
 import { FaBell, FaFloppyDisk, FaPlus, FaTrash } from 'react-icons/fa6'
 
 import { SEARCH_CHAPTERS } from 'server/queries/chapterQueries'
@@ -20,7 +20,7 @@ import {
   GET_MY_SNAPSHOT_SUBSCRIPTIONS,
   UPDATE_SNAPSHOT_SUBSCRIPTION,
 } from 'server/queries/subscriptionQueries'
-import { decodeRelayId } from 'utils/decodeRelayId'
+import { decodeRelayId, tryDecodeRelayId } from 'utils/decodeRelayId'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
@@ -142,10 +142,14 @@ function EntityMultiSelect({
   const [inputValue, setInputValue] = useState('')
   const [items, setItems] = useState<{ id: string; name: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  // Bumped before every new search (and on unmount) so stale in-flight responses are ignored.
+  const requestGeneration = useRef(0)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchSuggestions = useCallback(
     debounce(async (query: string) => {
+      const generation = requestGeneration.current
+      const isStale = () => generation !== requestGeneration.current
       const trimmedQuery = query.trim()
       if (trimmedQuery.length < 2) {
         setItems([])
@@ -159,17 +163,21 @@ function EntityMultiSelect({
           query: searchQuery,
           variables: { query: trimmedQuery },
         })
+        if (isStale()) return
 
         const results =
           ((data as Record<string, unknown>)?.[searchResultKey] as
             { id: string; name: string }[] | undefined) || []
         const selectedIds = new Set(selectedEntities.map((e) => e.id))
-        const filtered = results.filter((r) => !selectedIds.has(decodeRelayId(r.id)))
+        const filtered = results.filter((r) => {
+          const entityId = tryDecodeRelayId(r.id)
+          return entityId !== null && !selectedIds.has(entityId)
+        })
         setItems(filtered.slice(0, 5))
       } catch {
-        setItems([])
+        if (!isStale()) setItems([])
       } finally {
-        setIsLoading(false)
+        if (!isStale()) setIsLoading(false)
       }
     }, 300),
     [client, searchQuery, searchResultKey, selectedEntities]
@@ -179,6 +187,7 @@ function EntityMultiSelect({
     fetchSuggestions(inputValue)
     return () => {
       fetchSuggestions.cancel()
+      requestGeneration.current += 1
     }
   }, [inputValue, fetchSuggestions])
 
@@ -187,6 +196,7 @@ function EntityMultiSelect({
     if (selectedKey) {
       const selectedItem = items.find((item) => item.id === selectedKey)
       if (selectedItem) {
+        // `items` only holds results whose IDs decoded successfully (see fetchSuggestions).
         onAdd({ id: decodeRelayId(selectedItem.id), name: selectedItem.name })
         setInputValue('')
         setItems([])
@@ -206,6 +216,7 @@ function EntityMultiSelect({
         isLoading={isLoading}
         allowsCustomValue={false}
         menuTrigger="input"
+        clearButtonProps={{ 'aria-label': `Clear ${label.toLowerCase()} search` }}
         classNames={{
           base: 'w-full',
         }}
@@ -600,9 +611,15 @@ function SubscriptionContent() {
       committeeIds: number[]
     }
   ) => {
+    const subscriptionId = tryDecodeRelayId(id)
+    if (subscriptionId === null) {
+      addToast({ title: 'Error', description: 'Failed to update subscription.', color: 'danger' })
+      return
+    }
+
     updateSubscription({
       variables: {
-        subscriptionId: decodeRelayId(id),
+        subscriptionId,
         inputData: {
           name: data.name,
           frequency: data.frequency,
@@ -616,7 +633,13 @@ function SubscriptionContent() {
   }
 
   const handleDelete = (id: string) => {
-    deleteSubscription({ variables: { subscriptionId: decodeRelayId(id) } })
+    const subscriptionId = tryDecodeRelayId(id)
+    if (subscriptionId === null) {
+      addToast({ title: 'Error', description: 'Failed to delete subscription.', color: 'danger' })
+      return
+    }
+
+    deleteSubscription({ variables: { subscriptionId } })
   }
 
   const hasAtLeastOneNewPreference = Object.values(newPreferences).some(Boolean)

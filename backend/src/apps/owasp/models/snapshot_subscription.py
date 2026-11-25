@@ -14,6 +14,32 @@ MAX_NAME_LENGTH = 100
 MAX_SUBSCRIPTIONS = 5
 
 
+def _get_entities(model, ids, label):
+    """Return entities matching the given IDs.
+
+    Args:
+        model: The entity model class.
+        ids: List of entity IDs, or None to skip.
+        label: Plural entity name used in the error message.
+
+    Returns:
+        QuerySet of matching entities, or None if ids is None.
+
+    Raises:
+        ValidationError: If any of the provided IDs does not exist.
+
+    """
+    if ids is None:
+        return None
+
+    entities = model.objects.filter(pk__in=ids)
+    if len(entities) != len(set(ids)):
+        msg = f"One or more selected {label} could not be found."
+        raise ValidationError(msg)
+
+    return entities
+
+
 class SnapshotSubscription(models.Model):
     """Model representing a user's subscription to snapshot digest emails.
 
@@ -246,15 +272,22 @@ class SnapshotSubscription(models.Model):
             chapter_ids: List of chapter IDs, or None to skip.
             committee_ids: List of committee IDs, or None to skip.
 
+        Raises:
+            ValidationError: If any of the provided IDs does not exist.
+
         """
-        if project_ids is not None:
-            self.projects.set(Project.objects.filter(pk__in=project_ids))
+        projects = _get_entities(Project, project_ids, "projects")
+        chapters = _get_entities(Chapter, chapter_ids, "chapters")
+        committees = _get_entities(Committee, committee_ids, "committees")
 
-        if chapter_ids is not None:
-            self.chapters.set(Chapter.objects.filter(pk__in=chapter_ids))
+        if projects is not None:
+            self.projects.set(projects)
 
-        if committee_ids is not None:
-            self.committees.set(Committee.objects.filter(pk__in=committee_ids))
+        if chapters is not None:
+            self.chapters.set(chapters)
+
+        if committees is not None:
+            self.committees.set(committees)
 
     @classmethod
     def check_duplicate_setup(

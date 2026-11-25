@@ -137,6 +137,13 @@ describe('SubscribeButton', () => {
       render(<SubscribeButton {...defaultProps} />)
       expect(screen.getByText('Subscribe')).toBeInTheDocument()
     })
+
+    test('returns null when the entity ID cannot be decoded', () => {
+      setupMocks()
+      render(<SubscribeButton {...defaultProps} entityId="not-a-relay-id!" />)
+      expect(screen.queryByText('Subscribe')).not.toBeInTheDocument()
+      expect(screen.queryByText('Subscribed')).not.toBeInTheDocument()
+    })
   })
 
   describe('Subscribe Button (not subscribed)', () => {
@@ -318,7 +325,31 @@ describe('SubscribeButton', () => {
       fireEvent.click(screen.getByText('Create & Subscribe'))
 
       await waitFor(() => {
-        expect(mockCreateMutation).toHaveBeenCalled()
+        expect(mockCreateMutation).toHaveBeenCalledWith({
+          variables: {
+            inputData: { name: undefined, frequency: 'weekly', projectIds: [42] },
+          },
+        })
+      })
+    })
+
+    test('sends the entered name and selected frequency when creating', async () => {
+      setupMocks()
+      render(<SubscribeButton {...defaultProps} entityId={btoa('ProjectNode:42')} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      fireEvent.change(screen.getByPlaceholderText('e.g., My Weekly Digest'), {
+        target: { value: 'Custom Name' },
+      })
+      fireEvent.click(screen.getByText('Monthly'))
+      fireEvent.click(screen.getByText('Create & Subscribe'))
+
+      await waitFor(() => {
+        expect(mockCreateMutation).toHaveBeenCalledWith({
+          variables: {
+            inputData: { name: 'Custom Name', frequency: 'monthly', projectIds: [42] },
+          },
+        })
       })
     })
 
@@ -442,11 +473,11 @@ describe('SubscribeButton', () => {
   describe('Update Subscription via Modal', () => {
     const existingSubscriptions = [
       {
-        id: 'sub-1',
+        id: btoa('SnapshotSubscriptionNode:7'),
         name: 'My Weekly Digest',
         frequency: 'weekly',
         isActive: true,
-        projects: [],
+        projects: [{ id: 5, name: 'Existing Project' }],
         chapters: [],
         committees: [],
       },
@@ -461,8 +492,31 @@ describe('SubscribeButton', () => {
       fireEvent.click(screen.getByText('Add to Subscription'))
 
       await waitFor(() => {
-        expect(mockUpdateMutation).toHaveBeenCalled()
+        expect(mockUpdateMutation).toHaveBeenCalledWith({
+          variables: {
+            subscriptionId: 7,
+            inputData: { projectIds: [5, 42] },
+          },
+        })
       })
+    })
+
+    test('shows error toast and skips the mutation when the subscription ID cannot be decoded', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({ subscriptions: [{ ...existingSubscriptions[0], id: 'sub-1' }] })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+      fireEvent.click(screen.getByText('My Weekly Digest'))
+      fireEvent.click(screen.getByText('Add to Subscription'))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Error',
+          description: 'Failed to update subscription.',
+          color: 'danger',
+        })
+      })
+      expect(mockUpdateMutation).not.toHaveBeenCalled()
     })
 
     test('shows success toast on successful update', async () => {

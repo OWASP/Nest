@@ -79,11 +79,7 @@ describe.each([
     })
 
     const { container } = render(<SettingsPage />)
-    const results = await axe(container, {
-      rules: {
-        'button-name': { enabled: false },
-      },
-    })
+    const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
 

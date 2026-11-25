@@ -1,18 +1,29 @@
+const INTEGER_PATTERN = /^\d+$/
+const RELAY_GLOBAL_ID_PATTERN = /^[^:]+:(\d+)$/
+
 export function decodeRelayId(globalId: string): number {
-  const asInt = Number.parseInt(globalId, 10)
-  if (!Number.isNaN(asInt)) {
-    return asInt
+  if (INTEGER_PATTERN.test(globalId)) {
+    return Number.parseInt(globalId, 10)
   }
+
+  let decoded = ''
   try {
-    const decoded = atob(globalId)
-    const parts = decoded.split(':')
-    const parsed = Number.parseInt(parts.at(-1)!, 10)
-    if (!Number.isNaN(parsed)) {
-      return parsed
-    }
+    decoded = atob(globalId)
   } catch {
-    // Fall through to regex match
+    // Not valid base64; handled below.
   }
-  const match = /\d+/.exec(globalId)
-  return match ? Number.parseInt(match[0], 10) : 0
+
+  const match = RELAY_GLOBAL_ID_PATTERN.exec(decoded)
+  if (!match) {
+    throw new Error(`Invalid Relay ID: ${globalId}`)
+  }
+  return Number.parseInt(match[1], 10)
+}
+
+export function tryDecodeRelayId(globalId: string): number | null {
+  try {
+    return decodeRelayId(globalId)
+  } catch {
+    return null
+  }
 }

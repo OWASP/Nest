@@ -3,7 +3,7 @@
 import { useLazyQuery, useMutation } from '@apollo/client/react'
 import { registerBreadcrumb } from 'contexts/BreadcrumbContext'
 import { useParams, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FaCircleCheck, FaTriangleExclamation } from 'react-icons/fa6'
 import { ErrorDisplay } from 'app/global-error'
 import {
@@ -22,7 +22,6 @@ const UnsubscribePage = () => {
   const [errorMessage, setErrorMessage] = useState('')
   const [errorCode, setErrorCode] = useState(500)
   const [isUnsubscribing, setIsUnsubscribing] = useState(false)
-  const fetchedToken = useRef<string | null>(null)
 
   const [fetchSubscription] = useLazyQuery<{
     subscriptionByToken: { name: string } | null
@@ -33,8 +32,7 @@ const UnsubscribePage = () => {
   }>(UNSUBSCRIBE_BY_TOKEN)
 
   useEffect(() => {
-    if (!token || fetchedToken.current === token) return
-    fetchedToken.current = token
+    if (!token) return
 
     setStatus('loading')
     let active = true

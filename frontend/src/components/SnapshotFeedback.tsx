@@ -34,8 +34,8 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
 
-  const { data, refetch } = useQuery(GetSnapshotFeedbackDocument, {
-    variables: { key: snapshotKey },
+  const { data, fetchMore, refetch } = useQuery(GetSnapshotFeedbackDocument, {
+    variables: { key: snapshotKey, limit: FEEDBACK_INITIAL, offset: 0 },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
     skip: isSyncing,
@@ -48,6 +48,44 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
   const averageRating = snapshot?.averageRating ?? 0
   const feedbackCount = snapshot?.feedbackCount ?? 0
   const [showAllFeedback, setShowAllFeedback] = useState(false)
+  const [isFetchingMoreFeedback, setIsFetchingMoreFeedback] = useState(false)
+
+  const refreshFeedback = () => {
+    setShowAllFeedback(false)
+    refetch()
+  }
+
+  const handleToggleFeedback = () => {
+    if (showAllFeedback || entries.length >= feedbackCount) {
+      setShowAllFeedback((prev) => !prev)
+      return
+    }
+    if (isFetchingMoreFeedback) return
+
+    setIsFetchingMoreFeedback(true)
+    fetchMore({
+      variables: { offset: entries.length, limit: feedbackCount - entries.length },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!prev.snapshot || !fetchMoreResult?.snapshot) return prev
+        return {
+          ...prev,
+          snapshot: {
+            ...prev.snapshot,
+            feedback: [...prev.snapshot.feedback, ...fetchMoreResult.snapshot.feedback],
+          },
+        }
+      },
+    })
+      .then(() => setShowAllFeedback(true))
+      .catch(() => {
+        addToast({
+          title: 'Error',
+          description: 'Failed to load more feedback.',
+          color: 'danger',
+        })
+      })
+      .finally(() => setIsFetchingMoreFeedback(false))
+  }
 
   const seededRef = useRef<string | null>(null)
   useEffect(() => {
@@ -67,7 +105,7 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
         description: message,
         color: ok ? 'success' : 'danger',
       })
-      if (ok) refetch()
+      if (ok) refreshFeedback()
     },
     onError: () => {
       addToast({
@@ -89,7 +127,7 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
       if (ok) {
         setRating(0)
         setComment('')
-        refetch()
+        refreshFeedback()
       }
     },
     onError: () => {
@@ -242,11 +280,8 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
               )}
             </div>
           ))}
-          {entries.length > FEEDBACK_INITIAL && (
-            <ShowMoreButton
-              expanded={showAllFeedback}
-              onToggle={() => setShowAllFeedback((prev) => !prev)}
-            />
+          {Math.max(entries.length, feedbackCount) > FEEDBACK_INITIAL && (
+            <ShowMoreButton expanded={showAllFeedback} onToggle={handleToggleFeedback} />
           )}
         </div>
       )}

@@ -58,7 +58,11 @@ const StarRating = ({
   const displayed = previewed || value
 
   return (
-    <fieldset className="flex items-center gap-1 border-none p-0" aria-label={label}>
+    <fieldset
+      className="flex items-center gap-1 border-none p-0"
+      aria-label={label}
+      role="radiogroup"
+    >
       <legend className="sr-only">{label}</legend>
       {STARS.map((star) => (
         <span
@@ -69,13 +73,14 @@ const StarRating = ({
           onBlur={() => setPreviewed(0)}
         >
           <Button
+            aria-checked={star === value}
             aria-label={`${star} ${star === 1 ? 'star' : 'stars'}`}
-            aria-pressed={star === value}
             className="h-auto min-w-0 bg-transparent p-0.5 transition-transform hover:scale-110"
             disableAnimation
             isDisabled={isDisabled}
             isIconOnly
             onPress={() => onChange(star)}
+            role="radio"
             type="button"
           >
             <IconWrapper

@@ -18,9 +18,10 @@ describe('StarRating', () => {
       )
     })
 
-    it('renders no buttons', () => {
+    it('renders no interactive stars', () => {
       render(<StarRating value={5} />)
 
+      expect(screen.queryByRole('radio')).not.toBeInTheDocument()
       expect(screen.queryByRole('button')).not.toBeInTheDocument()
     })
 
@@ -39,40 +40,39 @@ describe('StarRating', () => {
   })
 
   describe('interactive mode', () => {
-    it('renders one button per star inside a labelled group', () => {
+    it('renders one radio per star inside a labelled radio group', () => {
       render(<StarRating value={0} onChange={jest.fn()} label="Your rating" />)
 
-      expect(screen.getAllByRole('button')).toHaveLength(MAX_RATING)
-      expect(screen.getByRole('group')).toHaveAccessibleName('Your rating')
+      expect(screen.getAllByRole('radio')).toHaveLength(MAX_RATING)
+      expect(screen.getByRole('radiogroup')).toHaveAccessibleName('Your rating')
     })
 
     it('labels the first star in the singular', () => {
       render(<StarRating value={0} onChange={jest.fn()} />)
 
-      expect(screen.getByRole('button', { name: '1 star' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: '2 stars' })).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: '1 star' })).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: '2 stars' })).toBeInTheDocument()
     })
 
     it('calls onChange with the selected rating', () => {
       const handleChange = jest.fn()
       render(<StarRating value={0} onChange={handleChange} />)
 
-      fireEvent.click(screen.getByRole('button', { name: '4 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '4 stars' }))
 
       expect(handleChange).toHaveBeenCalledWith(4)
     })
 
-    it('marks only the selected star as pressed', () => {
+    it('marks only the selected star as checked', () => {
       render(<StarRating value={2} onChange={jest.fn()} />)
 
-      expect(screen.getByRole('button', { name: '2 stars' })).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      )
-      expect(screen.getByRole('button', { name: '3 stars' })).toHaveAttribute(
-        'aria-pressed',
-        'false'
-      )
+      for (const star of [1, 2, 3, 4, 5]) {
+        const name = `${star} ${star === 1 ? 'star' : 'stars'}`
+        expect(screen.getByRole('radio', { name })).toHaveAttribute(
+          'aria-checked',
+          String(star === 2)
+        )
+      }
     })
 
     it('fills stars up to the current value', () => {
@@ -85,7 +85,7 @@ describe('StarRating', () => {
       const handleChange = jest.fn()
       const { container } = render(<StarRating value={1} onChange={handleChange} />)
 
-      fireEvent.mouseEnter(screen.getByRole('button', { name: '5 stars' }).parentElement!)
+      fireEvent.mouseEnter(screen.getByRole('radio', { name: '5 stars' }).parentElement!)
 
       expect(container.querySelectorAll('.text-yellow-500')).toHaveLength(5)
       expect(handleChange).not.toHaveBeenCalled()
@@ -93,7 +93,7 @@ describe('StarRating', () => {
 
     it('restores the committed rating when the pointer leaves', () => {
       const { container } = render(<StarRating value={1} onChange={jest.fn()} />)
-      const star = screen.getByRole('button', { name: '5 stars' }).parentElement!
+      const star = screen.getByRole('radio', { name: '5 stars' }).parentElement!
 
       fireEvent.mouseEnter(star)
       fireEvent.mouseLeave(star)
@@ -104,7 +104,7 @@ describe('StarRating', () => {
     it('previews on keyboard focus', () => {
       const { container } = render(<StarRating value={0} onChange={jest.fn()} />)
 
-      fireEvent.focus(screen.getByRole('button', { name: '3 stars' }))
+      fireEvent.focus(screen.getByRole('radio', { name: '3 stars' }))
 
       expect(container.querySelectorAll('.text-yellow-500')).toHaveLength(3)
     })
@@ -112,7 +112,7 @@ describe('StarRating', () => {
     it('does not preview while disabled', () => {
       const { container } = render(<StarRating value={0} onChange={jest.fn()} isDisabled />)
 
-      fireEvent.mouseEnter(screen.getByRole('button', { name: '5 stars' }).parentElement!)
+      fireEvent.mouseEnter(screen.getByRole('radio', { name: '5 stars' }).parentElement!)
 
       expect(container.querySelectorAll('.text-yellow-500')).toHaveLength(0)
     })
@@ -121,11 +121,11 @@ describe('StarRating', () => {
       const handleChange = jest.fn()
       render(<StarRating value={0} onChange={handleChange} isDisabled />)
 
-      for (const button of screen.getAllByRole('button')) {
-        expect(button).toBeDisabled()
+      for (const radio of screen.getAllByRole('radio')) {
+        expect(radio).toBeDisabled()
       }
 
-      fireEvent.click(screen.getByRole('button', { name: '3 stars' }))
+      fireEvent.click(screen.getByRole('radio', { name: '3 stars' }))
       expect(handleChange).not.toHaveBeenCalled()
     })
 

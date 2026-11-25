@@ -527,6 +527,7 @@ describe('SnapshotEntitySection', () => {
       expect(screen.getByText('Extra PR')).toBeInTheDocument()
     })
     expect(screen.getByText('Show less')).toBeInTheDocument()
+    expect(screen.queryByText('Show more')).not.toBeInTheDocument()
   })
 
   it('sets hasMoreIssues to false when server returns empty array', async () => {
@@ -561,6 +562,7 @@ describe('SnapshotEntitySection', () => {
   })
 
   it('handles server returning null pullRequests gracefully', async () => {
+    const { addToast } = jest.requireMock('@heroui/toast')
     const mockFetchPRs = jest.fn().mockResolvedValue({
       data: { snapshot: { pullRequests: null } },
     })
@@ -581,9 +583,19 @@ describe('SnapshotEntitySection', () => {
     await waitFor(() => {
       expect(mockFetchPRs).toHaveBeenCalled()
     })
+
+    await waitFor(() => {
+      expect(screen.queryByText('Show more')).not.toBeInTheDocument()
+    })
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    expect(screen.queryByText('Show less')).not.toBeInTheDocument()
+    expect(screen.getByText('PR 0')).toBeInTheDocument()
+    expect(screen.getByText('PR 5')).toBeInTheDocument()
+    expect(addToast).not.toHaveBeenCalled()
   })
 
   it('handles server returning null issues gracefully', async () => {
+    const { addToast } = jest.requireMock('@heroui/toast')
     const mockFetchIssues = jest.fn().mockResolvedValue({
       data: { snapshot: { issues: null } },
     })
@@ -608,6 +620,15 @@ describe('SnapshotEntitySection', () => {
     await waitFor(() => {
       expect(mockFetchIssues).toHaveBeenCalled()
     })
+
+    await waitFor(() => {
+      expect(screen.queryByText('Show more')).not.toBeInTheDocument()
+    })
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    expect(screen.queryByText('Show less')).not.toBeInTheDocument()
+    expect(screen.getByText('Issue 0')).toBeInTheDocument()
+    expect(screen.getByText('Issue 5')).toBeInTheDocument()
+    expect(addToast).not.toHaveBeenCalled()
   })
 
   it('toggles release visibility when onToggle is clicked', async () => {

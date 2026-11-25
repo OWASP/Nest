@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@apollo/client/react'
+import { useApolloClient, useQuery, useMutation } from '@apollo/client/react'
 import {
   mockActiveSubscriptions,
   mockCreateSubscriptionResult,
@@ -7,7 +7,7 @@ import {
   mockNoSubscriptions,
   mockUpdateSubscriptionResult,
 } from '@mockData/mockSubscriptionData'
-import { screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { act, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import SettingsPage from 'app/settings/page'
@@ -94,6 +94,7 @@ describe('SettingsPage Component', () => {
     test('shows loading spinner when session is loading', () => {
       setupMocks({}, { status: 'loading' })
       render(<SettingsPage />)
+      expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
       expect(screen.queryByText('Settings')).not.toBeInTheDocument()
     })
 
@@ -232,8 +233,121 @@ describe('SettingsPage Component', () => {
       fireEvent.click(confirmDeleteButton)
 
       await waitFor(() => {
-        expect(mockDeleteMutation).toHaveBeenCalled()
+        expect(mockDeleteMutation).toHaveBeenCalledWith({ variables: { subscriptionId: 1 } })
       })
+    })
+
+    test('shows an error and skips the mutation when the subscription ID cannot be decoded', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({
+        data: {
+          mySnapshotSubscriptions: [
+            { ...mockActiveSubscriptions.mySnapshotSubscriptions[0], id: 'not-a-relay-id!' },
+          ],
+        },
+      })
+      render(<SettingsPage />)
+      fireEvent.click(screen.getByText('Delete'))
+      const dialog = screen.getByRole('dialog')
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Error',
+          description: 'Failed to delete subscription.',
+          color: 'danger',
+        })
+      })
+      expect(mockDeleteMutation).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Update Subscription Flow', () => {
+    test('saves edited subscription with full update variables and refetches', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({ data: mockActiveSubscriptions })
+      render(<SettingsPage />)
+
+      fireEvent.change(screen.getByDisplayValue('My Weekly Digest'), {
+        target: { value: 'Renamed Digest' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Monthly' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Events' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Remove OWASP Aarhus' }))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }))
+
+      await waitFor(() => {
+        expect(mockUpdateMutation).toHaveBeenCalledWith({
+          variables: {
+            subscriptionId: 1,
+            inputData: {
+              name: 'Renamed Digest',
+              frequency: 'monthly',
+              includeChapters: true,
+              includeEvents: false,
+              includeIssues: true,
+              includePosts: true,
+              includeProjects: true,
+              includePullRequests: true,
+              includeReleases: true,
+              includeUsers: true,
+              projectIds: [1],
+              chapterIds: [],
+              committeeIds: [],
+            },
+          },
+        })
+      })
+      expect(addToast).toHaveBeenCalledWith({
+        title: 'Updated',
+        description: 'Your preferences have been saved.',
+        color: 'success',
+      })
+      expect(mockRefetch).toHaveBeenCalled()
+    })
+
+    test('shows error toast when update returns ok: false', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({ data: mockActiveSubscriptions })
+      mockUpdateMutation.mockResolvedValue({
+        data: { updateSnapshotSubscription: { ok: false, message: 'Update failed' } },
+      })
+      render(<SettingsPage />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Error',
+          description: 'Update failed',
+          color: 'danger',
+        })
+      })
+      expect(mockRefetch).not.toHaveBeenCalled()
+    })
+
+    test('shows an error and skips the mutation when the subscription ID cannot be decoded', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({
+        data: {
+          mySnapshotSubscriptions: [
+            { ...mockActiveSubscriptions.mySnapshotSubscriptions[0], id: 'not-a-relay-id!' },
+          ],
+        },
+      })
+      render(<SettingsPage />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Error',
+          description: 'Failed to update subscription.',
+          color: 'danger',
+        })
+      })
+      expect(mockUpdateMutation).not.toHaveBeenCalled()
     })
   })
 
@@ -290,9 +404,62 @@ describe('SettingsPage Component', () => {
     test('shows loading spinner when query is loading', () => {
       setupMocks({ loading: true })
       render(<SettingsPage />)
+      expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
       expect(
-        screen.queryByText('Manage your OWASP community update subscriptions.')
+        screen.queryByText(/Manage your OWASP community update subscriptions/)
       ).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Entity Search', () => {
+    const mockUseApolloClient = useApolloClient as unknown as jest.Mock
+    let defaultUseApolloClient: ReturnType<typeof mockUseApolloClient.getMockImplementation>
+
+    beforeEach(() => {
+      defaultUseApolloClient = mockUseApolloClient.getMockImplementation()
+    })
+
+    afterEach(() => {
+      mockUseApolloClient.mockImplementation(defaultUseApolloClient)
+    })
+
+    test('ignores an in-flight response once the search query has changed', async () => {
+      let resolveStale: (value: unknown) => void = () => {}
+      const query = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveStale = resolve
+            })
+        )
+        .mockResolvedValueOnce({
+          data: { searchProjects: [{ id: btoa('ProjectNode:20'), name: 'OWASP Fresh Result' }] },
+        })
+      const client = { query }
+      mockUseApolloClient.mockImplementation(() => client)
+
+      setupMocks({ data: mockNoSubscriptions })
+      render(<SettingsPage />)
+      fireEvent.click(screen.getByText('New Subscription'))
+
+      const input = screen.getByRole('combobox', { name: 'Projects' })
+      act(() => input.focus())
+      fireEvent.change(input, { target: { value: 'ow' } })
+      await waitFor(() => expect(query).toHaveBeenCalledTimes(1))
+
+      fireEvent.change(input, { target: { value: 'owasp' } })
+      await waitFor(() => expect(query).toHaveBeenCalledTimes(2))
+      expect(await screen.findByText('OWASP Fresh Result')).toBeInTheDocument()
+
+      await act(async () => {
+        resolveStale({
+          data: { searchProjects: [{ id: btoa('ProjectNode:10'), name: 'OWASP Stale Result' }] },
+        })
+      })
+
+      expect(screen.getByText('OWASP Fresh Result')).toBeInTheDocument()
+      expect(screen.queryByText('OWASP Stale Result')).not.toBeInTheDocument()
     })
   })
 })

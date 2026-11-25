@@ -3,11 +3,13 @@
 import strawberry
 import strawberry_django
 
+from apps.common.constants import (
+    MAX_SEARCH_QUERY_LENGTH,
+    MIN_SEARCH_QUERY_LENGTH,
+)
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
 from apps.owasp.models.committee import Committee
 
-MAX_SEARCH_QUERY_LENGTH = 100
-MIN_SEARCH_QUERY_LENGTH = 3
 SEARCH_COMMITTEES_LIMIT = 3
 
 

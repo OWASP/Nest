@@ -3,8 +3,16 @@ from unittest import mock
 import pytest
 from django.utils import timezone
 
+from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
+from apps.github.models.release import Release
+from apps.github.models.user import User
 from apps.owasp.exceptions import SnapshotProcessingError
 from apps.owasp.management.commands.owasp_process_snapshots import Command
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.event import Event
+from apps.owasp.models.post import Post
+from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot import Snapshot
 
 
@@ -104,32 +112,21 @@ class TestProcessSnapshots:
         mock_snapshot.start_at = timezone.now()
         mock_snapshot.end_at = timezone.now()
 
-        mock_chapters = mock.MagicMock()
-        mock_chapters.filter.return_value = mock_chapters
-        mock_chapters.count.return_value = 2
+        def make_queryset(count):
+            queryset = mock.MagicMock()
+            queryset.filter.return_value = queryset
+            queryset.count.return_value = count
+            queryset.__iter__.return_value = [mock.MagicMock() for _ in range(count)]
+            return queryset
 
-        mock_events = mock.MagicMock()
-        mock_events.count.return_value = 1
-
-        mock_issues = mock.MagicMock()
-        mock_issues.count.return_value = 5
-
-        mock_posts = mock.MagicMock()
-        mock_posts.count.return_value = 3
-
-        mock_projects = mock.MagicMock()
-        mock_projects.filter.return_value = mock_projects
-        mock_projects.count.return_value = 3
-
-        mock_pull_requests = mock.MagicMock()
-        mock_pull_requests.count.return_value = 4
-
-        mock_releases = mock.MagicMock()
-        mock_releases.filter.return_value = mock_releases
-        mock_releases.count.return_value = 1
-
-        mock_users = mock.MagicMock()
-        mock_users.count.return_value = 10
+        mock_chapters = make_queryset(2)
+        mock_events = make_queryset(1)
+        mock_issues = make_queryset(5)
+        mock_posts = make_queryset(3)
+        mock_projects = make_queryset(3)
+        mock_pull_requests = make_queryset(4)
+        mock_releases = make_queryset(1)
+        mock_users = make_queryset(10)
 
         with (
             mock.patch.object(command, "get_new_items") as mock_get_new_items,
@@ -149,8 +146,45 @@ class TestProcessSnapshots:
             command.process_snapshot(mock_snapshot)
 
             assert mock_get_new_items.call_count == 8
-            assert mock_get_new_items.call_args_list[1].kwargs == {"date_field": "start_date"}
-            assert mock_get_new_items.call_args_list[3].kwargs == {"date_field": "published_at"}
+            assert [call.args for call in mock_get_new_items.call_args_list] == [
+                (model, mock_snapshot.start_at, mock_snapshot.end_at)
+                for model in (
+                    Chapter,
+                    Event,
+                    Issue,
+                    Post,
+                    Project,
+                    PullRequest,
+                    Release,
+                    User,
+                )
+            ]
+            assert [call.kwargs for call in mock_get_new_items.call_args_list] == [
+                {},
+                {"date_field": "start_date"},
+                {},
+                {"date_field": "published_at"},
+                {},
+                {},
+                {},
+                {},
+            ]
+            mock_chapters.filter.assert_called_once_with(is_active=True)
+            mock_projects.filter.assert_called_once_with(is_active=True)
+            mock_releases.filter.assert_called_once_with(is_draft=False, is_pre_release=False)
+
+            for relation, queryset in (
+                (mock_snapshot.chapters, mock_chapters),
+                (mock_snapshot.events, mock_events),
+                (mock_snapshot.issues, mock_issues),
+                (mock_snapshot.posts, mock_posts),
+                (mock_snapshot.projects, mock_projects),
+                (mock_snapshot.pull_requests, mock_pull_requests),
+                (mock_snapshot.releases, mock_releases),
+                (mock_snapshot.users, mock_users),
+            ):
+                relation.add.assert_called_once_with(*queryset.__iter__.return_value)
+
             assert mock_snapshot.status == Snapshot.Status.COMPLETED
             mock_snapshot.save.assert_called()
 

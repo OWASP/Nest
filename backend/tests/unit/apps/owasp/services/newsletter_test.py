@@ -97,7 +97,7 @@ def _make_base_digest(**overrides):
 def _make_digest_with_content():
     """Return a digest result dict with minimal chapter content."""
     return _make_base_digest(
-        chapters_data={"items": ["ch1"], "total": 1, "extra": 0},
+        chapters_data={"rows": [[{"name": "Chapter 1", "url": "url"}]], "total": 1, "extra": 0},
     )
 
 
@@ -601,6 +601,15 @@ class TestGetEntityContent:
 class TestSendDigestEmail:
     """Test send_digest_email RQ job function."""
 
+    @pytest.fixture(autouse=True)
+    def _mock_transaction(self):
+        """Disable transaction.atomic for tests."""
+        with (
+            patch("django.db.transaction.Atomic.__enter__", return_value=None),
+            patch("django.db.transaction.Atomic.__exit__", return_value=False),
+        ):
+            yield
+
     @patch("apps.owasp.services.newsletter.SnapshotSubscription")
     @patch("apps.owasp.services.newsletter.Snapshot")
     def test_skips_if_snapshot_not_found(self, mock_snapshot_cls, mock_sub_cls):
@@ -611,7 +620,7 @@ class TestSendDigestEmail:
 
         send_digest_email(snapshot_id=999, subscription_id=1)
 
-        mock_sub_cls.objects.select_related.assert_not_called()
+        mock_sub_cls.objects.select_for_update.assert_not_called()
 
     @patch("apps.owasp.services.newsletter.EmailLog")
     @patch("apps.owasp.services.newsletter.SnapshotSubscription")
@@ -619,7 +628,9 @@ class TestSendDigestEmail:
     def test_skips_duplicate(self, mock_snapshot_cls, mock_sub_cls, mock_email_log):
         """Test job exits early on duplicate EmailLog."""
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.return_value = MagicMock()
         mock_email_log.is_duplicate.return_value = True
 
@@ -648,7 +659,9 @@ class TestSendDigestEmail:
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
         mock_sub.user.email = "test@example.com"
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
@@ -659,6 +672,8 @@ class TestSendDigestEmail:
 
         send_digest_email(snapshot_id=1, subscription_id=1)
 
+        mock_sub_cls.objects.select_for_update.assert_called_once_with(of=("self",))
+        mock_sub_qs.prefetch_related.return_value.get.assert_called_once_with(id=1)
         mock_service.send.assert_called_once()
         mock_email_log.mark_sent.assert_called_once_with(
             snapshot=mock_snapshot, snapshot_subscription=mock_sub
@@ -681,7 +696,9 @@ class TestSendDigestEmail:
     ):
         """Test job skips sending when all content is empty."""
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.return_value = MagicMock()
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_empty_digest()
@@ -710,7 +727,9 @@ class TestSendDigestEmail:
         mock_snapshot = MagicMock()
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
@@ -744,7 +763,9 @@ class TestSendDigestEmail:
         mock_snapshot = MagicMock()
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
@@ -767,7 +788,9 @@ class TestSendDigestEmail:
         mock_snapshot_cls.DoesNotExist = Snapshot.DoesNotExist
         mock_sub_cls.DoesNotExist = SnapshotSubscription.DoesNotExist
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.side_effect = (
             SnapshotSubscription.DoesNotExist
         )
@@ -789,7 +812,9 @@ class TestSendDigestEmail:
         mock_snapshot_cls.objects.get.return_value = MagicMock()
         mock_sub = MagicMock()
         mock_sub.is_active = False
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
 
         send_digest_email(snapshot_id=1, subscription_id=1)
@@ -814,7 +839,9 @@ class TestSendDigestEmail:
         mock_sub = MagicMock()
         mock_sub.is_active = True
         mock_sub.frequency = "monthly"
-        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs = (
+            mock_sub_cls.objects.select_for_update.return_value.select_related.return_value
+        )
         mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
 
         send_digest_email(snapshot_id=1, subscription_id=1, expected_frequency="weekly")
@@ -989,3 +1016,39 @@ class TestTemplateRendering:
         assert "• Issue 2" in content
         assert "USERS" in content
         assert "• User 1" in content
+
+    @pytest.mark.parametrize(
+        ("entities_extra", "is_overflow_shown"),
+        [
+            (2, True),
+            (0, False),
+        ],
+    )
+    def test_plain_text_template_renders_entities_extra(self, entities_extra, is_overflow_shown):
+        """Test the text template shows how many subscribed entities were left out."""
+        context = {
+            "entities_extra": entities_extra,
+            "entity_sections": [
+                {
+                    "entity": {"name": "OWASP Nest"},
+                    "entity_type": "project",
+                    "content": [
+                        {
+                            "type": "issues",
+                            "rows": [[{"title": "Issue 1", "url": "url"}]],
+                            "total": 1,
+                        },
+                    ],
+                },
+            ],
+            "snapshot_url": "url",
+            "site_url": "url",
+            "unsubscribe_url": "url",
+        }
+
+        content = render_to_string(SNAPSHOT_TEMPLATE_TXT, context)
+
+        assert "OWASP Nest (project)" in content
+        assert "• Issue 1" in content
+        overflow_line = f"+ {entities_extra} more subscribed entities"
+        assert (overflow_line in content) is is_overflow_shown

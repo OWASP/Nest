@@ -47,11 +47,36 @@ class Snapshot(SnapshotBase):
 class SnapshotDetail(SnapshotBase):
     """Detail schema for Snapshot (used in single item endpoints)."""
 
-    chapters_count: int
-    issues_count: int
-    projects_count: int
-    releases_count: int
-    users_count: int
+    new_chapters_count: int
+    new_issues_count: int
+    new_projects_count: int
+    new_releases_count: int
+    new_users_count: int
+
+    @staticmethod
+    def resolve_new_chapters_count(obj: SnapshotModel) -> int:
+        """Resolve new chapters count."""
+        return obj.chapters_count
+
+    @staticmethod
+    def resolve_new_issues_count(obj: SnapshotModel) -> int:
+        """Resolve new issues count."""
+        return obj.issues_count
+
+    @staticmethod
+    def resolve_new_projects_count(obj: SnapshotModel) -> int:
+        """Resolve new projects count."""
+        return obj.projects_count
+
+    @staticmethod
+    def resolve_new_releases_count(obj: SnapshotModel) -> int:
+        """Resolve new releases count."""
+        return obj.releases_count
+
+    @staticmethod
+    def resolve_new_users_count(obj: SnapshotModel) -> int:
+        """Resolve new users count."""
+        return obj.users_count
 
 
 class SnapshotIssue(Issue):

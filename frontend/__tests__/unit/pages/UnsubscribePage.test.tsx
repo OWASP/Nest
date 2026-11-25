@@ -284,11 +284,30 @@ describe('UnsubscribePage', () => {
     })
   })
 
-  test('does not register breadcrumb when subscription name is empty', () => {
-    mockFetchSubscription.mockReturnValue(new Promise(() => {}))
+  test('does not register breadcrumb when subscription name is empty', async () => {
+    mockFetchSubscription.mockResolvedValue({
+      data: { subscriptionByToken: { name: '' } },
+    })
 
     render(<UnsubscribePage />)
 
-    expect(mockRegisterBreadcrumb).not.toHaveBeenCalled()
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /confirm unsubscribe/i })).toBeInTheDocument()
+      expect(mockRegisterBreadcrumb).not.toHaveBeenCalled()
+    })
+  })
+
+  test('leaves the loading state under React StrictMode', async () => {
+    mockFetchSubscription.mockResolvedValue({
+      data: { subscriptionByToken: { name: 'My Weekly Digest' } },
+    })
+
+    // StrictMode mounts, cleans up and re-runs effects; the fetch must still resolve the page.
+    render(<UnsubscribePage />, { reactStrictMode: true })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /confirm unsubscribe/i })).toBeInTheDocument()
+    })
+    expect(screen.getByText('My Weekly Digest')).toBeInTheDocument()
   })
 })
