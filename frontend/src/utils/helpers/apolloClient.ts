@@ -1,7 +1,8 @@
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+import { ApolloClient, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { AppError, handleAppError } from 'app/global-error'
 import { GRAPHQL_URL } from 'utils/env.client'
+import { createApolloCache } from 'utils/helpers/apolloCache'
 import { getCsrfToken } from 'utils/utility'
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
@@ -27,14 +28,7 @@ const createApolloClient = () => {
   })
 
   return new ApolloClient({
-    cache: new InMemoryCache({
-      typePolicies: {
-        // Projects, chapters and committees share this type and use raw (overlapping) primary
-        // keys as `id`, so they must not be normalized by `__typename:id`.
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        SubscribedEntityNode: { keyFields: false },
-      },
-    }),
+    cache: createApolloCache(),
     link: authLink.concat(httpLink),
   })
 }
