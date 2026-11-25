@@ -371,6 +371,41 @@ aws ecs run-task \
         --region AWS_REGION
     ```
 
+## LocalStack
+
+Run the infrastructure locally through LocalStack instead of AWS.
+
+Requirements:
+
+- A LocalStack auth token.
+
+```bash
+export LOCALSTACK_AUTH_TOKEN="<your_auth_token>"
+```
+
+Create the Terraform variable files from the examples:
+
+```bash
+cp infrastructure/state/terraform.localstack.tfvars.example infrastructure/state/terraform.localstack.tfvars
+cp infrastructure/live/terraform.localstack.tfvars.example infrastructure/live/terraform.localstack.tfvars
+cp infrastructure/live/terraform.localstack.tfbackend.example infrastructure/live/terraform.localstack.tfbackend
+```
+
+Targets:
+
+- `make infrastructure-up`: start LocalStack and deploy the Terraform state and live configurations.
+- `make infrastructure-refresh`: build and push the backend and frontend images, then redeploy with the new tags.
+
+The targets are defined in `infrastructure/make/run.mk` and appear in `make help`.
+
+Run `make infrastructure-up` only for the initial deployment. Use `make infrastructure-refresh` for every later deployment.
+
+Stop LocalStack with:
+
+```bash
+docker compose --project-name nest-infrastructure -f docker-compose/infrastructure/compose.yaml down
+```
+
 ## Testing
 
 Local Make targets use Docker (like backend). CI runs Poetry + Terraform directly on the runner for speed (cached plugins/venv, no image build).
