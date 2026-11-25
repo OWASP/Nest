@@ -75,14 +75,14 @@ class TestProjectHealthMetricsModel:
             ("is_funding_requirements_compliant", False),
             ("is_leader_requirements_compliant", False),
             ("last_committed_at", None),
-            ("last_commit_days", 0),
-            ("last_pull_request_days", 0),
+            ("last_commit_days", None),
+            ("last_pull_request_days", None),
             ("last_released_at", None),
-            ("last_release_days", 0),
+            ("last_release_days", None),
             ("open_issues_count", 0),
             ("open_pull_requests_count", 0),
             ("owasp_page_last_updated_at", None),
-            ("owasp_page_last_update_days", 0),
+            ("owasp_page_last_update_days", None),
             ("pull_request_last_created_at", None),
             ("recent_releases_count", 0),
             ("score", None),
@@ -119,6 +119,21 @@ class TestProjectHealthMetricsModel:
         metrics.pull_request_last_created_at = self.FIXED_DATE
 
         assert getattr(metrics, field_name) == expected_days
+
+    @pytest.mark.parametrize(
+        "field_name",
+        [
+            "last_commit_days",
+            "last_pull_request_days",
+            "last_release_days",
+            "owasp_page_last_update_days",
+        ],
+    )
+    def test_days_are_none_when_date_missing(self, field_name):
+        """Should return None when the activity date is missing."""
+        metrics = ProjectHealthMetrics(created_at=self.FIXED_DATE)
+
+        assert getattr(metrics, field_name) is None
 
 
 class TestProjectHealthMetricsRequirements:

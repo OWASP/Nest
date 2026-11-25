@@ -12,11 +12,15 @@ const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
+// Shown instead of a day count when the underlying date is missing (e.g. no release yet).
+const NOT_AVAILABLE_LABEL = 'N/A'
+
 const BarChart: React.FC<{
   title: string
   icon?: IconType
   labels: string[]
-  days: number[]
+  // `null` means the date is missing and the bar is labeled N/A.
+  days: Array<number | null>
   requirements: number[]
   reverseColors?: boolean[]
 }> = ({ title, days, icon, requirements, labels, reverseColors }) => {
@@ -34,7 +38,7 @@ const BarChart: React.FC<{
 
   const seriesData: ApexBarChartDataSeries[] = days.map((day, index) => ({
     x: labels[index],
-    y: days[index],
+    y: day,
     goals: [
       {
         name: 'Requirement',
@@ -69,19 +73,32 @@ const BarChart: React.FC<{
           },
           tooltip: {
             theme: toApexTooltipTheme(resolvedTheme),
+            y: {
+              // Also called with the requirement, which is never null.
+              formatter: (val: number | null): string =>
+                val === null ? NOT_AVAILABLE_LABEL : String(val),
+            },
           },
           dataLabels: {
             formatter: (
-              val: string | number | number[],
+              val: string | number | number[] | null,
               opts?: { dataPointIndex?: number }
             ): string => {
               const idx = opts?.dataPointIndex ?? 0
               const requirement = requirements[idx]
-              const displayVal: string | number = Array.isArray(val) ? val[0] : val
+              const displayVal: string | number =
+                (Array.isArray(val) ? val[0] : val) ?? NOT_AVAILABLE_LABEL
               if (requirement !== undefined) {
                 return `${displayVal} / ${requirement}`
               }
               return String(displayVal)
+            },
+            style: {
+              // N/A has no bar behind it, so white would be unreadable in light mode.
+              colors: [
+                ({ dataPointIndex }: { dataPointIndex: number }): string =>
+                  days[dataPointIndex] === null ? themeColor : '#fff',
+              ],
             },
           },
           colors: [
@@ -103,6 +120,10 @@ const BarChart: React.FC<{
               return greenColor
             },
           ],
+          yaxis: {
+            // ApexCharts leaves a missing day's requirement out of the axis range.
+            max: (max: number): number => Math.max(max, ...requirements),
+          },
           legend: {
             show: true,
             showForSingleSeries: true,

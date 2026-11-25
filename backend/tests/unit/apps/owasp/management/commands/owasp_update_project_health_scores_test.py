@@ -1,14 +1,20 @@
+from datetime import timedelta
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.management import call_command
+from django.utils import timezone
 
 from apps.owasp.management.commands.owasp_update_project_health_scores import Command
+from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 EXPECTED_SCORE = 34.0
+MAX_SCORE = 100.0
+MISSING_DATES_WEIGHT = 24.0
+REQUIREMENT_DAYS = 365
 
 
 class TestUpdateProjectHealthMetricsScoreCommand:
@@ -82,3 +88,36 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         assert mock_metric.score == EXPECTED_SCORE
         assert "Updated project health scores successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
+
+    @pytest.mark.parametrize(
+        ("project_age_days", "expected_score"),
+        [
+            (REQUIREMENT_DAYS - 1, MAX_SCORE),
+            (REQUIREMENT_DAYS + 1, MAX_SCORE - MISSING_DATES_WEIGHT),
+            (None, MAX_SCORE - MISSING_DATES_WEIGHT),
+        ],
+    )
+    def test_handle_counts_missing_dates_from_project_start(
+        self, project_age_days, expected_score
+    ):
+        """Test missing activity dates earn points only within the project's first days."""
+        project = Project(name="Test Project", level="lab")
+        metric = ProjectHealthMetrics(
+            created_at=project_age_days and timezone.now() - timedelta(days=project_age_days),
+            is_funding_requirements_compliant=True,
+            is_leader_requirements_compliant=True,
+            project=project,
+        )
+        requirements = ProjectHealthRequirements(
+            last_commit_days=REQUIREMENT_DAYS,
+            last_pull_request_days=REQUIREMENT_DAYS,
+            last_release_days=REQUIREMENT_DAYS,
+            level=project.level,
+            owasp_page_last_update_days=REQUIREMENT_DAYS,
+        )
+        self.mock_metrics.return_value.select_related.return_value = [metric]
+        self.mock_requirements.return_value = [requirements]
+
+        call_command("owasp_update_project_health_scores", stdout=self.stdout)
+
+        assert metric.score == expected_score

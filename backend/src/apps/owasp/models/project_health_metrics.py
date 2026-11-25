@@ -97,9 +97,9 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         return self.project_requirements.age_days if self.project_requirements else 0
 
     @property
-    def last_commit_days(self) -> int:
-        """Calculate days since last commit."""
-        return (timezone.now() - self.last_committed_at).days if self.last_committed_at else 0
+    def last_commit_days(self) -> int | None:
+        """Calculate days since last commit, or None if there is none."""
+        return (timezone.now() - self.last_committed_at).days if self.last_committed_at else None
 
     @property
     def last_commit_days_requirement(self) -> int:
@@ -107,12 +107,12 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         return self.project_requirements.last_commit_days if self.project_requirements else 0
 
     @property
-    def last_pull_request_days(self) -> int:
-        """Calculate days since last pull request."""
+    def last_pull_request_days(self) -> int | None:
+        """Calculate days since last pull request, or None if there is none."""
         return (
             (timezone.now() - self.pull_request_last_created_at).days
             if self.pull_request_last_created_at
-            else 0
+            else None
         )
 
     @property
@@ -121,9 +121,9 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         return self.project_requirements.last_pull_request_days if self.project_requirements else 0
 
     @property
-    def last_release_days(self) -> int:
-        """Calculate days since last release."""
-        return (timezone.now() - self.last_released_at).days if self.last_released_at else 0
+    def last_release_days(self) -> int | None:
+        """Calculate days since last release, or None if there is none."""
+        return (timezone.now() - self.last_released_at).days if self.last_released_at else None
 
     @property
     def last_release_days_requirement(self) -> int:
@@ -131,12 +131,12 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         return self.project_requirements.last_release_days if self.project_requirements else 0
 
     @property
-    def owasp_page_last_update_days(self) -> int:
-        """Calculate days since OWASP page last update."""
+    def owasp_page_last_update_days(self) -> int | None:
+        """Calculate days since OWASP page last update, or None if there is none."""
         return (
             (timezone.now() - self.owasp_page_last_updated_at).days
             if self.owasp_page_last_updated_at
-            else 0
+            else None
         )
 
     @property

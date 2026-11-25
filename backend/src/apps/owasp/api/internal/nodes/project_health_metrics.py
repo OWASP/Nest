@@ -47,8 +47,8 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
         return root.nest_created_at
 
     @strawberry_django.field
-    def last_commit_days(self, root: ProjectHealthMetrics) -> int:
-        """Resolve last commit age in days."""
+    def last_commit_days(self, root: ProjectHealthMetrics) -> int | None:
+        """Resolve last commit age in days, or None if there is no commit."""
         return root.last_commit_days
 
     @strawberry_django.field
@@ -57,8 +57,8 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
         return root.last_commit_days_requirement
 
     @strawberry_django.field
-    def last_pull_request_days(self, root: ProjectHealthMetrics) -> int:
-        """Resolve last pull request age in days."""
+    def last_pull_request_days(self, root: ProjectHealthMetrics) -> int | None:
+        """Resolve last pull request age in days, or None if there is no pull request."""
         return root.last_pull_request_days
 
     @strawberry_django.field
@@ -67,8 +67,8 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
         return root.last_pull_request_days_requirement
 
     @strawberry_django.field
-    def last_release_days(self, root: ProjectHealthMetrics) -> int:
-        """Resolve last release age in days."""
+    def last_release_days(self, root: ProjectHealthMetrics) -> int | None:
+        """Resolve last release age in days, or None if there is no release."""
         return root.last_release_days
 
     @strawberry_django.field
@@ -87,8 +87,8 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
         return root.project.name
 
     @strawberry_django.field
-    def owasp_page_last_update_days(self, root: ProjectHealthMetrics) -> int:
-        """Resolve OWASP page last update age in days."""
+    def owasp_page_last_update_days(self, root: ProjectHealthMetrics) -> int | None:
+        """Resolve OWASP page last update age in days, or None if there is no update."""
         return root.owasp_page_last_update_days
 
     @strawberry_django.field

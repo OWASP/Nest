@@ -54,7 +54,11 @@ class Command(BaseCommand):
                     score += weight
 
             for field, weight in backward_fields.items():
-                if int(getattr(metric, field)) <= int(getattr(requirements, field)):
+                value = getattr(metric, field)
+                if value is None and metric.created_at:
+                    # No activity yet, so count from the project start.
+                    value = metric.age_days
+                if value is not None and int(value) <= int(getattr(requirements, field)):
                     score += weight
 
             metric.score = score

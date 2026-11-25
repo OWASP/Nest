@@ -21,7 +21,8 @@ export interface HeaderProps {
   mentors?: Array<{ login: string }>
   isActive?: boolean
   isArchived?: boolean
-  healthMetricsData?: Array<{ score?: number }>
+  // Ordered oldest to newest; the badge shows the newest entry's score.
+  healthMetricsData?: Array<{ score?: number | null }>
   showProgramActions?: boolean
   showModuleActions?: boolean
   showArchivedBadge?: boolean
@@ -49,6 +50,7 @@ const Header = ({
   showHealthMetrics,
 }: HeaderProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
+  const latestHealthScore = healthMetricsData?.at(-1)?.score ?? null
 
   return (
     <>
@@ -86,17 +88,13 @@ const Header = ({
               })()}
             {!isActive && <StatusBadge status="inactive" size="md" />}
             {showArchivedBadge && isArchived && <StatusBadge status="archived" size="md" />}
-            {showHealthMetrics &&
-              IS_PROJECT_HEALTH_ENABLED &&
-              healthMetricsData &&
-              healthMetricsData.length > 0 &&
-              healthMetricsData[0].score !== undefined && (
-                <MetricsScoreCircle
-                  score={healthMetricsData[0]?.score}
-                  clickable={true}
-                  onClick={() => scrollToAnchor('issues-trend')}
-                />
-              )}
+            {showHealthMetrics && IS_PROJECT_HEALTH_ENABLED && latestHealthScore !== null && (
+              <MetricsScoreCircle
+                score={latestHealthScore}
+                clickable={true}
+                onClick={() => scrollToAnchor('issues-trend')}
+              />
+            )}
           </div>
         </div>
       </div>

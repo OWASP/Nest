@@ -128,12 +128,23 @@ describe('HealthMetrics', () => {
   })
 
   describe('with incomplete data', () => {
-    it('handles missing last data point fields with fallback values', () => {
+    it('passes null days (shown as N/A) when the last data point has no dates', () => {
       render(<HealthMetrics data={getMockIncompleteHealthMetric()} />)
       const barChart = screen.getByTestId('BarChart')
       const props = JSON.parse(barChart.dataset.props || '{}')
-      expect(props.days).toEqual([0, 0])
+      expect(props.days).toEqual([null, null])
       expect(props.requirements).toEqual([0, 0])
+    })
+
+    it('passes null release days when the project has no release', () => {
+      const data = getMockHealthMetric()
+      const lastIndex = data.length - 1
+      const noReleaseData = data.map((item, index) =>
+        index === lastIndex ? { ...item, lastReleaseDays: null } : item
+      )
+      render(<HealthMetrics data={noReleaseData} />)
+      const props = JSON.parse(screen.getByTestId('BarChart').dataset.props || '{}')
+      expect(props.days).toEqual([data[lastIndex].lastCommitDays, null])
     })
 
     it('handles completely null/undefined optional fields', () => {
