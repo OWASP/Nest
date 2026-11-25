@@ -396,7 +396,7 @@ Targets:
 - `make infrastructure-up`: start LocalStack and deploy the Terraform state and live configurations.
 - `make infrastructure-refresh`: build and push the backend and frontend images, then redeploy with the new tags.
 
-The targets are defined in `infrastructure/make/run.mk` and appear in `make help`.
+The targets are defined in `infrastructure/make/run.mk`.
 
 Run `make infrastructure-up` only for the initial deployment. Use `make infrastructure-refresh` for every later deployment.
 
