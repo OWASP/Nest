@@ -391,7 +391,7 @@ const MyCertificatePage: React.FC = () => {
                         <span className="font-medium">{formatDate(cert.issuedAt)}</span>
                       </div>
                     </div>
-                    {cert.score > 0 && (
+                    {(cert.score ?? 0) > 0 && (
                       <div className="flex flex-col items-end gap-0.5">
                         <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
                           Score

@@ -38,6 +38,7 @@ class Snapshot(models.Model):
         max_length=10,
         choices=Frequency.choices,
         default=Frequency.WEEKLY,
+        db_default=Frequency.WEEKLY,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,16 +50,36 @@ class Snapshot(models.Model):
     error_message = models.TextField(blank=True, default="")
 
     # Many-to-Many relationships
-    chapters = models.ManyToManyField("owasp.Chapter", related_name="snapshots", blank=True)
+    # TODO(kasya): clean up the db_table names for these relationships once we have new dump data.
+    chapters = models.ManyToManyField(
+        "owasp.Chapter",
+        related_name="snapshots",
+        blank=True,
+        db_table="owasp_snapshots_new_chapters",
+    )
     events = models.ManyToManyField("owasp.Event", related_name="snapshots", blank=True)
-    issues = models.ManyToManyField("github.Issue", related_name="snapshots", blank=True)
+    issues = models.ManyToManyField(
+        "github.Issue", related_name="snapshots", blank=True, db_table="owasp_snapshots_new_issues"
+    )
     posts = models.ManyToManyField("owasp.Post", related_name="snapshots", blank=True)
-    projects = models.ManyToManyField("owasp.Project", related_name="snapshots", blank=True)
+    projects = models.ManyToManyField(
+        "owasp.Project",
+        related_name="snapshots",
+        blank=True,
+        db_table="owasp_snapshots_new_projects",
+    )
     pull_requests = models.ManyToManyField(
         "github.PullRequest", related_name="snapshots", blank=True
     )
-    releases = models.ManyToManyField("github.Release", related_name="snapshots", blank=True)
-    users = models.ManyToManyField("github.User", related_name="snapshots", blank=True)
+    releases = models.ManyToManyField(
+        "github.Release",
+        related_name="snapshots",
+        blank=True,
+        db_table="owasp_snapshots_new_releases",
+    )
+    users = models.ManyToManyField(
+        "github.User", related_name="snapshots", blank=True, db_table="owasp_snapshots_new_users"
+    )
 
     def __str__(self):
         """Return a string representation of the snapshot."""
