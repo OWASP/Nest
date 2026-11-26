@@ -3,6 +3,9 @@ import React from 'react'
 import { FaFire } from 'react-icons/fa'
 import '@testing-library/jest-dom'
 
+// Latest options passed to the chart, so tests can call its formatter functions.
+let mockLastChartOptions: Record<string, unknown> = {}
+
 // Mock react-apexcharts completely
 jest.mock('react-apexcharts', () => {
   return function MockChart(props: {
@@ -12,6 +15,7 @@ jest.mock('react-apexcharts', () => {
     type: string
   }) {
     const mockOptions = props.options as Record<string, unknown>
+    mockLastChartOptions = mockOptions
 
     if (
       mockOptions.colors &&
@@ -194,6 +198,16 @@ describe('<BarChart />', () => {
 
     expect(options.chart.foreColor).toBe('#ECECEC')
     expect(options.tooltip.theme).toBe('dark')
+    expect(options.legend.markers.fillColors).toEqual(['#52C41A', '#FF4D4F'])
+  })
+
+  it('uses dark mode colors when the system theme resolves to dark', () => {
+    mockUseTheme.mockReturnValue({ theme: 'system', resolvedTheme: 'dark' })
+    render(<BarChart {...mockProps} />)
+    const chartElement = screen.getByTestId('mock-chart')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
+
+    expect(options.chart.foreColor).toBe('#ECECEC')
     expect(options.legend.markers.fillColors).toEqual(['#52C41A', '#FF4D4F'])
   })
 
@@ -787,5 +801,68 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...maxCoverageProps} />)
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
+  })
+
+  describe('missing days (N/A)', () => {
+    type LabelFormatter = (val: number | null, opts?: { dataPointIndex?: number }) => string
+    type ColorFunction = (params: { dataPointIndex: number }) => string
+
+    const naProps = {
+      title: 'Days Since Last Commit and Release',
+      labels: ['Days Since Last Commit', 'Days Since Last Release'],
+      days: [10, null],
+      requirements: [30, 365],
+    }
+
+    const getOptions = () =>
+      mockLastChartOptions as {
+        dataLabels: { formatter: LabelFormatter; style: { colors: ColorFunction[] } }
+        tooltip: { y: { formatter: LabelFormatter } }
+        yaxis: { max: (max: number) => number }
+      }
+
+    it('plots a missing day count as a gap', () => {
+      renderWithTheme(<BarChart {...naProps} />)
+      const series = JSON.parse(screen.getByTestId('mock-chart').dataset.series || '[]')
+      expect(series[0].data.map((point: { y: number | null }) => point.y)).toEqual([10, null])
+    })
+
+    it('keeps the requirement of a missing day count within the axis range', () => {
+      renderWithTheme(<BarChart {...naProps} />)
+      const { max } = getOptions().yaxis
+      expect(max(10)).toBe(365)
+      expect(max(1415)).toBe(1415)
+    })
+
+    it('labels a missing day count as N/A with its requirement', () => {
+      renderWithTheme(<BarChart {...naProps} />)
+      const { formatter } = getOptions().dataLabels
+      expect(formatter(null, { dataPointIndex: 1 })).toBe('N/A / 365')
+      expect(formatter(10, { dataPointIndex: 0 })).toBe('10 / 30')
+    })
+
+    it('shows N/A in the tooltip only for the missing day count, not its requirement', () => {
+      renderWithTheme(<BarChart {...naProps} />)
+      const { formatter } = getOptions().tooltip.y
+      expect(formatter(null, { dataPointIndex: 1 })).toBe('N/A')
+      expect(formatter(365, { dataPointIndex: 1 })).toBe('365')
+      expect(formatter(0, { dataPointIndex: 0 })).toBe('0')
+    })
+
+    it.each<['light' | 'dark', string]>([
+      ['light', '#1E1E2C'],
+      ['dark', '#ECECEC'],
+    ])('uses a readable color for the N/A label in %s mode', (theme, expectedColor) => {
+      renderWithTheme(<BarChart {...naProps} />, theme)
+      const [colorFunction] = getOptions().dataLabels.style.colors
+      expect(colorFunction({ dataPointIndex: 1 })).toBe(expectedColor)
+      expect(colorFunction({ dataPointIndex: 0 })).toBe('#fff')
+    })
+
+    it('uses the theme color for a zero day count, which has no bar behind it', () => {
+      renderWithTheme(<BarChart {...naProps} days={[0, null]} />)
+      const [colorFunction] = getOptions().dataLabels.style.colors
+      expect(colorFunction({ dataPointIndex: 0 })).toBe('#1E1E2C')
+    })
   })
 })

@@ -496,6 +496,32 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
+  test('renders the health score badge in the project header', async () => {
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /health.*85.*score/i })).toBeInTheDocument()
+    })
+  })
+
+  test('does not render the health score badge for an inactive project', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        ...mockProjectDetailsData,
+        project: { ...mockProjectDetailsData.project, isActive: false },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('button', { name: /health.*score/i })).not.toBeInTheDocument()
+  })
+
   test('does not render health metrics when healthMetricsList is empty', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {

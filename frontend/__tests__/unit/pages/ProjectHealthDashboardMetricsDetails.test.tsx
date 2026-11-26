@@ -7,8 +7,12 @@ import ProjectHealthMetricsDetails from 'app/projects/dashboard/metrics/[project
 jest.mock('react-apexcharts', () => {
   return {
     __esModule: true,
-    default: () => {
-      return <div data-testid="mock-apexcharts">Mock ApexChart</div>
+    default: ({ series, type }: { series: unknown; type: string }) => {
+      return (
+        <div data-testid="mock-apexcharts" data-series={JSON.stringify(series)} data-type={type}>
+          Mock ApexChart
+        </div>
+      )
     },
   }
 })
@@ -259,7 +263,13 @@ describe('ProjectHealthMetricsDetails', () => {
       expect(screen.getByText('Days Metrics')).toBeInTheDocument()
       expect(screen.getByText('Stars')).toBeInTheDocument()
     })
+    const daysChart = screen
+      .getAllByTestId('mock-apexcharts')
+      .find((chart) => chart.dataset.type === 'bar')
+    const [{ data }] = JSON.parse(daysChart?.dataset.series ?? '[{ "data": [] }]')
+    expect(data.map((point: { y: number | null }) => point.y)).toEqual([0, null, null, null, null])
   })
+
   test('renders metrics with valid createdAt', async () => {
     const dataWithCreatedAt = {
       ...mockProjectsDashboardMetricsDetailsData,

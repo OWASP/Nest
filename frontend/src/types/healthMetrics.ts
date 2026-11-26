@@ -5,7 +5,7 @@ export type ApexLineChartSeries = {
 
 export type ApexBarChartDataSeries = {
   x: string
-  y: number
+  y: number | null
   fill?: string
   fillColor?: string
   strokeColor?: string
@@ -32,20 +32,20 @@ export type HealthMetricsProps = {
   forksCount?: number
   isFundingRequirementsCompliant?: boolean
   isLeaderRequirementsCompliant?: boolean
-  lastCommitDays?: number
+  lastCommitDays?: number | null
   lastCommitDaysRequirement?: number
-  lastPullRequestDays?: number
+  lastPullRequestDays?: number | null
   lastPullRequestDaysRequirement?: number
-  lastReleaseDays?: number
+  lastReleaseDays?: number | null
   lastReleaseDaysRequirement?: number
   openIssuesCount?: number
   openPullRequestsCount?: number
-  owaspPageLastUpdateDays?: number
+  owaspPageLastUpdateDays?: number | null
   owaspPageLastUpdateDaysRequirement?: number
   projectName?: string
   projectKey?: string
   recentReleasesCount?: number
-  score?: number
+  score?: number | null
   starsCount?: number
   totalIssuesCount?: number
   totalReleasesCount?: number

@@ -83,7 +83,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
         title="Days Since Last Commit and Release"
         icon={FaCodeCommit}
         labels={['Days Since Last Commit', 'Days Since Last Release']}
-        days={[data[length - 1]?.lastCommitDays ?? 0, data[length - 1]?.lastReleaseDays ?? 0]}
+        days={[data[length - 1]?.lastCommitDays ?? null, data[length - 1]?.lastReleaseDays ?? null]}
         requirements={[
           data[length - 1]?.lastCommitDaysRequirement ?? 0,
           data[length - 1]?.lastReleaseDaysRequirement ?? 0,

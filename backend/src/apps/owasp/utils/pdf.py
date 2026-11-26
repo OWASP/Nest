@@ -10,6 +10,15 @@ from reportlab.platypus import Table, TableStyle
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
+NOT_AVAILABLE = "N/A"
+
+
+def format_days(days: int | None, requirement: int) -> str:
+    """Format a days metric against its requirement, or N/A if the date is missing."""
+    if days is None:
+        return f"{NOT_AVAILABLE} / {requirement} days"
+    return f"{days}/{requirement} days"
+
 
 def create_table(data, col_widths="*"):
     """Create a styled table for PDF generation."""
@@ -55,7 +64,7 @@ def generate_metrics_overview_pdf(metrics_stats: ProjectHealthStatsNode) -> Byte
             "Average Score",
             f"{metrics_stats.average_score:.2f}"
             if metrics_stats.average_score is not None
-            else "N/A",
+            else NOT_AVAILABLE,
         ),
         ("Total Contributors", f"{metrics_stats.total_contributors:,}"),
         ("Total Forks", f"{metrics_stats.total_forks:,}"),
@@ -105,37 +114,33 @@ def generate_latest_metrics_pdf(metrics: ProjectHealthMetrics) -> BytesIO | None
     pdf.setFont("Helvetica", 12)
     pdf.drawCentredString(300, 700, f"Health Metrics Report for {metrics.project.name}")
     pdf.drawCentredString(
-        300, 680, f"Health Score: {metrics.score:.2f}" if metrics.score is not None else "N/A"
+        300,
+        680,
+        f"Health Score: {metrics.score:.2f}" if metrics.score is not None else NOT_AVAILABLE,
     )
     table_data = (
         ("Metric", "Value"),
         ("Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"),
         (
             "Last Commit",
-            f"{metrics.last_commit_days}/{metrics.last_commit_days_requirement} days",
+            format_days(metrics.last_commit_days, metrics.last_commit_days_requirement),
         ),
         (
             "Last Pull Request",
-            # To bypass ruff long line error
-            "/".join(
-                [
-                    str(metrics.last_pull_request_days),
-                    f"{metrics.last_pull_request_days_requirement} days",
-                ]
+            format_days(
+                metrics.last_pull_request_days,
+                metrics.last_pull_request_days_requirement,
             ),
         ),
         (
             "Last Release",
-            f"{metrics.last_release_days}/{metrics.last_release_days_requirement} days",
+            format_days(metrics.last_release_days, metrics.last_release_days_requirement),
         ),
         (
             "OWASP Page Last Update",
-            # To bypass ruff long line error
-            "/".join(
-                [
-                    str(metrics.owasp_page_last_update_days),
-                    f"{metrics.owasp_page_last_update_days_requirement} days",
-                ]
+            format_days(
+                metrics.owasp_page_last_update_days,
+                metrics.owasp_page_last_update_days_requirement,
             ),
         ),
         ("Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"),

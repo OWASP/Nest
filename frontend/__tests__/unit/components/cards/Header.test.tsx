@@ -105,6 +105,30 @@ describe('Header', () => {
     expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
   })
 
+  it('renders the newest health score when multiple entries exist', () => {
+    const healthMetricsData = [{ score: 40 }, { score: 85 }]
+    render(
+      <Header {...defaultProps} healthMetricsData={healthMetricsData} showHealthMetrics={true} />
+    )
+    expect(screen.getByTestId('metrics-score-circle')).toHaveTextContent('Score: 85')
+  })
+
+  it('does not render an older score when the latest entry is not scored yet', () => {
+    const healthMetricsData = [{ score: 40 }, { score: 62 }, { score: null }]
+    render(
+      <Header {...defaultProps} healthMetricsData={healthMetricsData} showHealthMetrics={true} />
+    )
+    expect(screen.queryByTestId('metrics-score-circle')).not.toBeInTheDocument()
+  })
+
+  it('does not render health metrics when no entry has a score', () => {
+    const healthMetricsData = [{ score: null }, { score: undefined }]
+    render(
+      <Header {...defaultProps} healthMetricsData={healthMetricsData} showHealthMetrics={true} />
+    )
+    expect(screen.queryByTestId('metrics-score-circle')).not.toBeInTheDocument()
+  })
+
   it('does not render health metrics when score is undefined', () => {
     const healthMetricsData = [{ score: undefined }]
     render(

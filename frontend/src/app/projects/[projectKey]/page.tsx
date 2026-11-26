@@ -9,7 +9,6 @@ import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
-import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
@@ -137,7 +136,8 @@ const ProjectDetailsPage = () => {
         title={project.name}
         isActive={project.isActive}
         isArchived={false}
-        showHealthMetrics={true}
+        healthMetricsData={project.healthMetricsList}
+        showHealthMetrics={project.isActive}
       />
 
       <Summary summary={project.summary} />
@@ -178,9 +178,7 @@ const ProjectDetailsPage = () => {
 
       {IS_PROJECT_HEALTH_ENABLED &&
         project.healthMetricsList &&
-        project.healthMetricsList.length > 0 && (
-          <HealthMetrics data={project.healthMetricsList as unknown as HealthMetricsProps[]} />
-        )}
+        project.healthMetricsList.length > 0 && <HealthMetrics data={project.healthMetricsList} />}
 
       {project.key && project.name && (
         <SponsorCard target={project.key} title={project.name} type="project" />

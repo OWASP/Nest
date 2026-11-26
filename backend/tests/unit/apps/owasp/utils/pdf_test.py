@@ -5,7 +5,11 @@ from unittest.mock import MagicMock, patch
 from reportlab.lib.pagesizes import letter
 
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
-from apps.owasp.utils.pdf import generate_latest_metrics_pdf, generate_metrics_overview_pdf
+from apps.owasp.utils.pdf import (
+    format_days,
+    generate_latest_metrics_pdf,
+    generate_metrics_overview_pdf,
+)
 
 
 class TestGenerateMetricsPDF:
@@ -110,7 +114,7 @@ class TestGenerateMetricsPDF:
             last_commit_days_requirement=7,
             last_pull_request_days=2,
             last_pull_request_days_requirement=30,
-            last_release_days=10,
+            last_release_days=None,
             last_release_days_requirement=14,
             open_issues_count=10,
             open_pull_requests_count=3,
@@ -133,34 +137,10 @@ class TestGenerateMetricsPDF:
         table_data = (
             ("Metric", "Value"),
             ("Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"),
-            (
-                "Last Commit",
-                f"{metrics.last_commit_days}/{metrics.last_commit_days_requirement} days",
-            ),
-            (
-                "Last Pull Request",
-                # To bypass ruff long line error
-                "/".join(
-                    [
-                        str(metrics.last_pull_request_days),
-                        f"{metrics.last_pull_request_days_requirement} days",
-                    ]
-                ),
-            ),
-            (
-                "Last Release",
-                f"{metrics.last_release_days}/{metrics.last_release_days_requirement} days",
-            ),
-            (
-                "OWASP Page Last Update",
-                # To bypass ruff long line error
-                "/".join(
-                    [
-                        str(metrics.owasp_page_last_update_days),
-                        f"{metrics.owasp_page_last_update_days_requirement} days",
-                    ]
-                ),
-            ),
+            ("Last Commit", "5/7 days"),
+            ("Last Pull Request", "2/30 days"),
+            ("Last Release", "N/A / 14 days"),
+            ("OWASP Page Last Update", "20/90 days"),
             ("Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"),
             (
                 "Open/Total Pull Requests",
@@ -195,3 +175,11 @@ class TestGenerateMetricsPDF:
         mock_table.return_value.drawOn.assert_called_once_with(canvas, 50, 220)
         canvas.showPage.assert_called_once()
         canvas.save.assert_called_once()
+
+
+class TestFormatDays:
+    def test_formats_days(self):
+        assert format_days(10, 365) == "10/365 days"
+
+    def test_formats_missing_days_as_not_available(self):
+        assert format_days(None, 365) == "N/A / 365 days"

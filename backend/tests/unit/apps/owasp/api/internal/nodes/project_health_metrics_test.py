@@ -53,14 +53,10 @@ class TestProjectHealthMetricsNode(GraphQLNodeBaseTest):
             ("forks_count", int),
             ("is_funding_requirements_compliant", bool),
             ("is_leader_requirements_compliant", bool),
-            ("last_commit_days", int),
             ("last_commit_days_requirement", int),
-            ("last_pull_request_days", int),
-            ("last_release_days", int),
             ("last_release_days_requirement", int),
             ("open_issues_count", int),
             ("open_pull_requests_count", int),
-            ("owasp_page_last_update_days", int),
             ("project_key", str),
             ("project_name", str),
             ("recent_releases_count", int),
@@ -75,6 +71,21 @@ class TestProjectHealthMetricsNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name(field_name, ProjectHealthMetricsNode)
         assert field is not None
         assert field.type is expected_type
+
+    @pytest.mark.parametrize(
+        "field_name",
+        [
+            "last_commit_days",
+            "last_pull_request_days",
+            "last_release_days",
+            "owasp_page_last_update_days",
+        ],
+    )
+    def test_days_field_types_are_nullable(self, field_name):
+        field = self._get_field_by_name(field_name, ProjectHealthMetricsNode)
+        assert field is not None
+        assert field.type.__class__.__name__ == "StrawberryOptional"
+        assert field.type.of_type is int
 
 
 class TestProjectHealthMetricsNodeResolvers:

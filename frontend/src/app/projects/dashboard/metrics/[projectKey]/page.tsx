@@ -200,10 +200,10 @@ const ProjectHealthMetricsDetails: FC = () => {
             ]}
             days={[
               metricsLatest.ageDays ?? 0,
-              metricsLatest.lastCommitDays ?? 0,
-              metricsLatest.lastReleaseDays ?? 0,
-              metricsLatest.lastPullRequestDays ?? 0,
-              metricsLatest.owaspPageLastUpdateDays ?? 0,
+              metricsLatest.lastCommitDays ?? null,
+              metricsLatest.lastReleaseDays ?? null,
+              metricsLatest.lastPullRequestDays ?? null,
+              metricsLatest.owaspPageLastUpdateDays ?? null,
             ]}
             requirements={[
               metricsLatest.ageDaysRequirement ?? 0,
