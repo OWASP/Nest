@@ -1,0 +1,4 @@
+{
+  "exclude": ["make/compliance.mk"],
+  "licenses": ["Apache-2.0", "MIT", "OFL-1.1"]
+}

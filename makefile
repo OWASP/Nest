@@ -10,6 +10,7 @@ include e2e/makefile
 include frontend/makefile
 include infrastructure/makefile
 include make/check.mk
+include make/compliance.mk
 include make/help.mk
 include make/maintenance.mk
 include make/run.mk

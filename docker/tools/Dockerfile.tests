@@ -57,8 +57,11 @@ RUN --mount=type=cache,target=/var/cache/apk \
 USER owasp
 WORKDIR /home/owasp/nest
 
+COPY --chown=root:root .fossology-allowlist.json .fossology-allowlist.json
 COPY --chown=root:root .github/scripts .github/scripts
+COPY --chown=root:root docker/fossology/Dockerfile docker/fossology/Dockerfile
 COPY --chown=root:root frontend/public/.well-known frontend/public/.well-known
+COPY --chown=root:root tools/compliance tools/compliance
 COPY --chown=root:root tools/security tools/security
 COPY --chown=root:root tools/tests tools/tests
 
