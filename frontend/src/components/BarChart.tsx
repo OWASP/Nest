@@ -53,7 +53,7 @@ const BarChart: React.FC<{
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
       <Chart
-        key={theme}
+        key={resolvedTheme ?? theme}
         options={{
           chart: {
             animations: {
