@@ -159,6 +159,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_milestone_2 = Mock()
         mock_repository.prefetched_recent_milestones = [mock_milestone_1, mock_milestone_2]
         mock_milestones = Mock()
+        mock_milestones.__getitem__ = Mock()
         mock_repository.recent_milestones = mock_milestones
 
         field = self._get_field_by_name("recent_milestones", RepositoryNode)
