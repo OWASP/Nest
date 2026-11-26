@@ -93,6 +93,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         ("project_age_days", "expected_score"),
         [
             (REQUIREMENT_DAYS - 1, MAX_SCORE),
+            (REQUIREMENT_DAYS, MAX_SCORE),
             (REQUIREMENT_DAYS + 1, MAX_SCORE - MISSING_DATES_WEIGHT),
             (None, MAX_SCORE - MISSING_DATES_WEIGHT),
         ],

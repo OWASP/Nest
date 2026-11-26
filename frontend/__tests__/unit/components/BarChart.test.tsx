@@ -201,6 +201,16 @@ describe('<BarChart />', () => {
     expect(options.legend.markers.fillColors).toEqual(['#52C41A', '#FF4D4F'])
   })
 
+  it('uses dark mode colors when the system theme resolves to dark', () => {
+    mockUseTheme.mockReturnValue({ theme: 'system', resolvedTheme: 'dark' })
+    render(<BarChart {...mockProps} />)
+    const chartElement = screen.getByTestId('mock-chart')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
+
+    expect(options.chart.foreColor).toBe('#ECECEC')
+    expect(options.legend.markers.fillColors).toEqual(['#52C41A', '#FF4D4F'])
+  })
+
   it('configures chart options correctly', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
@@ -847,6 +857,12 @@ describe('<BarChart />', () => {
       const [colorFunction] = getOptions().dataLabels.style.colors
       expect(colorFunction({ dataPointIndex: 1 })).toBe(expectedColor)
       expect(colorFunction({ dataPointIndex: 0 })).toBe('#fff')
+    })
+
+    it('uses the theme color for a zero day count, which has no bar behind it', () => {
+      renderWithTheme(<BarChart {...naProps} days={[0, null]} />)
+      const [colorFunction] = getOptions().dataLabels.style.colors
+      expect(colorFunction({ dataPointIndex: 0 })).toBe('#1E1E2C')
     })
   })
 })

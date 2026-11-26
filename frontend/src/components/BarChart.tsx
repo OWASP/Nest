@@ -29,7 +29,7 @@ const BarChart: React.FC<{
   let redColor = '#FF7875'
   let greenColor = '#73D13D'
   let orangeColor = '#FFBB33'
-  if (theme === 'dark') {
+  if ((resolvedTheme ?? theme) === 'dark') {
     themeColor = '#ECECEC'
     redColor = '#FF4D4F'
     greenColor = '#52C41A'
@@ -94,10 +94,10 @@ const BarChart: React.FC<{
               return String(displayVal)
             },
             style: {
-              // N/A has no bar behind it, so white would be unreadable in light mode.
+              // N/A and 0 have no bar behind them, so white would be unreadable in light mode.
               colors: [
                 ({ dataPointIndex }: { dataPointIndex: number }): string =>
-                  days[dataPointIndex] === null ? themeColor : '#fff',
+                  days[dataPointIndex] ? '#fff' : themeColor,
               ],
             },
           },
