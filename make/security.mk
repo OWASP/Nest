@@ -166,11 +166,17 @@ security-license-check: ## Check repository files for licenses outside the allow
 	args=(
 		'--rm'
 		'-i'
+		'--platform'
+		'linux/amd64'
+		'--entrypoint'
+		'/bin/bash'
 		'-v=$(CURDIR):/repo:ro'
 		"$$image"
-		'bash /repo/tools/security/fossology_scan.sh /repo'
+		'/repo/tools/security/fossology_scan.sh'
+		'/repo'
 	)
 	# Scan only files git tracks or would track, so .git, node_modules and caches are skipped.
+	# The scanner image is amd64-only; --platform keeps local runs working on Apple Silicon.
 	git ls-files -z --cached --others --exclude-standard | docker run "$${args[@]}"
 
 security-repository-scan-trivy:

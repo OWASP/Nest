@@ -503,8 +503,10 @@ make security-license-check
 This runs the [FOSSology](https://github.com/fossology/fossology) license scanners on files
 tracked by git (plus new files that are not ignored). It fails if the scanners detect a license
 that is not listed in `.fossology-allowlist.json`. Contents of archives (e.g. `.gz`, `.zip`) are
-not scanned. Add a license to the allowlist only if it is compatible with the project, and use
-`exclude` for exact paths that are false positives (an excluded path is skipped entirely).
+not scanned. The scanner image is linux/amd64 only; the Make target passes `--platform linux/amd64`
+so local runs work on Apple Silicon via emulation. Add a license to the allowlist only if it is
+compatible with the project, and use `exclude` for exact paths that are false positives (an
+excluded path is skipped entirely).
 
 #### Running SAST Scans Only
 
