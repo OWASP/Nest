@@ -8,7 +8,8 @@ export const fetchAlgoliaData = async <T>(
   query = '',
   currentPage = 0,
   hitsPerPage = 25,
-  facetFilters: string[] = []
+  facetFilters: string[] = [],
+  signal?: AbortSignal
 ): Promise<AlgoliaResponse<T>> => {
   try {
     if (['projects', 'chapters'].includes(indexName)) {
@@ -26,6 +27,7 @@ export const fetchAlgoliaData = async <T>(
         'X-CSRFToken': (await getCsrfToken()) || '',
       },
       credentials: 'include',
+      signal,
       body: JSON.stringify({
         facetFilters,
         hitsPerPage,
@@ -51,6 +53,10 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
+    // Let callers distinguish a deliberate cancellation from a real search failure.
+    if (signal?.aborted) {
+      throw error
+    }
     if (error instanceof AppError) {
       throw error
     }

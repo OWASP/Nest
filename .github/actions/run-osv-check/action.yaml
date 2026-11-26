@@ -28,5 +28,5 @@ runs:
     - name: Run OSV check
       env:
         OSV_RUN_COMMAND: ${{ inputs.command }}
-      run: bash -c "$OSV_RUN_COMMAND"
+      run: bash --noprofile --norc -e -o pipefail -c "$OSV_RUN_COMMAND"
       shell: bash

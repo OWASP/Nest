@@ -1,6 +1,6 @@
 import re
 from unittest import TestCase
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import (
@@ -193,6 +193,22 @@ class TestRepositoryContributor(TestCase):
             mock_queryset = self._setup_mock_queryset(mock_objects)
             RepositoryContributor.get_top_contributors(repository="my-repo")
             mock_queryset.filter.assert_any_call(repository__name__iexact="my-repo")
+
+    def test_get_top_contributors_public_members_only_filter(self):
+        """Test public_members_only excludes opted-out users before aggregation."""
+        with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
+            mock_queryset = self._setup_mock_queryset(mock_objects)
+            RepositoryContributor.get_top_contributors(public_members_only=True)
+            mock_queryset.filter.assert_any_call(user__has_public_member_page=True)
+
+    def test_get_top_contributors_includes_opted_out_users_by_default(self):
+        """Test opted-out users are not filtered unless public_members_only is set."""
+        with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
+            mock_queryset = self._setup_mock_queryset(mock_objects)
+            RepositoryContributor.get_top_contributors()
+            assert (
+                call(user__has_public_member_page=True) not in mock_queryset.filter.call_args_list
+            )
 
     def test_get_top_contributors_excluded_usernames_filter(self):
         """Test the excluded_usernames filtering logic in get_top_contributors."""

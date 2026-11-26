@@ -1,7 +1,8 @@
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+import { ApolloClient, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { AppError, handleAppError } from 'app/global-error'
 import { GRAPHQL_URL } from 'utils/env.client'
+import { createApolloCache } from 'utils/helpers/apolloCache'
 import { getCsrfToken } from 'utils/utility'
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
@@ -27,7 +28,7 @@ const createApolloClient = () => {
   })
 
   return new ApolloClient({
-    cache: new InMemoryCache(),
+    cache: createApolloCache(),
     link: authLink.concat(httpLink),
   })
 }

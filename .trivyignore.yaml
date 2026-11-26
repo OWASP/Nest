@@ -64,9 +64,3 @@ vulnerabilities:
     statement: >-
       setuptools MANIFEST.in / Unicode sdist issue; pip vendors only pkg_resources.
       False positive for pip's vendor tree.
-  - id: GHSA-6v7p-g79w-8964
-    purls:
-      - pkg:pypi/msgpack@1.1.2
-    statement: >-
-      msgpack 1.1.2 is only inside pip/_vendor (Nest uses ormsgpack). Accept until
-      pip vendors >=1.2.1.
