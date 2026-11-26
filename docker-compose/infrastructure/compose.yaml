@@ -7,6 +7,7 @@ services:
       # https://docs.localstack.cloud/aws/services/ecr/#endpoint-strategy
       - ECR_ENDPOINT_STRATEGY=off
       - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      - EXTRA_CORS_ALLOWED_ORIGINS=*
     networks:
       - infrastructure-nest
     ports:

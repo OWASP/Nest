@@ -1,4 +1,6 @@
-.PHONY: infrastructure-check-auth-token infrastructure-refresh infrastructure-up
+.PHONY: infrastructure-backend-index-data infrastructure-backend-load-data \
+	infrastructure-backend-migrate infrastructure-check-auth-token infrastructure-refresh \
+	infrastructure-sync-params infrastructure-up
 
 DOCKER_GID := $(shell stat -c '%g' /var/run/docker.sock 2>/dev/null || stat -f '%g' /var/run/docker.sock 2>/dev/null)
 export DOCKER_GID
@@ -17,12 +19,29 @@ infrastructure-check-auth-token:
 		exit 1; \
 	fi
 
+infrastructure-backend-index-data: infrastructure-check-auth-token ## Run the backend index-data ECS task on LocalStack
+	@$(MAKE) infrastructure-image-build || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_backend_task index-data
+
+infrastructure-backend-load-data: infrastructure-check-auth-token ## Run the backend load-data ECS task on LocalStack
+	@$(MAKE) infrastructure-image-build || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_backend_task load-data
+
+infrastructure-backend-migrate: infrastructure-check-auth-token ## Run the backend migrate ECS task on LocalStack
+	@$(MAKE) infrastructure-image-build || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_backend_task migrate
+
 infrastructure-refresh: infrastructure-check-auth-token ## Refresh an existing deployment on LocalStack
 	@$(MAKE) infrastructure-image-build || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) up --build --wait localstack || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_deploy --refresh
 
-infrastructure-up: infrastructure-check-auth-token ## Start LocalStack and deploy infrastructure
+infrastructure-sync-params: infrastructure-check-auth-token ## Sync backend .env values into LocalStack SSM parameters
+	@$(MAKE) infrastructure-image-build || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) up --build --wait localstack || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_sync_params $(SYNC_PARAMS_ARGS)
+
+infrastructure-up: infrastructure-check-auth-token fetch-nest-dump ## Start LocalStack and deploy infrastructure
 	@$(MAKE) infrastructure-image-build || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) up --build --wait localstack || exit $$?; \
 	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_deploy

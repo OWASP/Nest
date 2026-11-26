@@ -50,8 +50,19 @@ variable "django_db_user" {
   type        = string
 }
 
+variable "django_redis_auth_enabled" {
+  description = "Whether Redis connections should authenticate with a password (Required by Django)."
+  type        = bool
+  default     = true
+}
+
 variable "django_redis_host" {
   description = "The hostname of the Redis cache."
+  type        = string
+}
+
+variable "django_redis_port" {
+  description = "The port of the Redis cache (Required by Django)."
   type        = string
 }
 

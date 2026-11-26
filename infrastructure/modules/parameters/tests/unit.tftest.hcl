@@ -11,7 +11,9 @@ variables {
   django_db_name                = "nest_db"
   django_db_port                = "5432"
   django_db_user                = "nest_user"
+  django_redis_auth_enabled     = true
   django_redis_host             = "redis.example.com"
+  django_redis_port             = "6379"
   django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
   environment                   = "test"
@@ -259,6 +261,22 @@ run "test_django_open_ai_secret_key_is_secure_string" {
   }
 }
 
+run "test_django_redis_auth_enabled_path_format" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_redis_auth_enabled.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_AUTH_ENABLED"
+    error_message = "DJANGO_REDIS_AUTH_ENABLED must follow path: /{project}/{environment}/DJANGO_REDIS_AUTH_ENABLED."
+  }
+}
+
+run "test_django_redis_auth_enabled_is_string" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_redis_auth_enabled.type == "String"
+    error_message = "DJANGO_REDIS_AUTH_ENABLED must be stored as String."
+  }
+}
+
 run "test_django_redis_host_path_format" {
   command = plan
   assert {
@@ -272,6 +290,22 @@ run "test_django_redis_host_is_string" {
   assert {
     condition     = aws_ssm_parameter.django_redis_host.type == "String"
     error_message = "DJANGO_REDIS_HOST must be stored as String."
+  }
+}
+
+run "test_django_redis_port_path_format" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_redis_port.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PORT"
+    error_message = "DJANGO_REDIS_PORT must follow path: /{project}/{environment}/DJANGO_REDIS_PORT."
+  }
+}
+
+run "test_django_redis_port_is_string" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_redis_port.type == "String"
+    error_message = "DJANGO_REDIS_PORT must be stored as String."
   }
 }
 
