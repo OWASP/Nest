@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-SEARCH_PATHS = ("infrastructure/bootstrap", "infrastructure/modules")
+SEARCH_PATHS = ("infrastructure/bootstrap", "infrastructure/live", "infrastructure/modules")
 
 
 class ExecutionMode(StrEnum):
