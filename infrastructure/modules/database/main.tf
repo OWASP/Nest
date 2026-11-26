@@ -87,6 +87,19 @@ resource "aws_ssm_parameter" "django_db_password" {
   value       = local.db_password
 }
 
+resource "aws_secretsmanager_secret" "django_db_password" {
+  description             = "Database password used by Django."
+  kms_key_id              = var.kms_key_arn
+  name                    = "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
+  recovery_window_in_days = var.secret_recovery_window_in_days
+  tags                    = var.common_tags
+}
+
+resource "aws_secretsmanager_secret_version" "django_db_password" {
+  secret_id     = aws_secretsmanager_secret.django_db_password.id
+  secret_string = local.db_password
+}
+
 resource "aws_iam_role" "rds_proxy" {
   count = var.enable_rds_proxy ? 1 : 0
 

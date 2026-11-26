@@ -41,7 +41,7 @@ output "django_ssm_parameter_arns" {
 }
 
 output "external_secret_values" {
-  description = "Current externally managed SSM credentials to copy into Secrets Manager until runtime cutover."
+  description = "Map of environment variables to the values of externally managed SSM parameters."
   sensitive   = true
   value = merge({
     DJANGO_ALGOLIA_WRITE_API_KEY     = aws_ssm_parameter.django_algolia_write_api_key.value
@@ -74,7 +74,7 @@ output "frontend_ssm_parameter_arns" {
 }
 
 output "nextauth_secret" {
-  description = "The generated NextAuth secret used by the SSM parameter."
+  description = "The Terraform-generated secret key for NextAuth."
   sensitive   = true
   value       = random_string.nextauth_secret.result
 }

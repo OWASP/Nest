@@ -139,20 +139,28 @@ run "test_redis_secret_preserves_auth_token_and_ssm_reference" {
   }
 
   assert {
-    condition = (
-      aws_secretsmanager_secret.django_redis_password.name == aws_ssm_parameter.django_redis_password.name &&
-      aws_secretsmanager_secret.django_redis_password.kms_key_id == var.kms_key_arn &&
-      aws_secretsmanager_secret.django_redis_password.recovery_window_in_days == var.secret_recovery_window_in_days
-    )
-    error_message = "The Redis secret must use the existing parameter name and configured encryption and recovery window."
+    condition     = aws_secretsmanager_secret.django_redis_password.name == aws_ssm_parameter.django_redis_password.name
+    error_message = "The Redis secret must use the existing SSM parameter name."
   }
 
   assert {
-    condition = (
-      aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_elasticache_replication_group.main.auth_token &&
-      aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_ssm_parameter.django_redis_password.value
-    )
-    error_message = "Provisioning must copy the current Redis auth token without changing the cache password."
+    condition     = aws_secretsmanager_secret.django_redis_password.kms_key_id == var.kms_key_arn
+    error_message = "The Redis secret must use the configured KMS key."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret.django_redis_password.recovery_window_in_days == var.secret_recovery_window_in_days
+    error_message = "The Redis secret must use the configured recovery window."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_elasticache_replication_group.main.auth_token
+    error_message = "The Redis secret must store the existing cache auth token."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_ssm_parameter.django_redis_password.value
+    error_message = "The Redis secret must match the existing SSM parameter value."
   }
 
   assert {
