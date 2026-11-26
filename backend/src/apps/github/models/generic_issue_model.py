@@ -23,6 +23,11 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
         OPEN = "open", "Open"
         CLOSED = "closed", "Closed"
 
+    class StateReason(models.TextChoices):
+        """Issue state reason choices."""
+
+        COMPLETED = "completed", "Completed"
+
     title = models.CharField(verbose_name="Title", max_length=1000)
     body = models.TextField(verbose_name="Body", default="")
 

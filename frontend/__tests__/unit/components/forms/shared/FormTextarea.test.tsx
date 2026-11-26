@@ -55,4 +55,49 @@ describe('FormTextarea', () => {
     fireEvent.change(textarea, { target: { value: 'New Value' } })
     expect(handleChange).toHaveBeenCalledTimes(1)
   })
+
+  it('links the character counter to the textarea for assistive technology', () => {
+    render(<FormTextarea {...defaultProps} value="Hello" maxLength={280} showCharCount />)
+    const textarea = screen.getByRole('textbox')
+    const counter = screen.getByText(/5\/280 characters/)
+
+    expect(counter).toHaveAttribute('id', 'test-textarea-char-count')
+    // No live region: announcing the count on every keystroke is noisy.
+    expect(counter).not.toHaveAttribute('aria-live')
+    expect(textarea).toHaveAttribute('aria-describedby', 'test-textarea-char-count')
+  })
+
+  it('does not set aria-describedby when neither counter nor error is shown', () => {
+    render(<FormTextarea {...defaultProps} value="Hello" maxLength={280} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).not.toHaveAttribute('aria-describedby')
+    expect(textarea).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('exposes a visible error as the invalid state and description', () => {
+    render(<FormTextarea {...defaultProps} touched error="Message is required." />)
+    const textarea = screen.getByRole('textbox')
+
+    expect(textarea).toHaveAttribute('aria-invalid', 'true')
+    expect(textarea).toHaveAttribute('aria-describedby', 'test-textarea-error')
+    expect(screen.getByText('Message is required.')).toHaveAttribute('id', 'test-textarea-error')
+  })
+
+  it('describes the textarea with both the counter and the error', () => {
+    render(
+      <FormTextarea
+        {...defaultProps}
+        value=" "
+        maxLength={280}
+        showCharCount
+        touched
+        error="Message is required."
+      />
+    )
+
+    expect(screen.getByRole('textbox')).toHaveAttribute(
+      'aria-describedby',
+      'test-textarea-char-count test-textarea-error'
+    )
+  })
 })

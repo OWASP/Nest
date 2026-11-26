@@ -61,6 +61,22 @@ export type BoardOfDirectorsNode = Node & {
   year: Scalars['Int']['output'];
 };
 
+export type CertificateNode = {
+  __typename?: 'CertificateNode';
+  chapter?: Maybe<ChapterNode>;
+  githubUser: UserNode;
+  id: Scalars['String']['output'];
+  isVerified: Scalars['Boolean']['output'];
+  issuedAt: Scalars['DateTime']['output'];
+  issuer?: Maybe<UserNode>;
+  message: Scalars['String']['output'];
+  project?: Maybe<ProjectNode>;
+  recipient: UserNode;
+  score?: Maybe<Scalars['Int']['output']>;
+  tier: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
 export type ChapterNode = Node & {
   __typename?: 'ChapterNode';
   contributionData: Scalars['JSON']['output'];
@@ -229,6 +245,15 @@ export type GitHubAuthResult = {
   user?: Maybe<AuthUserNode>;
 };
 
+export type IssueCertificateInput = {
+  chapterKey?: InputMaybe<Scalars['String']['input']>;
+  message?: Scalars['String']['input'];
+  projectKey?: InputMaybe<Scalars['String']['input']>;
+  recipientLogin?: InputMaybe<Scalars['String']['input']>;
+  recipientLogins?: InputMaybe<Array<Scalars['String']['input']>>;
+  title: Scalars['String']['input'];
+};
+
 export type IssueNode = Node & {
   __typename?: 'IssueNode';
   assignees: Array<UserNode>;
@@ -334,9 +359,9 @@ export type ModuleNode = {
   experienceLevel: ExperienceLevelEnum;
   id: Scalars['ID']['output'];
   interestedUsers: Array<UserNode>;
-  issueByNumber?: Maybe<IssueNode>;
+  issueById?: Maybe<IssueNode>;
   issueMentees: Array<UserNode>;
-  recentIssues: Array<IssueNode>;
+  issues: Array<IssueNode>;
   issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
@@ -358,17 +383,17 @@ export type ModuleNode = {
 
 
 export type ModuleNodeInterestedUsersArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 
-export type ModuleNodeIssueByNumberArgs = {
-  number: Scalars['Int']['input'];
+export type ModuleNodeIssueByIdArgs = {
+  issueId: Scalars['ID']['input'];
 };
 
 
 export type ModuleNodeIssueMenteesArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 
@@ -391,12 +416,12 @@ export type ModuleNodeRecentPullRequestsArgs = {
 
 
 export type ModuleNodeTaskAssignedAtArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 
 export type ModuleNodeTaskDeadlineArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
 };
 
 export type Mutation = {
@@ -408,6 +433,7 @@ export type Mutation = {
   createProgram: ProgramNode;
   deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
+  issueCertificate: Array<CertificateNode>;
   logoutUser: LogoutResult;
   reorderModules: Array<ModuleNode>;
   revokeApiKey: RevokeApiKeyResult;
@@ -420,7 +446,7 @@ export type Mutation = {
 
 
 export type MutationAssignIssueToUserArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
@@ -428,7 +454,7 @@ export type MutationAssignIssueToUserArgs = {
 
 
 export type MutationClearTaskDeadlineArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
 };
@@ -461,6 +487,11 @@ export type MutationGithubAuthArgs = {
 };
 
 
+export type MutationIssueCertificateArgs = {
+  inputData: IssueCertificateInput;
+};
+
+
 export type MutationReorderModulesArgs = {
   inputData: ReorderModulesInput;
 };
@@ -473,14 +504,14 @@ export type MutationRevokeApiKeyArgs = {
 
 export type MutationSetTaskDeadlineArgs = {
   deadlineAt: Scalars['DateTime']['input'];
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
 };
 
 
 export type MutationUnassignIssueFromUserArgs = {
-  issueNumber: Scalars['Int']['input'];
+  issueId: Scalars['ID']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
@@ -731,15 +762,18 @@ export type Query = {
   apiKeys: Array<ApiKeyNode>;
   boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
+  certificate?: Maybe<CertificateNode>;
   chapter?: Maybe<ChapterNode>;
   chapterCountries: Array<Scalars['String']['output']>;
   committee?: Maybe<CommitteeNode>;
+  entityContributors: Array<UserNode>;
   getMenteeDetails?: Maybe<MenteeNode>;
   getMenteeModuleIssues: Array<IssueNode>;
   getModule?: Maybe<ModuleNode>;
   getProgram?: Maybe<ProgramNode>;
   getProgramModules: Array<ModuleNode>;
   getProjectModules: Array<ModuleNode>;
+  isChapterLeader: Scalars['Boolean']['output'];
   isMentee: Scalars['Boolean']['output'];
   isMentor: Scalars['Boolean']['output'];
   isProjectLeader: Scalars['Boolean']['output'];
@@ -748,6 +782,7 @@ export type Query = {
   managementProgramModules: Array<ModuleNode>;
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
+  myCertificates: Array<CertificateNode>;
   myPrograms: PaginatedPrograms;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
@@ -764,7 +799,9 @@ export type Query = {
   recentReleases: Array<ReleaseNode>;
   repositories: Array<RepositoryNode>;
   repository?: Maybe<RepositoryNode>;
+  searchChapters: Array<ChapterNode>;
   searchProjects: Array<ProjectNode>;
+  searchUsers: Array<UserNode>;
   snapshot?: Maybe<SnapshotNode>;
   snapshots: Array<SnapshotNode>;
   sponsors: Array<SponsorNode>;
@@ -786,6 +823,11 @@ export type QueryBoardsOfDirectorsArgs = {
 };
 
 
+export type QueryCertificateArgs = {
+  certificateId: Scalars['String']['input'];
+};
+
+
 export type QueryChapterArgs = {
   key: Scalars['String']['input'];
 };
@@ -793,6 +835,13 @@ export type QueryChapterArgs = {
 
 export type QueryCommitteeArgs = {
   key: Scalars['String']['input'];
+};
+
+
+export type QueryEntityContributorsArgs = {
+  chapterKey?: InputMaybe<Scalars['String']['input']>;
+  limit?: Scalars['Int']['input'];
+  projectKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -830,6 +879,11 @@ export type QueryGetProgramModulesArgs = {
 
 export type QueryGetProjectModulesArgs = {
   projectKey: Scalars['String']['input'];
+};
+
+
+export type QueryIsChapterLeaderArgs = {
+  login: Scalars['String']['input'];
 };
 
 
@@ -967,7 +1021,17 @@ export type QueryRepositoryArgs = {
 };
 
 
+export type QuerySearchChaptersArgs = {
+  query: Scalars['String']['input'];
+};
+
+
 export type QuerySearchProjectsArgs = {
+  query: Scalars['String']['input'];
+};
+
+
+export type QuerySearchUsersArgs = {
   query: Scalars['String']['input'];
 };
 
@@ -1049,7 +1113,6 @@ export type RepositoryNode = Node & {
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   isArchived: Scalars['Boolean']['output'];
-  recentIssues: Array<IssueNode>;
   key: Scalars['String']['output'];
   languages: Array<Scalars['String']['output']>;
   latestRelease?: Maybe<Scalars['String']['output']>;
@@ -1058,6 +1121,7 @@ export type RepositoryNode = Node & {
   openIssuesCount: Scalars['Int']['output'];
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
+  recentIssues: Array<IssueNode>;
   recentMilestones: Array<MilestoneNode>;
   releases: Array<ReleaseNode>;
   size: Scalars['Int']['output'];
@@ -1159,8 +1223,10 @@ export type UserNode = {
   bio: Scalars['String']['output'];
   company: Scalars['String']['output'];
   contributionData?: Maybe<Scalars['JSON']['output']>;
+  contributionScore?: Maybe<Scalars['Int']['output']>;
   contributionsCount: Scalars['Int']['output'];
   createdAt: Scalars['String']['output'];
+  currentCertificate?: Maybe<CertificateNode>;
   email: Scalars['String']['output'];
   firstOwaspContributionAt?: Maybe<Scalars['String']['output']>;
   followersCount: Scalars['Int']['output'];
@@ -1177,6 +1243,7 @@ export type UserNode = {
   name: Scalars['String']['output'];
   publicRepositoriesCount: Scalars['Int']['output'];
   releasesCount: Scalars['Int']['output'];
+  tier?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };

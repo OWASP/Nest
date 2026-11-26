@@ -33,6 +33,7 @@ Ghsas
 Golovanova
 Hackbright
 Héllo
+ICN
 Illia
 Ime
 Iyonsi
@@ -110,6 +111,7 @@ collectstatic
 coraza
 corsheaders
 credentialless
+crp
 csrfguard
 csrfprotector
 csrftoken

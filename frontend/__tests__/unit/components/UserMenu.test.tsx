@@ -1,3 +1,4 @@
+import { useLazyQuery } from '@apollo/client/react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
@@ -51,6 +52,7 @@ describe('UserMenu Component', () => {
   const mockUseSession = useDjangoSession as jest.MockedFunction<typeof useDjangoSession>
   const mockSignIn = signIn as jest.MockedFunction<typeof signIn>
   const mockUseLogout = useLogout as jest.MockedFunction<typeof useLogout>
+  const mockUseLazyQuery = useLazyQuery as unknown as jest.Mock
 
   const mockLogout = jest.fn()
   const defaultLogoutReturn = {
@@ -72,6 +74,10 @@ describe('UserMenu Component', () => {
     jest.clearAllMocks()
     mockUseLogout.mockReturnValue(defaultLogoutReturn)
     mockSignIn.mockResolvedValue(undefined)
+    mockUseLazyQuery.mockReturnValue([
+      jest.fn().mockResolvedValue({ data: {} }),
+      { data: null, loading: false },
+    ])
   })
 
   describe('Renders successfully with minimal required props', () => {
@@ -938,6 +944,162 @@ describe('UserMenu Component', () => {
 
       const dashboardLink = screen.getByText('Project Health Dashboard')
       fireEvent.click(dashboardLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+  })
+
+  describe('Certificate link', () => {
+    it('calls getMyCertificate query when opening dropdown menu', async () => {
+      const mockGetMyCertificate = jest.fn()
+      ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+        mockGetMyCertificate,
+        { data: null, loading: false },
+      ])
+
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      expect(mockGetMyCertificate).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders My Certificates link when user has certificates and closes dropdown when clicked', async () => {
+      const mockGetMyCertificate = jest.fn()
+      ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+        mockGetMyCertificate,
+        {
+          data: {
+            myCertificates: [
+              { id: 'F9DD2BJ9ZYXW', tier: 'level 1', issuedAt: '2024-01-01', score: 100 },
+            ],
+          },
+          loading: false,
+        },
+      ])
+
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('My Certificates')).toBeInTheDocument()
+      })
+
+      const certificateLink = screen.getByText('My Certificates')
+      expect(certificateLink).toHaveAttribute('href', '/my/certificates')
+
+      fireEvent.click(certificateLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+
+    it('does not render My Certificates link when user has no certificates', async () => {
+      ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+        jest.fn(),
+        {
+          data: { myCertificates: [] },
+          loading: false,
+        },
+      ])
+
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument()
+      })
+
+      expect(screen.queryByText('My Certificates')).not.toBeInTheDocument()
+    })
+
+    it('refreshes certificates from the network on each menu open', () => {
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      expect(useLazyQuery).toHaveBeenCalledWith(expect.anything(), {
+        fetchPolicy: 'cache-and-network',
+      })
+    })
+  })
+
+  describe('Issue Certificates link', () => {
+    const openMenuFor = async (user: Partial<NonNullable<ExtendedSession['user']>>) => {
+      mockUseSession.mockReturnValue({
+        session: { ...mockSession, user: { ...mockSession.user, ...user } },
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument()
+      })
+      return avatarButton
+    }
+
+    it('renders the link for a chapter leader', async () => {
+      await openMenuFor({ isLeader: false, isChapterLeader: true })
+
+      expect(screen.getByText('Issue Certificates')).toHaveAttribute(
+        'href',
+        '/my/certificates/issue'
+      )
+    })
+
+    it('renders the link for a project leader', async () => {
+      await openMenuFor({ isLeader: true, isChapterLeader: false })
+
+      expect(screen.getByText('Issue Certificates')).toHaveAttribute(
+        'href',
+        '/my/certificates/issue'
+      )
+    })
+
+    it('does not render the link for a member who leads nothing', async () => {
+      await openMenuFor({ isLeader: false, isChapterLeader: false })
+
+      expect(screen.queryByText('Issue Certificates')).not.toBeInTheDocument()
+    })
+
+    it('closes the dropdown when the link is clicked', async () => {
+      const avatarButton = await openMenuFor({ isLeader: false, isChapterLeader: true })
+
+      fireEvent.click(screen.getByText('Issue Certificates'))
 
       await waitFor(() => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'false')

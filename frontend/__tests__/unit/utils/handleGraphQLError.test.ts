@@ -116,6 +116,45 @@ describe('extractGraphQLErrors', () => {
       expect(result.unmappedErrors).toEqual(['Field-level error without code.'])
     })
 
+    it('maps field errors for additional codes when fieldErrorCodes is provided', () => {
+      const error = {
+        graphQLErrors: [
+          {
+            message: "GitHub user 'ghost' not found.",
+            extensions: { code: 'NOT_FOUND', field: 'recipientLogins' },
+          },
+          {
+            message: 'Forbidden.',
+            extensions: { code: 'FORBIDDEN', field: 'projectKey' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error, new Set(['VALIDATION_ERROR', 'NOT_FOUND']))
+
+      expect(result.hasValidationErrors).toBe(true)
+      expect(result.validationErrors).toEqual({
+        recipientLogins: "GitHub user 'ghost' not found.",
+      })
+      expect(result.unmappedErrors).toEqual(['Forbidden.'])
+    })
+
+    it('does not map NOT_FOUND field errors by default', () => {
+      const error = {
+        graphQLErrors: [
+          {
+            message: "GitHub user 'ghost' not found.",
+            extensions: { code: 'NOT_FOUND', field: 'recipientLogins' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.unmappedErrors).toEqual(["GitHub user 'ghost' not found."])
+    })
+
     it('separates validation errors from unmapped errors', () => {
       const error = {
         graphQLErrors: [

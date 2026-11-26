@@ -23,7 +23,7 @@ export const useIssueMutations = ({ programKey, moduleKey, issueId }: UseIssueMu
     refetchQueries: [
       {
         query: GetManagementModuleIssueViewDocument,
-        variables: { programKey, moduleKey, number: Number(issueId) },
+        variables: { programKey, moduleKey, issueId },
       },
     ],
     awaitRefetchQueries: true,
