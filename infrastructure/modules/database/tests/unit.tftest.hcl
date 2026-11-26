@@ -80,6 +80,11 @@ run "test_password_not_generated_when_provided" {
     condition     = length(random_password.db_password) == 0
     error_message = "Database password must not be generated when provided."
   }
+
+  assert {
+    condition     = aws_secretsmanager_secret_version.django_db_password.secret_string == var.db_password
+    error_message = "The Django database secret must store the supplied password."
+  }
 }
 
 run "test_proxy_created_when_enabled" {
@@ -148,6 +153,44 @@ run "test_ssm_parameter_path_format" {
   assert {
     condition     = aws_ssm_parameter.django_db_password.name == "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
     error_message = "SSM parameter must follow path: /{project}/{environment}/DJANGO_DB_PASSWORD."
+  }
+}
+
+run "test_database_secret_preserves_password_and_ssm_reference" {
+  command = apply
+
+  variables {
+    secret_recovery_window_in_days = 30
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret.django_db_password.name == aws_ssm_parameter.django_db_password.name
+    error_message = "The Django database secret must use the existing SSM parameter name."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret.django_db_password.kms_key_id == var.kms_key_arn
+    error_message = "The Django database secret must use the configured KMS key."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret.django_db_password.recovery_window_in_days == var.secret_recovery_window_in_days
+    error_message = "The Django database secret must use the configured recovery window."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret_version.django_db_password.secret_string == aws_db_instance.main.password
+    error_message = "The Django database secret must store the generated RDS password."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret_version.django_db_password.secret_string == aws_ssm_parameter.django_db_password.value
+    error_message = "The Django database secret must match the existing SSM parameter value."
+  }
+
+  assert {
+    condition     = output.db_password_arn == aws_ssm_parameter.django_db_password.arn
+    error_message = "The database password output must continue to reference SSM."
   }
 }
 
