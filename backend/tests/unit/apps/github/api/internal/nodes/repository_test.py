@@ -172,15 +172,17 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
     def test_recent_milestones_method_fallback(self):
         """Test recent_milestones method fallback when not prefetched."""
         mock_repository = Mock(spec=["recent_milestones"])
+        mock_milestone = Mock()
         mock_milestones = Mock()
-        mock_milestones.__getitem__ = Mock(return_value=[])
+        mock_milestones.__getitem__ = Mock(return_value=[mock_milestone])
         mock_repository.recent_milestones = mock_milestones
 
         field = self._get_field_by_name("recent_milestones", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
-        resolver(None, mock_repository, limit=3)
+        result = resolver(None, mock_repository, limit=3)
 
-        mock_milestones.__getitem__.assert_called_once()
+        assert result == [mock_milestone]
+        mock_milestones.__getitem__.assert_called_once_with(slice(None, 3, None))
 
     def test_recent_milestones_prefetch(self):
         """Test recent_milestones prefetch configuration."""
