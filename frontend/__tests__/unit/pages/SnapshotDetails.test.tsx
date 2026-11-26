@@ -1,13 +1,15 @@
-import { useQuery } from '@apollo/client/react'
+import { useQuery, useLazyQuery, useApolloClient } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
+import { GET_SUBSCRIPTION_BY_TOKEN } from 'server/queries/subscriptionQueries'
 
 jest.mock('@apollo/client/react', () => ({
-  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
+  useLazyQuery: jest.fn(),
+  useApolloClient: jest.fn(),
 }))
 
 jest.mock('@heroui/toast', () => ({
@@ -18,10 +20,13 @@ const mockRouter = {
   push: jest.fn(),
 }
 
+const mockUseSearchParams = jest.fn(() => new URLSearchParams())
+
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ id: '2024-12' }),
+  useSearchParams: () => mockUseSearchParams(),
 }))
 
 const mockError = {
@@ -34,12 +39,45 @@ jest.mock('@/components/MarkdownWrapper', () => {
   ))
 })
 
+jest.mock('@/components/SnapshotFeedback', () => ({
+  __esModule: true,
+  default: () => <div data-testid="snapshot-feedback" />,
+}))
+
+const findButtonInSection = (buttonText: string, sectionTitle: string) => {
+  const heading = screen.getByText(sectionTitle)
+  let container: Element | null = null
+  if (heading.id) {
+    container = document.querySelector(`[aria-labelledby="${heading.id}"]`)
+  }
+  if (!container) {
+    container = heading.closest(
+      '[role="region"], [role="group"], [role="article"], [role="toolbar"], section, article, div.shadow-md'
+    )
+  }
+  if (!container) return undefined
+  const buttons = container.querySelectorAll('button')
+  for (const btn of Array.from(buttons)) {
+    if (btn.textContent?.includes(buttonText)) return btn
+  }
+  return undefined
+}
+
 describe('SnapshotDetailsPage', () => {
   beforeEach(() => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       loading: false,
       error: null,
+    })
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+      jest.fn().mockResolvedValue({ data: {} }),
+    ])
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      cache: {
+        updateQuery: jest.fn(),
+      },
     })
   })
 
@@ -74,9 +112,14 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.getByText('New Snapshot')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('New Chapters')).toBeInTheDocument()
-    expect(screen.getByText('New Projects')).toBeInTheDocument()
-    expect(screen.getByText('New Releases')).toBeInTheDocument()
+    expect(screen.getByText('Chapters')).toBeInTheDocument()
+    expect(screen.getByText('Projects')).toBeInTheDocument()
+    expect(screen.getByText('Releases')).toBeInTheDocument()
+    expect(screen.getByText('Events')).toBeInTheDocument()
+    expect(screen.getByText('Posts')).toBeInTheDocument()
+    expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    expect(screen.getByText('Issues')).toBeInTheDocument()
+    expect(screen.getByText('Contributors')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {
@@ -124,8 +167,9 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
     })
 
-    const projectCardButton = screen.getAllByRole('button', { name: /View Details/i })[1]
-    fireEvent.click(projectCardButton)
+    const projectButton = findButtonInSection('View Details', 'OWASP Nest')
+    expect(projectButton).toBeDefined()
+    if (projectButton) fireEvent.click(projectButton)
 
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/projects/nest')
@@ -172,9 +216,14 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [],
-          newProjects: [],
-          newReleases: [],
+          chapters: [],
+          events: [],
+          issues: [],
+          posts: [],
+          projects: [],
+          pullRequests: [],
+          releases: [],
+          users: [],
         },
       },
       error: null,
@@ -183,15 +232,20 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.queryByText('New Chapters')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Projects')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Releases')).not.toBeInTheDocument()
+      expect(screen.queryByText('Chapters')).not.toBeInTheDocument()
+      expect(screen.queryByText('Events')).not.toBeInTheDocument()
+      expect(screen.queryByText('Issues')).not.toBeInTheDocument()
+      expect(screen.queryByText('Posts')).not.toBeInTheDocument()
+      expect(screen.queryByText('Projects')).not.toBeInTheDocument()
+      expect(screen.queryByText('Pull Requests')).not.toBeInTheDocument()
+      expect(screen.queryByText('Releases')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributors')).not.toBeInTheDocument()
     })
   })
 
   test('renders project card with null key (uses name fallback)', async () => {
     const projectWithNullKey = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       key: null,
       name: 'Test Project',
     }
@@ -199,9 +253,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [projectWithNullKey],
-          newChapters: [],
-          newReleases: [],
+          projects: [projectWithNullKey],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -217,16 +271,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders project card without level', async () => {
     const projectWithoutLevel = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       level: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [projectWithoutLevel],
-          newChapters: [],
-          newReleases: [],
+          projects: [projectWithoutLevel],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -241,16 +295,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders project card without summary', async () => {
     const projectWithoutSummary = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       summary: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [projectWithoutSummary],
-          newChapters: [],
-          newReleases: [],
+          projects: [projectWithoutSummary],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -265,16 +319,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders chapter card without relatedUrls', async () => {
     const chapterWithoutUrls = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       relatedUrls: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [chapterWithoutUrls],
-          newProjects: [],
-          newReleases: [],
+          chapters: [chapterWithoutUrls],
+          projects: [],
+          releases: [],
         },
       },
       error: null,
@@ -289,16 +343,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders chapter card without summary', async () => {
     const chapterWithoutSummary = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       summary: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [chapterWithoutSummary],
-          newProjects: [],
-          newReleases: [],
+          chapters: [chapterWithoutSummary],
+          projects: [],
+          releases: [],
         },
       },
       error: null,
@@ -313,13 +367,13 @@ describe('SnapshotDetailsPage', () => {
 
   test('filters out inactive chapters', async () => {
     const activeChapter = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       name: 'Active Chapter',
       key: 'active-chapter',
       isActive: true,
     }
     const inactiveChapter = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       name: 'Inactive Chapter',
       key: 'inactive-chapter',
       isActive: false,
@@ -328,9 +382,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [activeChapter, inactiveChapter],
-          newProjects: [],
-          newReleases: [],
+          chapters: [activeChapter, inactiveChapter],
+          projects: [],
+          releases: [],
         },
       },
       error: null,
@@ -346,13 +400,13 @@ describe('SnapshotDetailsPage', () => {
 
   test('filters out inactive projects', async () => {
     const activeProject = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       name: 'Active Project',
       key: 'active-project',
       isActive: true,
     }
     const inactiveProject = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       name: 'Inactive Project',
       key: 'inactive-project',
       isActive: false,
@@ -361,9 +415,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [activeProject, inactiveProject],
-          newChapters: [],
-          newReleases: [],
+          projects: [activeProject, inactiveProject],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -379,16 +433,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders release without id (uses fallback key)', async () => {
     const releaseWithoutId = {
-      ...mockSnapshotDetailsData.snapshot.newReleases[0],
+      ...mockSnapshotDetailsData.snapshot.releases[0],
       id: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newReleases: [releaseWithoutId],
-          newChapters: [],
-          newProjects: [],
+          releases: [releaseWithoutId],
+          chapters: [],
+          projects: [],
         },
       },
       error: null,
@@ -404,7 +458,7 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders release without id and repositoryName (uses unknown fallback)', async () => {
     const releaseWithoutIdAndRepo = {
-      ...mockSnapshotDetailsData.snapshot.newReleases[0],
+      ...mockSnapshotDetailsData.snapshot.releases[0],
       id: undefined,
       repositoryName: undefined,
     }
@@ -412,9 +466,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newReleases: [releaseWithoutIdAndRepo],
-          newChapters: [],
-          newProjects: [],
+          releases: [releaseWithoutIdAndRepo],
+          chapters: [],
+          projects: [],
         },
       },
       error: null,
@@ -426,6 +480,635 @@ describe('SnapshotDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('v0.9.2')).toBeInTheDocument()
       expect(screen.getByText('Unknown repository')).toBeInTheDocument()
+    })
+  })
+
+  test('sorts events by priority: Global first, then AppSec Days, Partner, Other', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Events')).toBeInTheDocument()
+    })
+
+    const allH3s = screen.getAllByRole('heading', { level: 3 })
+    const knownEventNames = new Set([
+      'Global AppSec 2024',
+      'Global Summit',
+      'AppSec Days Pacific',
+      'Partner Security Summit',
+      'Local Meetup',
+    ])
+    const eventNames = allH3s
+      .map((el) => el.textContent)
+      .filter((name) => knownEventNames.has(name || ''))
+
+    const globalIdx = eventNames.indexOf('Global AppSec 2024')
+    const appsecIdx = eventNames.indexOf('AppSec Days Pacific')
+    const partnerIdx = eventNames.indexOf('Partner Security Summit')
+    const localIdx = eventNames.indexOf('Local Meetup')
+
+    expect(globalIdx).toBeGreaterThanOrEqual(0)
+    expect(appsecIdx).toBeGreaterThanOrEqual(0)
+    expect(partnerIdx).toBeGreaterThanOrEqual(0)
+    expect(localIdx).toBeGreaterThanOrEqual(0)
+
+    expect(globalIdx).toBeLessThan(appsecIdx)
+    expect(appsecIdx).toBeLessThan(partnerIdx)
+    expect(partnerIdx).toBeLessThan(localIdx)
+  })
+
+  test('shows more events when Show more button is clicked', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Events')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Security Workshop')).not.toBeInTheDocument()
+
+    const eventsShowMore = findButtonInSection('Show more', 'Events')
+    expect(eventsShowMore).toBeDefined()
+    if (eventsShowMore) fireEvent.click(eventsShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('Security Workshop')).toBeInTheDocument()
+    })
+  })
+
+  test('renders releases section with show more toggle', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Releases')).toBeInTheDocument()
+      expect(screen.getByText('v0.9.2')).toBeInTheDocument()
+      expect(screen.getByText('Latest pre-release')).toBeInTheDocument()
+    })
+  })
+
+  test('shows more contributors when Show more button is clicked', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributors')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('User Thirteen')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Arkadii Yakovets').length).toBeGreaterThanOrEqual(1)
+
+    const contribShowMore = findButtonInSection('Show more', 'Contributors')
+    expect(contribShowMore).toBeDefined()
+    if (contribShowMore) fireEvent.click(contribShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('User Thirteen')).toBeInTheDocument()
+    })
+  })
+
+  test('clicks Show more on pull requests to trigger pagination', async () => {
+    const mockFetchMorePRs = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          pullRequests: [
+            {
+              id: 'pr-new',
+              author: {
+                avatarUrl: 'https://avatars.githubusercontent.com/u/99?v=4',
+                id: '99',
+                login: 'newuser',
+                name: 'New PR User',
+              },
+              createdAt: '2024-12-20T09:00:00.000Z',
+              mergedAt: null,
+              organizationName: 'owasp',
+              repositoryName: 'nest',
+              state: 'open',
+              title: 'Brand New PR',
+              url: 'https://github.com/owasp/nest/pull/200',
+            },
+          ],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchMorePRs])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('PR Seven')).not.toBeInTheDocument()
+
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
+    expect(prShowMore).toBeDefined()
+    if (prShowMore) fireEvent.click(prShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('PR Seven')).toBeInTheDocument()
+    })
+  })
+
+  test('clicks Show more on issues to trigger pagination', async () => {
+    const mockFetchMoreIssues = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          issues: [
+            {
+              id: 'issue-new',
+              author: {
+                avatarUrl: 'https://avatars.githubusercontent.com/u/99?v=4',
+                id: '99',
+                login: 'newuser',
+                name: 'New Issue User',
+              },
+              createdAt: '2024-12-20T08:00:00.000Z',
+              organizationName: 'owasp',
+              repositoryName: 'nest',
+              state: 'open',
+              title: 'Brand New Issue',
+              url: 'https://github.com/owasp/nest/issues/200',
+            },
+          ],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock)
+      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([mockFetchMoreIssues])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Issue Seven')).not.toBeInTheDocument()
+
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
+    expect(issueShowMore).toBeDefined()
+    if (issueShowMore) fireEvent.click(issueShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issue Seven')).toBeInTheDocument()
+    })
+  })
+
+  test('shows more posts when Show more button is clicked', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Posts')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Post Six')).not.toBeInTheDocument()
+
+    const postsShowMore = findButtonInSection('Show more', 'Posts')
+    expect(postsShowMore).toBeDefined()
+    if (postsShowMore) fireEvent.click(postsShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('Post Six')).toBeInTheDocument()
+    })
+  })
+
+  test('clicks Show less on pull requests to collapse', async () => {
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+      jest.fn().mockResolvedValue({
+        data: {
+          snapshot: {
+            pullRequests: [
+              {
+                id: 'pr-7',
+                author: {
+                  avatarUrl: 'https://avatars.githubusercontent.com/u/7?v=4',
+                  id: '7',
+                  login: 'user7',
+                  name: 'User Seven',
+                },
+                createdAt: '2024-12-18T09:00:00.000Z',
+                mergedAt: null,
+                organizationName: 'owasp',
+                repositoryName: 'nest',
+                state: 'open',
+                title: 'PR Seven',
+                url: 'https://github.com/owasp/nest/pull/106',
+              },
+            ],
+          },
+        },
+      }),
+    ])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    })
+
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
+    expect(prShowMore).toBeDefined()
+    if (prShowMore) fireEvent.click(prShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('PR Seven')).toBeInTheDocument()
+    })
+
+    const prShowLess = findButtonInSection('Show less', 'Pull Requests')
+    expect(prShowLess).toBeDefined()
+    if (prShowLess) fireEvent.click(prShowLess)
+
+    await waitFor(() => {
+      expect(screen.queryByText('PR Seven')).not.toBeInTheDocument()
+    })
+  })
+
+  test('clicks Show less on issues to collapse', async () => {
+    ;(useLazyQuery as unknown as jest.Mock)
+      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([
+        jest.fn().mockResolvedValue({
+          data: {
+            snapshot: {
+              issues: [
+                {
+                  id: 'issue-7',
+                  author: {
+                    avatarUrl: 'https://avatars.githubusercontent.com/u/7?v=4',
+                    id: '7',
+                    login: 'user7',
+                    name: 'User Seven',
+                  },
+                  createdAt: '2024-12-17T08:00:00.000Z',
+                  organizationName: 'owasp',
+                  repositoryName: 'nest',
+                  state: 'open',
+                  title: 'Issue Seven',
+                  url: 'https://github.com/owasp/nest/issues/56',
+                },
+              ],
+            },
+          },
+        }),
+      ])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+    })
+
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
+    expect(issueShowMore).toBeDefined()
+    if (issueShowMore) fireEvent.click(issueShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issue Seven')).toBeInTheDocument()
+    })
+
+    const issueShowLess = findButtonInSection('Show less', 'Issues')
+    expect(issueShowLess).toBeDefined()
+    if (issueShowLess) fireEvent.click(issueShowLess)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Issue Seven')).not.toBeInTheDocument()
+    })
+  })
+
+  test('PR fetchMore triggers cache update when new PRs are returned', async () => {
+    const mockUpdateQuery = jest.fn()
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      cache: {
+        updateQuery: mockUpdateQuery,
+      },
+    })
+
+    const mockFetchMorePRs = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          pullRequests: [
+            {
+              id: 'pr-fetched',
+              author: null,
+              createdAt: '2024-12-20T09:00:00.000Z',
+              mergedAt: null,
+              organizationName: 'owasp',
+              repositoryName: 'nest',
+              state: 'open',
+              title: 'Fetched PR',
+              url: 'https://github.com/owasp/nest/pull/300',
+            },
+          ],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchMorePRs])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    })
+
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
+    expect(prShowMore).toBeDefined()
+    if (prShowMore) fireEvent.click(prShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMorePRs).toHaveBeenCalled()
+    })
+
+    await waitFor(() => {
+      expect(mockUpdateQuery).toHaveBeenCalled()
+    })
+
+    const updateFn = mockUpdateQuery.mock.calls[0][1]
+    const prevData = {
+      snapshot: {
+        pullRequests: [{ id: 'existing-pr' }],
+      },
+    }
+    const result = updateFn(prevData)
+    expect(result.snapshot.pullRequests).toHaveLength(2)
+
+    const nullResult = updateFn(null)
+    expect(nullResult).toBeNull()
+  })
+
+  test('Issue fetchMore triggers cache update when new issues are returned', async () => {
+    const mockUpdateQuery = jest.fn()
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      cache: {
+        updateQuery: mockUpdateQuery,
+      },
+    })
+
+    const mockFetchMoreIssues = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          issues: [
+            {
+              id: 'issue-fetched',
+              author: null,
+              createdAt: '2024-12-20T08:00:00.000Z',
+              organizationName: 'owasp',
+              repositoryName: 'nest',
+              state: 'open',
+              title: 'Fetched Issue',
+              url: 'https://github.com/owasp/nest/issues/300',
+            },
+          ],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock)
+      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([mockFetchMoreIssues])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+    })
+
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
+    expect(issueShowMore).toBeDefined()
+    if (issueShowMore) fireEvent.click(issueShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMoreIssues).toHaveBeenCalled()
+    })
+
+    await waitFor(() => {
+      expect(mockUpdateQuery).toHaveBeenCalled()
+    })
+
+    const updateFn = mockUpdateQuery.mock.calls[0][1]
+    const prevData = {
+      snapshot: {
+        issues: [{ id: 'existing-issue' }],
+      },
+    }
+    const result = updateFn(prevData)
+    expect(result.snapshot.issues).toHaveLength(2)
+
+    const nullResult = updateFn(null)
+    expect(nullResult).toBeNull()
+  })
+
+  test('shows more chapters when Show more button is clicked', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapters')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('OWASP London')).not.toBeInTheDocument()
+    expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
+
+    const chaptersShowMore = findButtonInSection('Show more', 'Chapters')
+    expect(chaptersShowMore).toBeDefined()
+    if (chaptersShowMore) fireEvent.click(chaptersShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP London')).toBeInTheDocument()
+    })
+  })
+
+  test('shows more projects when Show more button is clicked', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Projects')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('OWASP SAMM')).not.toBeInTheDocument()
+    expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
+
+    const projectsShowMore = findButtonInSection('Show more', 'Projects')
+    expect(projectsShowMore).toBeDefined()
+    if (projectsShowMore) fireEvent.click(projectsShowMore)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP SAMM')).toBeInTheDocument()
+    })
+  })
+
+  test('PR fetchMore error triggers handleAppError', async () => {
+    const mockFetchMorePRs = jest.fn().mockRejectedValue(new Error('Network error'))
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchMorePRs])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    })
+
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
+    expect(prShowMore).toBeDefined()
+    if (prShowMore) fireEvent.click(prShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMorePRs).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalled()
+    })
+  })
+
+  test('Issue fetchMore error triggers handleAppError', async () => {
+    const mockFetchMoreIssues = jest.fn().mockRejectedValue(new Error('Network error'))
+    ;(useLazyQuery as unknown as jest.Mock)
+      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([mockFetchMoreIssues])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+    })
+
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
+    expect(issueShowMore).toBeDefined()
+    if (issueShowMore) fireEvent.click(issueShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMoreIssues).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalled()
+    })
+  })
+
+  test('PR Show more paginates locally when data already loaded and hasMorePRs is false', async () => {
+    const mockFetchMorePRs = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          pullRequests: [],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchMorePRs])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    })
+
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
+    expect(prShowMore).toBeDefined()
+    if (prShowMore) fireEvent.click(prShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMorePRs).toHaveBeenCalled()
+    })
+
+    const prShowMore2 = await waitFor(() => {
+      const btn = findButtonInSection('Show more', 'Pull Requests')
+      expect(btn).toBeDefined()
+      return btn
+    })
+    if (prShowMore2) fireEvent.click(prShowMore2)
+
+    await waitFor(() => {
+      expect(screen.getByText('PR Seven')).toBeInTheDocument()
+    })
+    expect(mockFetchMorePRs).toHaveBeenCalledTimes(1)
+  })
+
+  test('Issue Show more paginates locally when data already loaded and hasMoreIssues is false', async () => {
+    const mockFetchMoreIssues = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          issues: [],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock)
+      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([mockFetchMoreIssues])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+    })
+
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
+    expect(issueShowMore).toBeDefined()
+    if (issueShowMore) fireEvent.click(issueShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMoreIssues).toHaveBeenCalled()
+    })
+
+    const issueShowMore2 = await waitFor(() => {
+      const btn = findButtonInSection('Show more', 'Issues')
+      expect(btn).toBeDefined()
+      return btn
+    })
+    if (issueShowMore2) fireEvent.click(issueShowMore2)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issue Seven')).toBeInTheDocument()
+    })
+    expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
+  })
+
+  test('shows SnapshotFeedback when no subscription token is present', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snapshot-feedback')).toBeInTheDocument()
+    })
+  })
+
+  test('hides SnapshotFeedback when a valid subscription token resolves', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=valid-token'))
+    ;(useQuery as unknown as jest.Mock).mockImplementation((document: unknown) => {
+      if (document === GET_SUBSCRIPTION_BY_TOKEN) {
+        return {
+          data: { subscriptionByToken: { includeProjects: true } },
+          loading: false,
+          error: null,
+        }
+      }
+      return {
+        data: mockSnapshotDetailsData,
+        loading: false,
+        error: null,
+      }
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId('snapshot-feedback')).not.toBeInTheDocument()
+  })
+
+  test('shows SnapshotFeedback when subscription token is invalid or expired', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=expired-token'))
+    ;(useQuery as unknown as jest.Mock).mockImplementation((document: unknown) => {
+      if (document === GET_SUBSCRIPTION_BY_TOKEN) {
+        return {
+          data: { subscriptionByToken: null },
+          loading: false,
+          error: null,
+        }
+      }
+      return {
+        data: mockSnapshotDetailsData,
+        loading: false,
+        error: null,
+      }
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snapshot-feedback')).toBeInTheDocument()
     })
   })
 })

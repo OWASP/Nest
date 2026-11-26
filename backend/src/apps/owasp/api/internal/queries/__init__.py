@@ -10,6 +10,7 @@ from .post import PostQuery
 from .project import ProjectQuery
 from .project_health_metrics import ProjectHealthMetricsQuery
 from .snapshot import SnapshotQuery
+from .snapshot_subscription import SnapshotSubscriptionQuery
 from .sponsor import SponsorQuery
 from .stats import StatsQuery
 
@@ -25,6 +26,7 @@ class OwaspQuery(
     ProjectHealthMetricsQuery,
     ProjectQuery,
     SnapshotQuery,
+    SnapshotSubscriptionQuery,
     SponsorQuery,
     StatsQuery,
 ):

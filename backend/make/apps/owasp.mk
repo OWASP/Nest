@@ -1,10 +1,11 @@
 .PHONY: owasp-add-project-custom-tags owasp-aggregate-entity-contributions \
 	owasp-aggregate-member-contributions owasp-aggregate-projects owasp-create-project-metadata-file \
-	owasp-crp-recalculate-scores owasp-enrich-chapters owasp-enrich-committees owasp-enrich-events \
-	owasp-enrich-projects owasp-generate-community-snapshot-video owasp-process-snapshots \
-	owasp-sync-board-activity owasp-sync-chapters owasp-sync-committees owasp-sync-posts \
-	owasp-sync-projects owasp-update-events owasp-update-leaders owasp-update-project-health-metrics \
-	owasp-update-project-health-requirements owasp-update-project-health-scores owasp-update-sponsors
+	owasp-create-snapshot owasp-crp-recalculate-scores owasp-enrich-chapters owasp-enrich-committees \
+	owasp-enrich-events owasp-enrich-projects owasp-generate-community-snapshot-video \
+	owasp-process-snapshots owasp-send-snapshot-emails owasp-sync-board-activity owasp-sync-chapters \
+	owasp-sync-committees owasp-sync-posts owasp-sync-projects owasp-update-events \
+	owasp-update-leaders owasp-update-project-health-metrics owasp-update-project-health-requirements \
+	owasp-update-project-health-scores owasp-update-sponsors
 
 owasp-add-project-custom-tags:
 	@echo "Adding project custom tags from $(FILE)"
@@ -26,6 +27,12 @@ owasp-aggregate-projects:
 owasp-create-project-metadata-file:
 	@echo "Generating metadata"
 	@CMD="python manage.py owasp_create_project_metadata_file $(entity_key)" $(MAKE) backend-exec-command
+
+SNAPSHOT_FREQUENCY ?= weekly
+
+owasp-create-snapshot:
+	@echo "Creating OWASP community snapshot"
+	@CMD="python manage.py owasp_create_snapshot --frequency $(SNAPSHOT_FREQUENCY)" $(MAKE) exec-backend-command
 
 owasp-crp-recalculate-scores:
 	@echo "Recalculating contributor scores"
@@ -81,6 +88,12 @@ owasp-sync-chapters:
 owasp-sync-committees:
 	@echo "Syncing OWASP committees"
 	@CMD="python manage.py owasp_sync_committees" $(MAKE) backend-exec-command
+
+NEWSLETTER_SNAPSHOT_KEY ?=
+
+owasp-send-snapshot-emails:
+	@echo "Sending snapshot digest emails"
+	@CMD="python manage.py owasp_send_snapshot_emails --snapshot-key $(NEWSLETTER_SNAPSHOT_KEY)" $(MAKE) backend-exec-command
 
 owasp-sync-board-activity:
 	@echo "Syncing OWASP board activity from www-board"

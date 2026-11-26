@@ -98,6 +98,7 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+asvs
 atheris
 attisdropped
 bangbang
@@ -189,6 +190,7 @@ millify
 misconfig
 mkv
 mpim
+mso
 navlink
 nestbot
 ngx
@@ -261,6 +263,7 @@ unhover
 unrs
 usefixtures
 vcodec
+vml
 webgoat
 winsrdf
 wrk

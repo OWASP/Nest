@@ -687,4 +687,35 @@ describe('Card', () => {
       expect(socialLink).toHaveAttribute('aria-label', 'Social media link')
     })
   })
+
+  describe('extraAction prop', () => {
+    it('renders extraAction when provided', () => {
+      const propsWithExtraAction = {
+        ...baseProps,
+        extraAction: <button data-testid="extra-action">Subscribe</button>,
+      }
+      render(<Card {...propsWithExtraAction} />)
+      expect(screen.getByTestId('extra-action')).toBeInTheDocument()
+      expect(screen.getByText('Subscribe')).toBeInTheDocument()
+    })
+
+    it('does not render extraAction when not provided', () => {
+      render(<Card {...baseProps} />)
+      expect(screen.queryByTestId('extra-action')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('className prop', () => {
+    it('lets className override conflicting base utilities', () => {
+      const { container } = render(
+        <Card {...baseProps} className="border-0 bg-gray-200 dark:bg-gray-700" />
+      )
+      const card = container.firstElementChild
+
+      expect(card).toHaveClass('border-0', 'bg-gray-200', 'dark:bg-gray-700', 'rounded-md')
+      expect(card).not.toHaveClass('border-1')
+      expect(card).not.toHaveClass('bg-white')
+      expect(card).not.toHaveClass('dark:bg-[#212529]')
+    })
+  })
 })
