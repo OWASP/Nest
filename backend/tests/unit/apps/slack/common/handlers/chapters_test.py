@@ -57,13 +57,22 @@ class TestChapterHandler:
         assert len(blocks) == 1
         assert "No chapters found for" in blocks[0]["text"]["text"]
 
-    def test_get_blocks_pagination(self, setup_mocks, mock_chapter_data):
+    def test_get_blocks_pagination(self, setup_mocks, mock_chapter_data, pagination_case):
+        """Keep every result page reachable without offering a page past the end."""
+        total_pages, page, expected_buttons = pagination_case
+        mock_chapter_data["nbPages"] = total_pages
         setup_mocks["get_chapters"].return_value = mock_chapter_data
-        presentation = EntityPresentation(include_pagination=True)
+        presentation = EntityPresentation(include_pagination=True, include_feedback=False)
 
-        blocks = get_blocks(page=1, presentation=presentation)
+        blocks = get_blocks(page=page, presentation=presentation)
 
-        assert blocks[-1]["type"] == "section"
+        buttons = [
+            (button["text"]["text"], button["value"])
+            for block in blocks
+            if block.get("type") == "actions"
+            for button in block["elements"]
+        ]
+        assert buttons == expected_buttons
 
     def test_get_blocks_text_truncation(self, setup_mocks):
         long_name = "Very Long Chapter Name That Should Be Truncated"
@@ -92,7 +101,10 @@ class TestChapterHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        assert "Extended search over 42 OWASP chapters" in blocks[-1]["text"]["text"]
+        assert any(
+            "Extended search over 42 OWASP chapters" in block.get("text", {}).get("text", "")
+            for block in blocks
+        )
 
     def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_chapter_data):
         """Test that pagination buttons are added on page 2."""
