@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import strawberry
+from django.db.models import F
 from strawberry.relay import GlobalID
 
 from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH
@@ -180,7 +181,10 @@ class TestModuleNodeResolvers:
             assert len(mentees) == 1
             mock_module_node.issues.filter.assert_called_once_with(pk=123)
             mock_task_objects.filter.assert_called_once_with(
-                module=mock_module_node, issue_id__in=["issue_id_1"], assignee__isnull=False
+                module=mock_module_node,
+                issue_id__in=["issue_id_1"],
+                assignee__isnull=False,
+                issue__assignees=F("assignee"),
             )
             mock_task_objects.filter.return_value.exclude.assert_called_once_with(
                 status=Task.Status.UNASSIGNED

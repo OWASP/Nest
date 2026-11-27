@@ -3,6 +3,7 @@
 from datetime import datetime
 
 import strawberry
+from django.db.models import F
 from strawberry.relay import GlobalID
 from strawberry.types import Info
 
@@ -74,9 +75,14 @@ class ModuleNode:
         if not issue_ids:
             return []
 
-        # Get mentees assigned to tasks for this issue
+        # Get mentees with a task for this issue who are still assigned to it.
         mentee_users = (
-            Task.objects.filter(module=self, issue_id__in=issue_ids, assignee__isnull=False)
+            Task.objects.filter(
+                module=self,
+                issue_id__in=issue_ids,
+                assignee__isnull=False,
+                issue__assignees=F("assignee"),
+            )
             .exclude(status=Task.Status.UNASSIGNED)
             .select_related("assignee")
             .values_list("assignee", flat=True)

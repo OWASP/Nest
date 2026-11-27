@@ -10,6 +10,7 @@ from django.db.utils import IntegrityError
 from django.utils import timezone
 from github.GithubException import GithubException
 from graphql import GraphQLError
+from requests.exceptions import RequestException
 from strawberry.relay import GlobalID
 
 from apps.github.auth import get_github_client
@@ -36,6 +37,7 @@ NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines
 NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
 NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
 GITHUB_NOT_CONFIGURED_MSG = "GitHub integration is not configured."
+GITHUB_UNREACHABLE_MSG = "Could not reach GitHub. Please try again."
 ISSUE_REPOSITORY_MISMATCH_MSG = "Issue repository does not belong to the module's project."
 NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG = "You can only set deadlines for issues assigned to you."
 
@@ -53,19 +55,21 @@ def get_github_issue(module: Module, issue_id: GlobalID) -> tuple:
         raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
     if not issue.repository:
-        raise ValidationError(message="Issue has no repository.")
+        msg = "Issue has no repository."
+        raise GraphQLError(msg)
 
     if not issue.repository.owner:
-        raise ValidationError(message="Issue repository has no owner.")
+        msg = "Issue repository has no owner."
+        raise GraphQLError(msg)
 
     # Module issues are refreshed by a sync, so they can outlive a project change.
     if not module.project.repositories.filter(pk=issue.repository.pk).exists():
-        raise ValidationError(message=ISSUE_REPOSITORY_MISMATCH_MSG)
+        raise GraphQLError(ISSUE_REPOSITORY_MISMATCH_MSG)
 
     try:
         gh_client = get_github_client()
     except ValueError as e:
-        raise ValidationError(message=GITHUB_NOT_CONFIGURED_MSG) from e
+        raise GraphQLError(GITHUB_NOT_CONFIGURED_MSG) from e
 
     gh_repository = gh_client.get_repo(issue.repository.path)
     gh_issue = gh_repository.get_issue(number=issue.number)
@@ -78,12 +82,25 @@ def is_github_assignee(gh_issue, user_login: str) -> bool:
     return user_login.lower() in {assignee.login.lower() for assignee in gh_issue.assignees}
 
 
-def undo_github_assignment_change(undo, user_login: str) -> None:
-    """Revert a GitHub assignee change after the local update failed."""
+def is_deadline_in_module_range(module: Module, deadline_at: datetime) -> bool:
+    """Return whether the deadline falls within the module's start and end dates."""
+    return module.started_at.date() <= deadline_at.date() <= module.ended_at.date()
+
+
+def undo_github_assignment_change(gh_issue, user_login: str, *, assigned: bool) -> None:
+    """Restore the GitHub assignee state after the local update failed."""
     try:
-        undo(user_login)
+        if assigned:
+            gh_issue.add_to_assignees(user_login)
+        else:
+            gh_issue.remove_from_assignees(user_login)
     except Exception:
         logger.exception("Failed to revert GitHub assignee change for '%s'", user_login)
+        return
+
+    # The call above refreshes the assignees from GitHub's response.
+    if is_github_assignee(gh_issue, user_login) != assigned:
+        logger.error("GitHub did not revert the assignee change for '%s'", user_login)
 
 
 def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
@@ -222,19 +239,28 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
+        was_assigned = None
         try:
             issue, gh_issue = get_github_issue(module, issue_id)
             was_assigned = is_github_assignee(gh_issue, user_login)
             gh_issue.add_to_assignees(user_login)
         except GithubException as e:
-            raise ValidationError(message=f"Failed to assign issue on GitHub: {e}") from e
+            logger.warning("Failed to assign issue on GitHub", exc_info=True)
+            msg = f"Failed to assign issue on GitHub (status {e.status})."
+            raise GraphQLError(msg) from e
+        except RequestException as e:
+            # The request may have reached GitHub before the connection failed.
+            if was_assigned is False:
+                undo_github_assignment_change(gh_issue, user_login, assigned=False)
+            raise GraphQLError(GITHUB_UNREACHABLE_MSG) from e
 
         # GitHub ignores users it cannot assign and still reports success.
         if not is_github_assignee(gh_issue, user_login):
-            raise ValidationError(
-                message=f"GitHub did not assign this issue to '{user_login}'. "
+            msg = (
+                f"GitHub did not assign this issue to '{user_login}'. "
                 "The user may not be assignable in this repository."
             )
+            raise GraphQLError(msg)
 
         try:
             with transaction.atomic():
@@ -267,18 +293,31 @@ class ModuleMutation:
                     if task.module != module:
                         task.module = module
                         update_fields.append("module")
+                        # A deadline set in another module may not fit this one.
+                        if task.deadline_at and not is_deadline_in_module_range(
+                            module, task.deadline_at
+                        ):
+                            task.deadline_at = None
+                            update_fields.append("deadline_at")
 
-                    was_unassigned = task.status == Task.Status.UNASSIGNED
-                    if was_unassigned or task.assigned_at is None:
+                    # A Task kept as history starts over: an unassigned one, or a
+                    # completed one whose user is assigned again to an open issue.
+                    restart = task.status == Task.Status.UNASSIGNED or (
+                        task.status == Task.Status.COMPLETED
+                        and not was_assigned
+                        and issue.state.lower() != "closed"
+                    )
+                    if restart or task.assigned_at is None:
                         task.assigned_at = now
                         update_fields.append("assigned_at")
 
-                    if was_unassigned:
+                    if restart:
                         task.deadline_at = None
-                        update_fields.append("deadline_at")
+                        if "deadline_at" not in update_fields:
+                            update_fields.append("deadline_at")
 
                     # A Task created by setting a deadline starts as TODO.
-                    if was_unassigned or task.status == Task.Status.TODO:
+                    if restart or task.status == Task.Status.TODO:
                         task.status = Task.Status.IN_PROGRESS
                         update_fields.append("status")
 
@@ -291,7 +330,7 @@ class ModuleMutation:
         except Exception:
             # Keep GitHub in line with the portal when the local update fails.
             if not was_assigned:
-                undo_github_assignment_change(gh_issue.remove_from_assignees, user_login)
+                undo_github_assignment_change(gh_issue, user_login, assigned=False)
             raise
 
         return module
@@ -324,12 +363,24 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
+        was_assigned = None
         try:
             issue, gh_issue = get_github_issue(module, issue_id)
             was_assigned = is_github_assignee(gh_issue, user_login)
             gh_issue.remove_from_assignees(user_login)
         except GithubException as e:
-            raise ValidationError(message=f"Failed to unassign issue on GitHub: {e}") from e
+            logger.warning("Failed to unassign issue on GitHub", exc_info=True)
+            msg = f"Failed to unassign issue on GitHub (status {e.status})."
+            raise GraphQLError(msg) from e
+        except RequestException as e:
+            # The request may have reached GitHub before the connection failed.
+            if was_assigned:
+                undo_github_assignment_change(gh_issue, user_login, assigned=True)
+            raise GraphQLError(GITHUB_UNREACHABLE_MSG) from e
+
+        if is_github_assignee(gh_issue, user_login):
+            msg = f"GitHub did not unassign this issue from '{user_login}'."
+            raise GraphQLError(msg)
 
         try:
             with transaction.atomic():
@@ -343,7 +394,7 @@ class ModuleMutation:
         except Exception:
             # Keep GitHub in line with the portal when the local update fails.
             if was_assigned:
-                undo_github_assignment_change(gh_issue.add_to_assignees, user_login)
+                undo_github_assignment_change(gh_issue, user_login, assigned=True)
             raise
 
         return module
@@ -406,7 +457,7 @@ class ModuleMutation:
         if timezone.is_naive(normalized_deadline):
             normalized_deadline = timezone.make_aware(normalized_deadline)
 
-        if not module.started_at.date() <= normalized_deadline.date() <= module.ended_at.date():
+        if not is_deadline_in_module_range(module, normalized_deadline):
             raise ValidationError(message=DEADLINE_OUT_OF_RANGE_MSG)
 
         now = timezone.now()
@@ -474,7 +525,7 @@ class ModuleMutation:
 
         tasks_to_update: list[Task] = []
         for assignee in assignees:
-            task = Task.objects.filter(module=module, issue=issue, assignee=assignee).first()
+            task = Task.objects.filter(issue=issue, assignee=assignee).first()
             if task and task.deadline_at is not None:
                 task.deadline_at = None
                 tasks_to_update.append(task)
