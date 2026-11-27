@@ -126,6 +126,23 @@ class TestEventModel:
     def test_parse_dates_year_without_comma(self, dates, start_date, expected_end):
         assert Event.parse_dates(dates, start_date) == expected_end
 
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 1 - 2 2026", date(2025, 10, 1), date(2026, 10, 2)),
+            ("October 1 - 2nd, 2026", date(2025, 10, 1), date(2026, 10, 2)),
+            ("October 31 - 2ND 2026", date(2025, 10, 31), date(2026, 11, 2)),
+            ("October 31 - 2, 2026", date(2025, 10, 31), date(2026, 11, 2)),
+            ("December 30 - 2ND, 2027", date(2025, 12, 30), date(2027, 1, 2)),
+            ("December 30 - 2 2027", date(2025, 12, 30), date(2027, 1, 2)),
+            ("February 1 - 29 2028", date(2025, 2, 1), date(2028, 2, 29)),
+            ("February 1 - 29 2026", date(2024, 2, 1), None),
+            ("October 1 - 2 0000", date(2025, 10, 1), None),
+        ],
+    )
+    def test_parse_dates_explicit_end_year(self, dates, start_date, expected_end):
+        assert Event.parse_dates(dates, start_date) == expected_end
+
     @pytest.mark.parametrize("start_date", ["2025-10-31", date(2025, 10, 31)])
     @pytest.mark.parametrize(
         ("dates", "expected_end"),
@@ -133,6 +150,8 @@ class TestEventModel:
             ("October 31 - 2", date(2025, 11, 2)),
             ("October 31 - 2nd", date(2025, 11, 2)),
             ("October 31 - 31st", date(2025, 10, 31)),
+            ("October 31 - 2ND 2026", date(2026, 11, 2)),
+            ("October 31 - 31st, 2026", date(2026, 10, 31)),
         ],
     )
     def test_from_dict_day_only_dates(self, start_date, dates, expected_end):
