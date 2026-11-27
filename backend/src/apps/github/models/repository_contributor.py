@@ -128,6 +128,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         limit=15,
         organization=None,
         project=None,
+        public_members_only=False,
         repository=None,
     ):
         """Get top contributors across repositories, organization, or project.
@@ -140,6 +141,8 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             limit (int, optional): Maximum number of contributors to return.
             organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
+            public_members_only (bool, optional): Exclude users who opted out of a public
+                member page, before the results are limited.
             repository (str, optional): Repository key to filter by.
 
         Returns:
@@ -157,6 +160,9 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         if has_full_name:
             queryset = queryset.filter(user__name__regex=CONTRIBUTOR_FULL_NAME_REGEX)
+
+        if public_members_only:
+            queryset = queryset.filter(user__has_public_member_page=True)
 
         if project:
             from apps.owasp.models.project import Project  # noqa: PLC0415

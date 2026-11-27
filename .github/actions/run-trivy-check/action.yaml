@@ -28,5 +28,5 @@ runs:
     - name: Run Trivy check
       env:
         TRIVY_RUN_COMMAND: ${{ inputs.command }}
-      run: bash -c "$TRIVY_RUN_COMMAND"
+      run: bash --noprofile --norc -e -o pipefail -c "$TRIVY_RUN_COMMAND"
       shell: bash

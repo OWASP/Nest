@@ -50,7 +50,7 @@ dependency-compile-requirements:
 		set -e
 		python -m pip install --no-warn-script-location --quiet pip-tools
 		python -m piptools compile --no-strip-extras --generate-hashes --output-file=.github/requirements/scripts.txt .github/requirements/scripts.in
-		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in
+		python -m piptools compile --allow-unsafe --no-strip-extras --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in
 		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/cluster-fuzz-lite.txt backend/requirements/cluster-fuzz-lite.in
 		python -m piptools compile --no-strip-extras --generate-hashes --output-file=tools/requirements/pre-commit.txt tools/requirements/pre-commit.in
 		python -m piptools compile --no-strip-extras --generate-hashes --output-file=tools/requirements/test.txt tools/requirements/test.in

@@ -4,6 +4,7 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import type { CardProps } from 'types/card'
 import { ICONS } from 'utils/data'
 import { getSocialIcon } from 'utils/urlIconMappings'
+import { cn } from 'utils/utility'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
@@ -13,6 +14,8 @@ import Markdown from 'components/MarkdownWrapper'
 const Card = ({
   button,
   cardKey,
+  className = '',
+  extraAction,
   icons,
   labels,
   level,
@@ -26,7 +29,12 @@ const Card = ({
   url,
 }: CardProps) => {
   return (
-    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
+    <div
+      className={cn(
+        'mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]',
+        className
+      )}
+    >
       {/* Card Header with Badge and Title */}
       <div className="w-full">
         <div className="flex items-center gap-3">
@@ -137,8 +145,9 @@ const Card = ({
             ))}
           </div>
 
-          {/* Action Button */}
-          <div className="flex sm:justify-end">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 sm:justify-end">
+            {extraAction}
             <ActionButton
               tooltipLabel={tooltipLabel}
               url={button.url}

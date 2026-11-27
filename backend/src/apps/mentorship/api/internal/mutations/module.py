@@ -7,6 +7,8 @@ import strawberry
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from graphql import GraphQLError
+from strawberry.relay import GlobalID
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.graphql_errors import (
@@ -20,6 +22,7 @@ from apps.mentorship.api.internal.nodes.module import (
     ReorderModulesInput,
     UpdateModuleInput,
 )
+from apps.mentorship.api.internal.utils import get_issue_pk
 from apps.mentorship.models import Mentor, Module, Program
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
@@ -159,7 +162,7 @@ class ModuleMutation:
         *,
         module_key: str,
         program_key: str,
-        issue_number: int,
+        issue_id: GlobalID,
         user_login: str,
     ) -> ModuleNode:
         """Assign an issue to a user by updating Issue.assignees within the module scope."""
@@ -180,7 +183,7 @@ class ModuleMutation:
         if gh_user is None:
             raise MentorshipNotFoundError(ASSIGNEE_NOT_FOUND_MSG)
 
-        issue = module.issues.filter(number=issue_number).first()
+        issue = module.issues.filter(pk=get_issue_pk(issue_id)).first()
         if issue is None:
             raise MentorshipNotFoundError(ISSUE_NOT_FOUND_MSG)
 
@@ -198,7 +201,7 @@ class ModuleMutation:
         *,
         module_key: str,
         program_key: str,
-        issue_number: int,
+        issue_id: GlobalID,
         user_login: str,
     ) -> ModuleNode:
         """Unassign an issue from a user by updating Issue.assignees within the module scope."""
@@ -219,10 +222,10 @@ class ModuleMutation:
         if gh_user is None:
             raise MentorshipNotFoundError(ASSIGNEE_NOT_FOUND_MSG)
 
-        issue = module.issues.filter(number=issue_number).first()
+        issue = module.issues.filter(pk=get_issue_pk(issue_id)).first()
         if issue is None:
-            msg = f"Issue {issue_number} not found in this module."
-            raise MentorshipNotFoundError(msg)
+            msg = "Issue not found in this module."
+            raise ObjectDoesNotExist(msg)
 
         issue.assignees.remove(gh_user)
 
@@ -236,7 +239,7 @@ class ModuleMutation:
         *,
         module_key: str,
         program_key: str,
-        issue_number: int,
+        issue_id: GlobalID,
         deadline_at: datetime,
     ) -> ModuleNode:
         """Set a deadline for a task.
@@ -267,7 +270,7 @@ class ModuleMutation:
         issue = (
             module.issues.select_related("repository")
             .prefetch_related("assignees")
-            .filter(number=issue_number)
+            .filter(pk=get_issue_pk(issue_id))
             .first()
         )
         if issue is None:
@@ -312,7 +315,7 @@ class ModuleMutation:
         *,
         module_key: str,
         program_key: str,
-        issue_number: int,
+        issue_id: GlobalID,
     ) -> ModuleNode:
         """Clear the deadline for a task.
 
@@ -334,7 +337,7 @@ class ModuleMutation:
         issue = (
             module.issues.select_related("repository")
             .prefetch_related("assignees")
-            .filter(number=issue_number)
+            .filter(pk=get_issue_pk(issue_id))
             .first()
         )
         if issue is None:

@@ -35,3 +35,12 @@ export const GET_COMMITTEE_METADATA = gql`
     }
   }
 `
+
+export const SEARCH_COMMITTEES = gql`
+  query SearchCommitteeNames($query: String!) {
+    searchCommittees(query: $query) {
+      id
+      name
+    }
+  }
+`
