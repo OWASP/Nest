@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import shutil
 import subprocess
 import tempfile
@@ -63,8 +64,8 @@ class FossologyLicenseChecker:
         if self._path_lister is not None:
             return self._path_lister(self.root)
         try:
-            completed = subprocess.run(  # noqa: S603
-                ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+            completed = subprocess.run(
+                ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],  # noqa: S607
                 cwd=self.root,
                 check=True,
                 capture_output=True,
@@ -123,8 +124,14 @@ class FossologyLicenseChecker:
             raise FossologyLicenseCheckError(message)
 
         image = self.read_image()
-        with tempfile.TemporaryDirectory(prefix="fossology-license-") as temporary:
+        # ignore_cleanup_errors: results/ may be root-owned if the scanner ignores --user.
+        with tempfile.TemporaryDirectory(
+            prefix="fossology-license-",
+            ignore_cleanup_errors=True,
+        ) as temporary:
             scan_root = Path(temporary)
+            results_dir = scan_root / "results"
+            results_dir.mkdir()
             self.stage_scan_tree(relative_paths, scan_root)
             command = [
                 "docker",
@@ -132,10 +139,13 @@ class FossologyLicenseChecker:
                 "--rm",
                 "--platform",
                 "linux/amd64",
+                "--user",
+                f"{os.getuid()}:{os.getgid()}",
                 "--entrypoint",
                 SCANNER_ENTRYPOINT,
-                # /src must be writable: fossologyscanner creates a results/ directory there.
-                f"-v={scan_root}:/src",
+                f"-v={scan_root}:/src:ro",
+                # Writable overlay so root-owned results do not block host cleanup.
+                f"-v={results_dir}:/src/results",
                 f"-v={allowlist}:/allowlist.json:ro",
                 "-w=/src",
                 image,
@@ -166,7 +176,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         FossologyLicenseChecker(root.resolve()).check()
     except FossologyLicenseCheckError as error:
-        logger.error("%s", error)
+        logger.exception("FOSSology license check failed")
         return error.exit_code
     return 0
 

@@ -14,8 +14,8 @@ from fossology_license_check import (
     DOCKERFILE_PATH,
     SCANNER_ARGS,
     SCANNER_ENTRYPOINT,
-    FossologyLicenseCheckError,
     FossologyLicenseChecker,
+    FossologyLicenseCheckError,
     main,
 )
 
@@ -121,7 +121,9 @@ class TestFossologyLicenseCheck:
         )
 
         assert (destination / "tracked.txt").read_text(encoding="utf-8") == "tracked\n"
-        assert (destination / "nested" / "with space.txt").read_text(encoding="utf-8") == "nested\n"
+        assert (destination / "nested" / "with space.txt").read_text(
+            encoding="utf-8"
+        ) == "nested\n"
 
     def test_check_runs_docker(self, tmp_path: Path) -> None:
         paths = write_fixture(tmp_path)
@@ -132,8 +134,12 @@ class TestFossologyLicenseCheck:
         assert len(runner.calls) == 1
         command = runner.calls[0]
         assert command[0] == "docker"
-        assert "--platform" in command and "linux/amd64" in command
+        assert "--platform" in command
+        assert "linux/amd64" in command
+        assert "--user" in command
         assert SCANNER_ENTRYPOINT in command
+        assert any(arg.endswith(":/src:ro") for arg in command)
+        assert any(arg.endswith(":/src/results") for arg in command)
         assert "fossology/fossology:4.7.3-scanner@sha256:abc" in command
         assert all(arg in command for arg in SCANNER_ARGS)
         assert "--allowlist-path" in command
@@ -157,8 +163,9 @@ class TestFossologyLicenseCheck:
     ) -> None:
         write_fixture(tmp_path)
 
-        def fail_check(self: FossologyLicenseChecker) -> None:
-            raise FossologyLicenseCheckError("failed", exit_code=2)
+        def fail_check(_self: FossologyLicenseChecker) -> None:
+            message = "failed"
+            raise FossologyLicenseCheckError(message, exit_code=2)
 
         monkeypatch.setattr(FossologyLicenseChecker, "check", fail_check)
         assert main(["--repository-root", str(tmp_path)]) == 2
