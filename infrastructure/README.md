@@ -129,13 +129,13 @@ To do this locally:
 - Copy the contents from the template file into your new local terraform variables file:
 
     ```bash
-    cp terraform.tfvars.staging.example terraform.tfvars
+    cp terraform.staging.tfvars.example terraform.tfvars
     ```
 
 - Copy the contents from the template file into your new local terraform backend file:
 
     ```bash
-    cp terraform.tfbackend.staging.example terraform.tfbackend
+    cp terraform.staging.tfbackend.example terraform.tfbackend
     ```
 
   > [!NOTE]
@@ -236,7 +236,7 @@ Migrate and load data into the new database.
 
 1. **Shared bucket and `nest.dump`**
 
-- Terraform (`module.storage` → `shared_data_bucket` in `infrastructure/modules/storage`) provisions **`owasp-nest-shared-data`**. Public read of **`nest.dump`** at the bucket root (HTTPS) is for **local/CI** only. ECS **load-data** uses the **fixtures** bucket at **`databases/nest.dump`** per environment.
+- Terraform (`module.storage` → `shared_data_bucket` in `infrastructure/modules/storage`) provisions **`owasp-nest-shared-data`**. Public read of **`nest.dump`** at that bucket's root (HTTPS) is for **local/CI** only. ECS **load-data** reads **`nest.dump`** at the root of each environment's **fixtures** bucket.
 - **Dump:** `make dump-data` → `backend/data/nest.dump`. **Upload / fetch:** `make upload-nest-dump` / `make fetch-nest-dump` (host AWS credentials; optional **`SHARED_DATA_BUCKET`**).
 - **CLI** (after `cd infrastructure/live`):
 
@@ -276,6 +276,12 @@ aws ecs run-task \
   --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
   --task-definition nest-staging-migrate \
   --region AWS_REGION
+```
+
+1. Copy a custom-format `nest.dump` (`pg_dump --format=custom`, the format produced by `make dump-data`) into the root of this environment's fixtures bucket before load-data. `pg_restore` cannot load a plain SQL file. From `infrastructure/live`:
+
+```bash
+aws s3 cp ../../backend/data/nest.dump "s3://$(terraform output -raw fixtures_bucket_name)/nest.dump"
 ```
 
 1. Run load-data task and wait for it to be complete:
