@@ -5,7 +5,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
+from django.db.utils import IntegrityError
 from django.utils import timezone
+from graphql import GraphQLError
 from strawberry.relay import GlobalID
 
 from apps.mentorship.api.internal.mutations.module import (
@@ -220,6 +222,7 @@ class TestModuleMutationCreateModule:
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "intermediate"
+        mock_module.objects.filter.return_value.values_list.return_value.first.return_value = None
         mock_module.objects.create.return_value = mock_mod
 
         mock_resolve.return_value = set()
@@ -302,6 +305,7 @@ class TestModuleMutationCreateModule:
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "advanced"
+        mock_module.objects.filter.return_value.values_list.return_value.first.return_value = None
         mock_module.objects.create.return_value = mock_mod
 
         mock_resolve.return_value = set()
@@ -347,6 +351,7 @@ class TestModuleMutationCreateModule:
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "intermediate"
+        mock_module.objects.filter.return_value.values_list.return_value.first.return_value = None
         mock_module.objects.create.return_value = mock_mod
 
         mock_resolve.return_value = set()
@@ -356,6 +361,146 @@ class TestModuleMutationCreateModule:
 
         assert result == mock_mod
         mock_prog.save.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Project")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
+    def test_create_module_duplicate_name(
+        self, mock_validate, mock_program, mock_project, mock_module
+    ):
+        """Test GraphQLError when a module with the exact same name exists in the program."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(name="Web Security")
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_program.objects.get.return_value = mock_prog
+        mock_project.objects.get.return_value = MagicMock()
+        mock_validate.return_value = (input_data.started_at, input_data.ended_at)
+        mock_module.objects.filter.return_value.values_list.return_value.first.return_value = (
+            "Web Security"
+        )
+
+        mutation = ModuleMutation()
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_module(info, input_data)
+
+        assert "This module name already exists in this program." in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+        mock_module.objects.create.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Project")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
+    def test_create_module_slug_collision(
+        self, mock_validate, mock_program, mock_project, mock_module
+    ):
+        """Test GraphQLError when a different module name collides on key in the program."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(name="Web-Security")
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_program.objects.get.return_value = mock_prog
+        mock_project.objects.get.return_value = MagicMock()
+        mock_validate.return_value = (input_data.started_at, input_data.ended_at)
+        mock_module.objects.filter.return_value.values_list.return_value.first.return_value = (
+            "Web Security"
+        )
+
+        mutation = ModuleMutation()
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_module(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+        mock_module.objects.create.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Project")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
+    def test_create_module_empty_slug(self, mock_validate, mock_program, mock_project):
+        """Test GraphQLError when module name produces an empty slug."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(name="---")
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_program.objects.get.return_value = mock_prog
+        mock_project.objects.get.return_value = MagicMock()
+        mock_validate.return_value = (input_data.started_at, input_data.ended_at)
+
+        mutation = ModuleMutation()
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_module(info, input_data)
+
+        assert "at least one letter or number" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+
+    @pytest.mark.parametrize(
+        "error_message",
+        [
+            'duplicate key value violates unique constraint "unique_module_key_in_program"',
+            "UNIQUE constraint failed: mentorship_modules.program_id, mentorship_modules.key",
+        ],
+    )
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Project")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
+    def test_create_module_key_integrity_error(
+        self, mock_validate, mock_program, mock_project, mock_module, error_message
+    ):
+        """Test GraphQLError fallback when module create hits DB key constraint."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(name="Web-Security")
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_program.objects.get.return_value = mock_prog
+        mock_project.objects.get.return_value = MagicMock()
+        mock_validate.return_value = (input_data.started_at, input_data.ended_at)
+        mock_module.objects.filter.return_value.values_list.return_value.first.return_value = None
+        mock_module.objects.create.side_effect = IntegrityError(error_message)
+
+        mutation = ModuleMutation()
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_module(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Project")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
+    def test_create_module_unrecognized_integrity_error_reraises(
+        self, mock_validate, mock_program, mock_project, mock_module
+    ):
+        """Test unrecognized IntegrityError is re-raised on create_module."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(name="Web Security")
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_program.objects.get.return_value = mock_prog
+        mock_project.objects.get.return_value = MagicMock()
+        mock_validate.return_value = (input_data.started_at, input_data.ended_at)
+        mock_module.objects.filter.return_value.values_list.return_value.first.return_value = None
+        mock_module.objects.create.side_effect = IntegrityError("other db failure")
+
+        mutation = ModuleMutation()
+        with pytest.raises(IntegrityError, match="other db failure"):
+            mutation.create_module(info, input_data)
 
 
 class TestModuleMutationAssignIssue:
@@ -1264,6 +1409,10 @@ class TestModuleMutationUpdateModule:
         info.context.request.user = user
         return info
 
+    def _mock_conflict(self, mock_module, value=None):
+        exclude_qs = mock_module.objects.filter.return_value.exclude.return_value
+        exclude_qs.values_list.return_value.first.return_value = value
+
     def _make_input_data(self, **overrides):
         defaults = {
             "key": "mod-1",
@@ -1304,6 +1453,7 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mod_qs = mock_module.objects.select_related.return_value
         mod_qs.select_for_update.return_value.get.return_value = mock_mod
+        self._mock_conflict(mock_module)
         mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
 
         mock_creator = MagicMock()
@@ -1404,6 +1554,7 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mod_qs = mock_module.objects.select_related.return_value
         mod_qs.select_for_update.return_value.get.return_value = mock_mod
+        self._mock_conflict(mock_module)
         mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = True
 
         mock_mentor.objects.get.return_value = MagicMock()
@@ -1437,6 +1588,7 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mod_qs = mock_module.objects.select_related.return_value
         mod_qs.select_for_update.return_value.get.return_value = mock_mod
+        self._mock_conflict(mock_module)
         mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
 
         mock_mentor.objects.get.return_value = MagicMock()
@@ -1448,6 +1600,65 @@ class TestModuleMutationUpdateModule:
 
         assert "advanced" in mock_mod.program.experience_levels
         mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
+
+    @patch("apps.mentorship.api.internal.mutations.module.Project")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
+    def test_update_module_slug_collision(self, mock_validate, mock_module, mock_project):
+        """Test GraphQLError when updated module name collides on key in same program."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(name="Web-Security", mentor_logins=["mentor1"])
+
+        mock_mod = MagicMock()
+        mock_mod.id = 1
+        mock_mod.pk = 1
+        mock_mod.program.has_admin.return_value = True
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
+        mock_validate.return_value = (input_data.started_at, input_data.ended_at)
+        mock_project.objects.get.return_value = MagicMock()
+        self._mock_conflict(mock_module, "Web Security")
+
+        mutation = ModuleMutation()
+        with pytest.raises(GraphQLError) as raised:
+            mutation.update_module(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+        mock_mod.mentors.set.assert_not_called()
+        mock_mod.save.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Project")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
+    def test_update_module_key_integrity_error(self, mock_validate, mock_module, mock_project):
+        """Test GraphQLError fallback when update_module save hits unique_module_key_in_program."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(name="Web-Security", mentor_logins=None)
+
+        mock_mod = MagicMock()
+        mock_mod.id = 1
+        mock_mod.pk = 1
+        mock_mod.program.has_admin.return_value = True
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
+        mock_validate.return_value = (input_data.started_at, input_data.ended_at)
+        mock_project.objects.get.return_value = MagicMock()
+        self._mock_conflict(mock_module)
+        mock_mod.save.side_effect = IntegrityError(
+            'duplicate key value violates unique constraint "unique_module_key_in_program"'
+        )
+
+        mutation = ModuleMutation()
+        with pytest.raises(GraphQLError) as raised:
+            mutation.update_module(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
 
 
 class TestModuleMutationDeleteModule:

@@ -6,8 +6,10 @@ import strawberry
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from graphql import GraphQLError
 
+from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
@@ -50,7 +52,45 @@ def resolve_admins_from_logins(logins: list[str]) -> set:
     return admins
 
 
-def _handle_program_save_integrity_error(exc: IntegrityError) -> None:
+def _program_key_conflict_message(key: str = "") -> str:
+    """Build a clear validation message when a program name collides on key."""
+    if key:
+        return (
+            f"This name produces the key '{key}', which is already in use by another program. "
+            "Please choose a different name."
+        )
+    return (
+        "This name produces a key that is already in use by another program. "
+        "Please choose a different name."
+    )
+
+
+def _validate_program_name_uniqueness(name: str, *, exclude_pk: int | None = None) -> str:
+    """Validate that a program name produces a unique, non-empty key."""
+    key = slugify(name)
+    if not key:
+        msg = "Program name must contain at least one letter or number."
+        raise GraphQLError(msg, extensions={"code": "VALIDATION_ERROR", "field": "name"})
+
+    queryset = Program.objects.all()
+    if exclude_pk is not None:
+        queryset = queryset.exclude(pk=exclude_pk)
+
+    conflicting_name = (
+        queryset.filter(Q(name=name) | Q(key=key)).values_list("name", flat=True).first()
+    )
+    if conflicting_name is not None:
+        msg = (
+            "A program with this name already exists."
+            if conflicting_name == name
+            else _program_key_conflict_message(key)
+        )
+        raise GraphQLError(msg, extensions={"code": "VALIDATION_ERROR", "field": "name"})
+
+    return key
+
+
+def _handle_program_save_integrity_error(exc: IntegrityError, *, key: str = "") -> None:
     """Translate program save IntegrityError to GraphQLError for known constraints.
 
     Program ``key`` is derived from ``name`` on save, so name and key uniqueness
@@ -63,16 +103,21 @@ def _handle_program_save_integrity_error(exc: IntegrityError) -> None:
 
     if (
         "mentorship_programs_name_key" in error_message
-        or "mentorship_programs_key_key" in error_message
+        or "mentorship_programs.name" in error_message
     ):
         msg = "A program with this name already exists."
-        field = "name"
+    elif (
+        "mentorship_programs_key_key" in error_message
+        or "mentorship_programs_key_" in error_message
+        or "mentorship_programs.key" in error_message
+    ):
+        msg = _program_key_conflict_message(key)
     else:
         raise exc
 
     raise GraphQLError(
         msg,
-        extensions={"code": "VALIDATION_ERROR", "field": field},
+        extensions={"code": "VALIDATION_ERROR", "field": "name"},
     ) from exc
 
 
@@ -105,19 +150,22 @@ class ProgramMutation:
             )
             raise ValidationError(msg)
 
+        program_key = _validate_program_name_uniqueness(input_data.name)
+
         try:
-            program = Program.objects.create(
-                name=input_data.name,
-                description=input_data.description,
-                mentees_limit=input_data.mentees_limit,
-                started_at=input_data.started_at,
-                ended_at=input_data.ended_at,
-                domains=input_data.domains,
-                tags=input_data.tags,
-                status=ProgramStatusEnum.DRAFT.value,
-            )
+            with transaction.atomic():
+                program = Program.objects.create(
+                    name=input_data.name,
+                    description=input_data.description,
+                    mentees_limit=input_data.mentees_limit,
+                    started_at=input_data.started_at,
+                    ended_at=input_data.ended_at,
+                    domains=input_data.domains,
+                    tags=input_data.tags,
+                    status=ProgramStatusEnum.DRAFT.value,
+                )
         except IntegrityError as e:
-            _handle_program_save_integrity_error(e)
+            _handle_program_save_integrity_error(e, key=program_key)
 
         admin, _ = Admin.objects.get_or_create(github_user=user.github_user)
         if not admin.nest_user:
@@ -184,10 +232,13 @@ class ProgramMutation:
         if input_data.status is not None:
             program.status = input_data.status.value
 
+        program_key = _validate_program_name_uniqueness(program.name, exclude_pk=program.pk)
+
         try:
-            program.save()
+            with transaction.atomic():
+                program.save()
         except IntegrityError as e:
-            _handle_program_save_integrity_error(e)
+            _handle_program_save_integrity_error(e, key=program_key)
 
         if input_data.admin_logins is not None:
             program.admins.set(resolve_admins_from_logins(input_data.admin_logins))
