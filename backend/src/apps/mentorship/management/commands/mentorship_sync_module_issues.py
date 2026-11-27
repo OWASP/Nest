@@ -138,14 +138,21 @@ class Command(BaseCommand):
                         defaults={"module": module, "status": status},
                     )
 
+                    # A Task kept as history after its user was unassigned starts over.
+                    was_unassigned = not created and task.status == Task.Status.UNASSIGNED
+
                     updates = {}
+                    if was_unassigned and task.deadline_at is not None:
+                        updates["deadline_at"] = None
                     if task.module != module:
                         updates["module"] = module
                     if task.status != status:
                         updates["status"] = status
 
                     # Only fetch assigned_at when needed.
-                    if (created or task.assigned_at is None) and issue.repository:
+                    if (
+                        created or was_unassigned or task.assigned_at is None
+                    ) and issue.repository:
                         repo_full_name = self._extract_repo_full_name(issue.repository)
                         if repo_full_name:
                             if repo_full_name not in repo_cache:
@@ -180,6 +187,9 @@ class Command(BaseCommand):
                                 f"in module '{module.name}'"
                             )
                         )
+
+                    if was_unassigned and "assigned_at" not in updates:
+                        updates["assigned_at"] = timezone.now()
 
                     if updates:
                         for field, value in updates.items():

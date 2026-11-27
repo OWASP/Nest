@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.utils import timezone
+from github.GithubException import GithubException
 from strawberry.relay import GlobalID
 
 from apps.mentorship.api.internal.mutations.module import (
@@ -14,6 +15,8 @@ from apps.mentorship.api.internal.mutations.module import (
     resolve_mentors_from_logins,
 )
 from apps.mentorship.models.task import Task
+
+MODULE_PATH = "apps.mentorship.api.internal.mutations.module"
 
 
 @pytest.fixture(autouse=True)
@@ -361,6 +364,21 @@ class TestModuleMutationCreateModule:
 class TestModuleMutationAssignIssue:
     """Tests for ModuleMutation.assign_issue_to_user."""
 
+    @pytest.fixture(autouse=True)
+    def _mock_github_and_models(self):
+        """Mock the GitHub client and the models written on assignment."""
+        with (
+            patch(f"{MODULE_PATH}.get_github_client") as mock_client,
+            patch(f"{MODULE_PATH}.Task") as self.mock_task,
+            patch(f"{MODULE_PATH}.Mentee") as mock_mentee,
+            patch(f"{MODULE_PATH}.MenteeModule"),
+        ):
+            self.gh_issue = mock_client.return_value.get_repo.return_value.get_issue.return_value
+            self.gh_issue.assignees = [MagicMock(login="TestUser")]
+            self.mock_task.objects.get_or_create.return_value = (MagicMock(), True)
+            mock_mentee.objects.get_or_create.return_value = (MagicMock(), True)
+            yield
+
     def _make_info(self, user):
         info = MagicMock()
         info.context.request.user = user
@@ -387,7 +405,8 @@ class TestModuleMutationAssignIssue:
         mock_gh_user.objects.filter.return_value.first.return_value = mock_gh
 
         mock_issue = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.filter.return_value.first.return_value = mock_issue
 
         mutation = ModuleMutation()
         result = mutation.assign_issue_to_user(
@@ -399,8 +418,156 @@ class TestModuleMutationAssignIssue:
         )
 
         assert result == mock_mod
+        self.gh_issue.add_to_assignees.assert_called_once_with("testuser")
         mock_issue.assignees.add.assert_called_once_with(mock_gh)
+        self.mock_task.objects.get_or_create.assert_called_once()
+        task_kwargs = self.mock_task.objects.get_or_create.call_args.kwargs
+        assert task_kwargs["defaults"]["module"] == mock_mod
+        assert task_kwargs["issue"] == mock_issue
+        assert task_kwargs["assignee"] == mock_gh
         mock_interest.objects.filter.return_value.delete.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_assign_issue_ignored_by_github(self, mock_module, mock_gh_user):
+        """GitHub accepting the call without assigning the user is reported as an error."""
+        mock_mod = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        issue_qs = mock_mod.issues.select_related.return_value
+        mock_issue = issue_qs.filter.return_value.first.return_value
+        self.gh_issue.assignees = []
+
+        with pytest.raises(ValidationError, match="GitHub did not assign this issue"):
+            ModuleMutation().assign_issue_to_user(
+                self._make_info(MagicMock()),
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_id=GlobalID("IssueNode", "1"),
+                user_login="testuser",
+            )
+
+        mock_issue.assignees.add.assert_not_called()
+        self.mock_task.objects.get_or_create.assert_not_called()
+
+    @patch(
+        "apps.mentorship.api.internal.mutations.module.get_github_client",
+        side_effect=ValueError("not configured"),
+    )
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_assign_issue_github_not_configured(self, mock_module, mock_gh_user, mock_client):
+        """Missing GitHub credentials are reported as a validation error."""
+        with pytest.raises(ValidationError, match="GitHub integration is not configured"):
+            ModuleMutation().assign_issue_to_user(
+                self._make_info(MagicMock()),
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_id=GlobalID("IssueNode", "1"),
+                user_login="testuser",
+            )
+
+        self.mock_task.objects.get_or_create.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.IssueUserInterest")
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_assign_issue_moves_task_from_another_module(
+        self, mock_module, mock_gh_user, mock_interest
+    ):
+        """A Task the user already has for the issue in another module is reused."""
+        mock_mod = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        task = MagicMock(module=MagicMock(), status=self.mock_task.Status.IN_PROGRESS)
+        self.mock_task.objects.get_or_create.return_value = (task, False)
+
+        ModuleMutation().assign_issue_to_user(
+            self._make_info(MagicMock()),
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_id=GlobalID("IssueNode", "1"),
+            user_login="testuser",
+        )
+
+        assert task.module == mock_mod
+        task.save.assert_called_once_with(update_fields=["module"])
+
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_assign_issue_without_repository(self, mock_module, mock_gh_user):
+        """An issue without a repository cannot be assigned on GitHub."""
+        mock_mod = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        issue_qs = mock_mod.issues.select_related.return_value
+        mock_issue = issue_qs.filter.return_value.first.return_value
+        mock_issue.repository = None
+
+        with pytest.raises(ValidationError, match="Issue has no repository"):
+            ModuleMutation().assign_issue_to_user(
+                self._make_info(MagicMock()),
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_id=GlobalID("IssueNode", "1"),
+                user_login="testuser",
+            )
+
+        self.gh_issue.add_to_assignees.assert_not_called()
+        mock_issue.assignees.add.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.IssueUserInterest")
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_assign_issue_reuses_unassigned_task(self, mock_module, mock_gh_user, mock_interest):
+        """Re-assigning a user restarts their unassigned Task without the old deadline."""
+        old_assigned_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        task = MagicMock(
+            module=mock_mod,
+            status=self.mock_task.Status.UNASSIGNED,
+            assigned_at=old_assigned_at,
+            deadline_at=datetime(2025, 2, 1, tzinfo=UTC),
+        )
+        self.mock_task.objects.get_or_create.return_value = (task, False)
+
+        ModuleMutation().assign_issue_to_user(
+            self._make_info(MagicMock()),
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_id=GlobalID("IssueNode", "1"),
+            user_login="testuser",
+        )
+
+        assert task.status == self.mock_task.Status.IN_PROGRESS
+        assert task.deadline_at is None
+        assert task.assigned_at > old_assigned_at
+        task.save.assert_called_once_with(update_fields=["assigned_at", "deadline_at", "status"])
+
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_assign_issue_github_failure(self, mock_module, mock_gh_user):
+        """A GitHub API failure raises ValidationError and changes nothing locally."""
+        mock_mod = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        issue_qs = mock_mod.issues.select_related.return_value
+        mock_issue = issue_qs.filter.return_value.first.return_value
+        self.gh_issue.add_to_assignees.side_effect = GithubException(403, "Forbidden")
+
+        with pytest.raises(ValidationError, match="Failed to assign issue on GitHub"):
+            ModuleMutation().assign_issue_to_user(
+                self._make_info(MagicMock()),
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_id=GlobalID("IssueNode", "1"),
+                user_login="testuser",
+            )
+
+        mock_issue.assignees.add.assert_not_called()
+        self.mock_task.objects.get_or_create.assert_not_called()
 
     @pytest.mark.parametrize("selected_pk", [101, 102])
     @patch("apps.mentorship.api.internal.mutations.module.IssueUserInterest")
@@ -414,7 +581,7 @@ class TestModuleMutationAssignIssue:
             mock_module.objects.select_related.return_value.filter.return_value.first.return_value
         )
         issues = {pk: MagicMock(pk=pk, number=42) for pk in (101, 102)}
-        module.issues.filter.side_effect = lambda **filters: MagicMock(
+        module.issues.select_related.return_value.filter.side_effect = lambda **filters: MagicMock(
             first=lambda: issues.get(filters["pk"])
         )
         assignee = mock_gh_user.objects.filter.return_value.first.return_value
@@ -517,7 +684,7 @@ class TestModuleMutationAssignIssue:
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh.objects.filter.return_value.first.return_value = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = None
+        mock_mod.issues.select_related.return_value.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
         issue_id = GlobalID("IssueNode", "1")
@@ -533,6 +700,16 @@ class TestModuleMutationAssignIssue:
 
 class TestModuleMutationUnassignIssue:
     """Tests for ModuleMutation.unassign_issue_from_user."""
+
+    @pytest.fixture(autouse=True)
+    def _mock_github_and_models(self):
+        """Mock the GitHub client and the Task model."""
+        with (
+            patch(f"{MODULE_PATH}.get_github_client") as mock_client,
+            patch(f"{MODULE_PATH}.Task") as self.mock_task,
+        ):
+            self.gh_issue = mock_client.return_value.get_repo.return_value.get_issue.return_value
+            yield
 
     def _make_info(self, user):
         info = MagicMock()
@@ -558,7 +735,8 @@ class TestModuleMutationUnassignIssue:
         mock_gh_user.objects.filter.return_value.first.return_value = mock_gh
         issues = {pk: MagicMock(pk=pk, number=42) for pk in (101, 102)}
         mock_issue = issues[selected_pk]
-        mock_mod.issues.filter.side_effect = lambda **filters: MagicMock(
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.filter.side_effect = lambda **filters: MagicMock(
             first=lambda: issues.get(filters["pk"])
         )
 
@@ -572,9 +750,55 @@ class TestModuleMutationUnassignIssue:
         )
 
         assert result == mock_mod
+        self.gh_issue.remove_from_assignees.assert_called_once_with("testuser")
         mock_issue.assignees.remove.assert_called_once_with(mock_gh)
         other_pk = 102 if selected_pk == 101 else 101
         issues[other_pk].assignees.remove.assert_not_called()
+        self.mock_task.objects.filter.assert_called_once_with(issue=mock_issue, assignee=mock_gh)
+        task = self.mock_task.objects.filter.return_value.first.return_value
+        assert task.status == self.mock_task.Status.UNASSIGNED
+        task.save.assert_called_once_with(update_fields=["status"])
+
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_unassign_issue_keeps_completed_task(self, mock_module, mock_gh_user):
+        """Unassigning a user after the issue was completed keeps the Task completed."""
+        task = self.mock_task.objects.filter.return_value.first.return_value
+        task.status = self.mock_task.Status.COMPLETED
+
+        ModuleMutation().unassign_issue_from_user(
+            self._make_info(MagicMock()),
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_id=GlobalID("IssueNode", "1"),
+            user_login="testuser",
+        )
+
+        assert task.status == self.mock_task.Status.COMPLETED
+        task.save.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_unassign_issue_github_failure(self, mock_module, mock_gh_user):
+        """A GitHub API failure raises ValidationError and changes nothing locally."""
+        mock_mod = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        issue_qs = mock_mod.issues.select_related.return_value
+        mock_issue = issue_qs.filter.return_value.first.return_value
+        self.gh_issue.remove_from_assignees.side_effect = GithubException(403, "Forbidden")
+
+        with pytest.raises(ValidationError, match="Failed to unassign issue on GitHub"):
+            ModuleMutation().unassign_issue_from_user(
+                self._make_info(MagicMock()),
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_id=GlobalID("IssueNode", "1"),
+                user_login="testuser",
+            )
+
+        mock_issue.assignees.remove.assert_not_called()
+        self.mock_task.objects.filter.assert_not_called()
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_unassign_module_not_found(self, mock_module):
@@ -659,7 +883,7 @@ class TestModuleMutationUnassignIssue:
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh.objects.filter.return_value.first.return_value = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = None
+        mock_mod.issues.select_related.return_value.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
         issue_id = GlobalID("IssueNode", "42")
@@ -739,6 +963,44 @@ class TestModuleMutationSetTaskDeadline:
         other_pk = 102 if selected_pk == 101 else 101
         issues[other_pk].assignees.all.assert_not_called()
         mock_task.objects.bulk_update.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Task")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_set_task_deadline_restarts_unassigned_task(self, mock_module, mock_task):
+        """Setting a deadline on an unassigned task of a current assignee restarts it."""
+        mock_task.Status = Task.Status
+        mock_mod = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+
+        issue_qs = mock_mod.issues.select_related.return_value
+        mock_issue = issue_qs.prefetch_related.return_value.filter.return_value.first.return_value
+        assignees_qs = MagicMock()
+        assignees_qs.exists.return_value = True
+        assignees_qs.__iter__ = MagicMock(return_value=iter([MagicMock()]))
+        mock_issue.assignees.all.return_value = assignees_qs
+
+        old_assigned_at = datetime(2025, 1, 2, tzinfo=UTC)
+        task = MagicMock(status=Task.Status.UNASSIGNED, assigned_at=old_assigned_at)
+        mock_task.objects.get_or_create.return_value = (task, False)
+        deadline = datetime(2025, 12, 1, tzinfo=UTC)
+
+        ModuleMutation().set_task_deadline(
+            self._make_info(MagicMock()),
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_id=GlobalID("IssueNode", "1"),
+            deadline_at=deadline,
+        )
+
+        assert task.status == Task.Status.IN_PROGRESS
+        assert task.assigned_at > old_assigned_at
+        assert task.deadline_at == deadline
+        mock_task.objects.bulk_update.assert_called_once_with(
+            [task], ["assigned_at", "deadline_at", "status"]
+        )
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_set_deadline_module_not_found(self, mock_module):

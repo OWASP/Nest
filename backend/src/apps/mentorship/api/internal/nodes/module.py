@@ -77,6 +77,7 @@ class ModuleNode:
         # Get mentees assigned to tasks for this issue
         mentee_users = (
             Task.objects.filter(module=self, issue_id__in=issue_ids, assignee__isnull=False)
+            .exclude(status=Task.Status.UNASSIGNED)
             .select_related("assignee")
             .values_list("assignee", flat=True)
             .distinct()
@@ -107,11 +108,13 @@ class ModuleNode:
         # BULK load data
         deadline_rows = (
             Task.objects.filter(module=self, deadline_at__isnull=False)
+            .exclude(status=Task.Status.UNASSIGNED)
             .order_by("issue_id", "-assigned_at")
             .values("issue_id", "deadline_at")
         )
         assigned_rows = (
             Task.objects.filter(module=self, assigned_at__isnull=False)
+            .exclude(status=Task.Status.UNASSIGNED)
             .order_by("issue_id", "-assigned_at")
             .values("issue_id", "assigned_at")
         )
@@ -245,6 +248,7 @@ class ModuleNode:
                 issue_id=get_issue_pk(issue_id),
                 deadline_at__isnull=False,
             )
+            .exclude(status=Task.Status.UNASSIGNED)
             .order_by("-assigned_at")
             .values_list("deadline_at", flat=True)
             .first()
@@ -263,6 +267,7 @@ class ModuleNode:
                 issue_id=get_issue_pk(issue_id),
                 assigned_at__isnull=False,
             )
+            .exclude(status=Task.Status.UNASSIGNED)
             .order_by("-assigned_at")
             .values_list("assigned_at", flat=True)
             .first()

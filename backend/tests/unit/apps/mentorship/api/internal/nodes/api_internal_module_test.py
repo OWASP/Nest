@@ -168,9 +168,8 @@ class TestModuleNodeResolvers:
             patch("apps.mentorship.models.task.Task.objects") as mock_task_objects,
             patch("apps.github.models.user.User.objects") as mock_user_objects,
         ):
-            mock_task_filter_related = (
-                mock_task_objects.filter.return_value.select_related.return_value
-            )
+            task_qs = mock_task_objects.filter.return_value.exclude.return_value
+            mock_task_filter_related = task_qs.select_related.return_value
             mock_task_filter_related.values_list.return_value.distinct.return_value = [
                 "assignee_id_1"
             ]
@@ -305,7 +304,9 @@ class TestModuleNodeResolvers:
     def test_module_node_task_deadline(self, mock_module_node):
         """Test task_deadline method."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by.return_value
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by.return_value
+            )
             mock_task_order_by.values_list.return_value.first.return_value = datetime(
                 2025, 10, 26, tzinfo=UTC
             )
@@ -319,7 +320,9 @@ class TestModuleNodeResolvers:
     def test_module_node_task_deadline_none(self, mock_module_node):
         """Test task_deadline when no deadline is found."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by
+            )
             mock_task_order_by.return_value.values_list.return_value.first.return_value = None
 
             deadline = mock_module_node.mock_task_deadline(issue_id=GlobalID("IssueNode", "101"))
@@ -350,7 +353,9 @@ class TestModuleNodeResolvers:
     def test_module_node_task_assigned_at(self, mock_module_node):
         """Test task_assigned_at method."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by
+            )
             mock_task_order_by.return_value.values_list.return_value.first.return_value = datetime(
                 2025, 9, 15, tzinfo=UTC
             )
@@ -366,7 +371,9 @@ class TestModuleNodeResolvers:
     def test_module_node_task_assigned_at_none(self, mock_module_node):
         """Test task_assigned_at when no assignment timestamp is found."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by.return_value
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by.return_value
+            )
             mock_task_order_by.values_list.return_value.first.return_value = None
 
             assigned_at = mock_module_node.mock_task_assigned_at(
@@ -441,9 +448,8 @@ class TestModuleNodeResolvers:
                 {"issue_id": 102, "assigned_at": datetime(2025, 9, 17, tzinfo=UTC)},
             ]
 
-            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
-                deadline_data
-            )
+            task_qs = mock_task_objects.filter.return_value.exclude.return_value
+            task_qs.order_by.return_value.values.return_value = deadline_data
 
             mock_qs = (
                 mock_module_node.issues.select_related.return_value.prefetch_related.return_value
@@ -454,18 +460,15 @@ class TestModuleNodeResolvers:
             ]
 
             filter_mock = mock_task_objects.filter
-            filter_mock.side_effect = [
-                MagicMock(
-                    order_by=MagicMock(
-                        return_value=MagicMock(values=MagicMock(return_value=deadline_data))
-                    )
-                ),
-                MagicMock(
-                    order_by=MagicMock(
-                        return_value=MagicMock(values=MagicMock(return_value=assigned_data))
-                    )
-                ),
-            ]
+            deadline_qs = MagicMock()
+            deadline_qs.exclude.return_value.order_by.return_value.values.return_value = (
+                deadline_data
+            )
+            assigned_qs = MagicMock()
+            assigned_qs.exclude.return_value.order_by.return_value.values.return_value = (
+                assigned_data
+            )
+            filter_mock.side_effect = [deadline_qs, assigned_qs]
 
             info = MagicMock()
             info.context.task_deadlines_by_issue = {}

@@ -35,6 +35,7 @@ NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
 NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines."
 NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
 NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
+GITHUB_NOT_CONFIGURED_MSG = "GitHub integration is not configured."
 NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG = "You can only set deadlines for issues assigned to you."
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,11 @@ def get_github_issue(module: Module, issue_id: GlobalID) -> tuple:
     if not issue.repository:
         raise ValidationError(message="Issue has no repository.")
 
-    gh_client = get_github_client()
+    try:
+        gh_client = get_github_client()
+    except ValueError as e:
+        raise ValidationError(message=GITHUB_NOT_CONFIGURED_MSG) from e
+
     gh_repository = gh_client.get_repo(issue.repository.path)
     gh_issue = gh_repository.get_issue(number=issue.number)
 
@@ -202,6 +207,13 @@ class ModuleMutation:
         except GithubException as e:
             raise ValidationError(message=f"Failed to assign issue on GitHub: {e}") from e
 
+        # GitHub ignores users it cannot assign and still reports success.
+        if user_login.lower() not in {assignee.login.lower() for assignee in gh_issue.assignees}:
+            raise ValidationError(
+                message=f"GitHub did not assign this issue to '{user_login}'. "
+                "The user may not be assignable in this repository."
+            )
+
         with transaction.atomic():
             issue.assignees.add(gh_user)
             now = timezone.now()
@@ -216,20 +228,33 @@ class ModuleMutation:
                 },
             )
 
+            # A Task is unique per issue and assignee, whichever module it started in.
             task, created = Task.objects.get_or_create(
-                module=module,
                 issue=issue,
                 assignee=gh_user,
                 defaults={
                     "assigned_at": now,
+                    "module": module,
                     "status": Task.Status.IN_PROGRESS,
                 },
             )
 
-            if not created and task.assigned_at is None:
-                task.assigned_at = now
-                task.status = Task.Status.IN_PROGRESS
-                task.save(update_fields=["assigned_at", "status"])
+            if not created:
+                update_fields = []
+                if task.module != module:
+                    task.module = module
+                    update_fields.append("module")
+
+                was_unassigned = task.status == Task.Status.UNASSIGNED
+                if was_unassigned or task.assigned_at is None:
+                    if was_unassigned:
+                        task.deadline_at = None
+                    task.assigned_at = now
+                    task.status = Task.Status.IN_PROGRESS
+                    update_fields += ["assigned_at", "deadline_at", "status"]
+
+                if update_fields:
+                    task.save(update_fields=update_fields)
 
             IssueUserInterest.objects.filter(
                 module=module, issue_id=issue.id, user=gh_user
@@ -247,7 +272,7 @@ class ModuleMutation:
         issue_id: GlobalID,
         user_login: str,
     ) -> ModuleNode:
-        """Unassign an issue from a user by updating Issue.assignees within the module scope."""
+        """Unassign an issue from a user and mark the related Task as unassigned."""
         user = info.context.request.user
 
         module = (
@@ -274,11 +299,11 @@ class ModuleMutation:
         with transaction.atomic():
             issue.assignees.remove(gh_user)
 
-            task = Task.objects.filter(module=module, issue=issue, assignee=gh_user).first()
-            if task:
-                task.status = Task.Status.CLOSED
-                task.assigned_at = None
-                task.save(update_fields=["status", "assigned_at"])
+            task = Task.objects.filter(issue=issue, assignee=gh_user).first()
+            # A completed Task stays completed: it records finished work.
+            if task and task.status != Task.Status.COMPLETED:
+                task.status = Task.Status.UNASSIGNED
+                task.save(update_fields=["status"])
 
         return module
 
@@ -295,7 +320,7 @@ class ModuleMutation:
     ) -> ModuleNode:
         """Set a deadline for a task.
 
-        User must be a mentor of the program.
+        The user must be a mentor of the module.
         """
         user = info.context.request.user
 
@@ -349,12 +374,15 @@ class ModuleMutation:
             task, _created = Task.objects.get_or_create(
                 module=module, issue=issue, assignee=assignee
             )
-            if task.assigned_at is None:
+            if task.status == Task.Status.UNASSIGNED:
+                task.status = Task.Status.IN_PROGRESS
+                task.assigned_at = now
+            elif task.assigned_at is None:
                 task.assigned_at = now
             task.deadline_at = normalized_deadline
             tasks_to_update.append(task)
 
-        Task.objects.bulk_update(tasks_to_update, ["assigned_at", "deadline_at"])
+        Task.objects.bulk_update(tasks_to_update, ["assigned_at", "deadline_at", "status"])
 
         return module
 
