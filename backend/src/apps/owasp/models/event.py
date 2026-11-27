@@ -142,21 +142,22 @@ class Event(BulkSaveModel, TimestampedModel):
                 day_match = re.match(r"^(\d{1,2})", end_str)
                 if day_match:
                     end_day = int(day_match.group(1))
-                    end_date = start_date
                     day_only_match = re.fullmatch(
-                        r"\d{1,2}(?:st|nd|rd|th)?(?:(?:,\s*|\s+)\d{4})?",
+                        r"\d{1,2}(?:st|nd|rd|th)?(?:(?:,\s*|\s+)(\d{4}))?",
                         end_str,
                         re.IGNORECASE,
                     )
-                    if end_day < start_date.day and day_only_match:
-                        months_in_year = 12
-                        end_date = start_date.replace(
-                            year=start_date.year + (start_date.month == months_in_year),
-                            month=start_date.month % months_in_year + 1,
-                            day=1,
-                        )
-                        return end_date.replace(day=end_day)
-                    if day_only_match or len(end_str) <= max_day_length or "," in end_str:
+                    if day_only_match:
+                        explicit_year = day_only_match.group(1)
+                        end_year = int(explicit_year) if explicit_year else start_date.year
+                        end_month = start_date.month
+                        if end_day < start_date.day:
+                            months_in_year = 12
+                            end_month = start_date.month % months_in_year + 1
+                            if not explicit_year:
+                                end_year += start_date.month == months_in_year
+                        return start_date.replace(year=end_year, month=end_month, day=end_day)
+                    if len(end_str) <= max_day_length or "," in end_str:
                         return start_date.replace(day=end_day)
 
                 end_date = parser.parse(
