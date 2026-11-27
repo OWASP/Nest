@@ -148,14 +148,20 @@ class TestFossologyLicenseCheck:
         paths = write_fixture(tmp_path)
 
         runner = RecordingRunner(exit_code=2)
+        scanner_failure = FossologyLicenseChecker(
+            tmp_path, runner=runner, path_lister=lambda _: paths
+        )
         with pytest.raises(FossologyLicenseCheckError) as raised:
-            FossologyLicenseChecker(tmp_path, runner=runner, path_lister=lambda _: paths).check()
+            scanner_failure.check()
         assert raised.value.exit_code == 2
 
         (tmp_path / ALLOWLIST_NAME).unlink()
         runner = RecordingRunner()
+        missing_allowlist = FossologyLicenseChecker(
+            tmp_path, runner=runner, path_lister=lambda _: paths
+        )
         with pytest.raises(FossologyLicenseCheckError, match="Missing"):
-            FossologyLicenseChecker(tmp_path, runner=runner, path_lister=lambda _: paths).check()
+            missing_allowlist.check()
         assert runner.calls == []
 
     def test_main_returns_scanner_exit_code(
