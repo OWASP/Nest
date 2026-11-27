@@ -53,6 +53,31 @@ class SnapshotDetail(SnapshotBase):
     new_releases_count: int
     new_users_count: int
 
+    @staticmethod
+    def resolve_new_chapters_count(obj: SnapshotModel) -> int:
+        """Resolve new chapters count."""
+        return obj.chapters_count
+
+    @staticmethod
+    def resolve_new_issues_count(obj: SnapshotModel) -> int:
+        """Resolve new issues count."""
+        return obj.issues_count
+
+    @staticmethod
+    def resolve_new_projects_count(obj: SnapshotModel) -> int:
+        """Resolve new projects count."""
+        return obj.projects_count
+
+    @staticmethod
+    def resolve_new_releases_count(obj: SnapshotModel) -> int:
+        """Resolve new releases count."""
+        return obj.releases_count
+
+    @staticmethod
+    def resolve_new_users_count(obj: SnapshotModel) -> int:
+        """Resolve new users count."""
+        return obj.users_count
+
 
 class SnapshotIssue(Issue):
     """Schema for Snapshot Issue (used in list endpoints)."""
@@ -171,7 +196,7 @@ def list_snapshot_chapters(
     if snapshot := SnapshotModel.objects.filter(
         key__iexact=snapshot_id, status=SnapshotModel.Status.COMPLETED
     ).first():
-        return snapshot.new_chapters.order_by(ordering or "-created_at")
+        return snapshot.chapters.order_by(ordering or "-created_at")
 
     return ChapterModel.objects.none()
 
@@ -196,7 +221,7 @@ def list_snapshot_issues(
     if snapshot := SnapshotModel.objects.filter(
         key__iexact=snapshot_id, status=SnapshotModel.Status.COMPLETED
     ).first():
-        return snapshot.new_issues.select_related("repository__organization").order_by(
+        return snapshot.issues.select_related("repository__organization").order_by(
             ordering or "-created_at"
         )
 
@@ -223,7 +248,7 @@ def list_snapshot_members(
     if snapshot := SnapshotModel.objects.filter(
         key__iexact=snapshot_id, status=SnapshotModel.Status.COMPLETED
     ).first():
-        return snapshot.new_users.order_by(ordering or "-created_at")
+        return snapshot.users.order_by(ordering or "-created_at")
 
     return UserModel.objects.none()
 
@@ -248,7 +273,7 @@ def list_snapshot_projects(
     if snapshot := SnapshotModel.objects.filter(
         key__iexact=snapshot_id, status=SnapshotModel.Status.COMPLETED
     ).first():
-        return snapshot.new_projects.order_by(ordering or "-created_at")
+        return snapshot.projects.order_by(ordering or "-created_at")
 
     return ProjectModel.objects.none()
 
@@ -273,7 +298,7 @@ def list_snapshot_releases(
     if snapshot := SnapshotModel.objects.filter(
         key__iexact=snapshot_id, status=SnapshotModel.Status.COMPLETED
     ).first():
-        return snapshot.new_releases.select_related("repository__organization").order_by(
+        return snapshot.releases.select_related("repository__organization").order_by(
             ordering or "-published_at"
         )
 

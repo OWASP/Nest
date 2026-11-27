@@ -32,7 +32,7 @@ services:
       '
     container_name: nest-cache
     env_file: ../../backend/.env
-    image: redis:8.10.1-alpine3.23@sha256:ef216d85ec44f4fdf7c0e6df2d1757a4734ed32fbb278cabd3181b5a27353b79
+    image: redis:8.10.2-alpine3.23@sha256:9f8d2d789b9a1d1e3f283f979aa9cbf393373806472e1ccd460e2f9c869b833b
     healthcheck:
       interval: 5s
       retries: 5
@@ -103,7 +103,7 @@ services:
     container_name: nest-worker
     command: >
       sh -c '
-        python manage.py rqworker ai --with-scheduler
+        python manage.py rqworker ai emails --with-scheduler
       '
     image: nest-local-backend
     depends_on:

@@ -650,6 +650,15 @@ describe('ContributorsList Component', () => {
       expect(links[2]).toHaveAttribute('title', 'user3')
     })
 
+    it('opens compact contributor links in the same tab', () => {
+      render(<ContributorsList {...defaultProps} />)
+
+      for (const link of screen.getAllByTestId('contributor-link')) {
+        expect(link).not.toHaveAttribute('target')
+        expect(link).not.toHaveAttribute('rel')
+      }
+    })
+
     it('renders button with proper role', () => {
       const manyContributors = Array.from({ length: 15 })
         .fill(null)
@@ -715,13 +724,13 @@ describe('ContributorsList Component', () => {
       }
     })
 
-    it('renders contributor links with proper styling', () => {
+    it('renders contributor names with proper styling', () => {
       render(<ContributorsList {...defaultProps} />)
 
-      const links = screen.getAllByTestId('contributor-link')
+      const names = screen.getAllByTestId('contributor-name')
 
-      for (const link of links) {
-        expect(link).toHaveClass(
+      for (const name of names) {
+        expect(name).toHaveClass(
           'cursor-pointer',
           'overflow-hidden',
           'text-ellipsis',
@@ -730,6 +739,62 @@ describe('ContributorsList Component', () => {
           'text-blue-400',
           'hover:underline'
         )
+      }
+    })
+  })
+
+  describe('Card variant', () => {
+    it('renders avatar, name and @login for each contributor', () => {
+      render(<ContributorsList {...defaultProps} variant="card" />)
+
+      const avatars = screen.getAllByTestId('contributor-avatar')
+      expect(avatars).toHaveLength(3)
+      expect(avatars[0]).toHaveAttribute('alt', 'developer1')
+      expect(avatars[0]).toHaveAttribute('src', 'https://github.com/developer1.avatar?s=128')
+      expect(avatars[0]).toHaveAttribute('width', '64')
+      expect(avatars[0]).toHaveAttribute('height', '64')
+
+      expect(screen.getByText('Alex Developer')).toBeInTheDocument()
+      expect(screen.getByText('@developer1')).toBeInTheDocument()
+      expect(screen.getByText('@contributor2')).toBeInTheDocument()
+      expect(screen.getByText('@user3')).toBeInTheDocument()
+    })
+
+    it('falls back to login when name is missing', () => {
+      render(<ContributorsList {...defaultProps} variant="card" />)
+
+      expect(screen.getByText('user3')).toBeInTheDocument()
+      expect(screen.queryByText('User3')).not.toBeInTheDocument()
+    })
+
+    it('appends the avatar size with & when the avatar URL has a query string', () => {
+      render(
+        <ContributorsList
+          contributors={[
+            { ...mockContributors[0], avatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4' },
+          ]}
+          getUrl={getMemberUrl}
+          variant="card"
+        />
+      )
+
+      expect(screen.getByTestId('contributor-avatar')).toHaveAttribute(
+        'src',
+        'https://avatars.githubusercontent.com/u/1?v=4&s=128'
+      )
+    })
+
+    it('renders contributor links that open in a new tab', () => {
+      render(<ContributorsList {...defaultProps} variant="card" />)
+
+      const links = screen.getAllByRole('link')
+      expect(links).toHaveLength(3)
+      expect(links[0]).toHaveAttribute('href', '/members/developer1')
+      expect(links[1]).toHaveAttribute('href', '/members/contributor2')
+      expect(links[2]).toHaveAttribute('href', '/members/user3')
+      for (const link of links) {
+        expect(link).toHaveAttribute('target', '_blank')
+        expect(link).toHaveAttribute('rel', 'noopener noreferrer')
       }
     })
   })

@@ -21,6 +21,12 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(() => '/committees/test-committee'),
 }))
 
+jest.mock('components/SubscribeButton', () => {
+  return function MockSubscribeButton() {
+    return <button data-testid="subscribe-button">Subscribe</button>
+  }
+})
+
 describe('CommitteeDetailsPage Component', () => {
   beforeEach(() => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({

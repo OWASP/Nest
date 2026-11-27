@@ -216,7 +216,13 @@ const UserDetailsPage: React.FC = () => {
         }
       />
 
-      <Metadata details={userDetails} stats={userStats} detailsTitle="User Details" />
+      <Metadata
+        details={userDetails}
+        stats={userStats}
+        detailsTitle="User Details"
+        contributionScore={user?.contributionScore ?? undefined}
+        tierLevel={user?.tier ?? undefined}
+      />
 
       <Contributions hasContributions={false} />
 

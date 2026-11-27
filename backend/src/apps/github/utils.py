@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
@@ -130,7 +130,7 @@ def get_latest_invite_link_commit(
     file_path: str = "_includes/slack_invite.html",
     max_commits_to_scan: int = 500,
     repository_name: str | None = None,
-) -> tuple[datetime.datetime | None, str | None]:
+) -> tuple[dt.datetime | None, str | None]:
     """Return commit date and SHA of the newest matching change to the public Slack invite file.
 
     Matches commits whose message contains the words ``update``, ``slack``, and ``invite`` in
@@ -174,8 +174,8 @@ def get_latest_invite_link_commit(
             rest = rest.split(word, 1)[1]
         if not matched:
             continue
-        dt = data.commit.committer.date
-        if timezone.is_naive(dt):
-            dt = timezone.make_aware(dt, datetime.UTC)
-        return dt, data.sha
+        committed_at = data.commit.committer.date
+        if timezone.is_naive(committed_at):
+            committed_at = timezone.make_aware(committed_at, dt.UTC)
+        return committed_at, data.sha
     return None, None

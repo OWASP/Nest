@@ -61,3 +61,19 @@ export const GET_CHAPTER_COUNTRIES = gql`
     chapterCountries
   }
 `
+
+export const SEARCH_CHAPTERS = gql`
+  query SearchChapterNames($query: String!) {
+    searchChapters(query: $query) {
+      id
+      key
+      name
+    }
+  }
+`
+
+export const IS_CHAPTER_LEADER = gql`
+  query IsChapterLeader($login: String!) {
+    isChapterLeader(login: $login)
+  }
+`

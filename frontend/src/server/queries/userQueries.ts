@@ -68,6 +68,8 @@ export const GET_USER_DATA = gql`
       contributionData
       contributionsCount
       createdAt
+      contributionScore
+      tier
       email
       followersCount
       followingCount
@@ -90,6 +92,28 @@ export const GET_USER_METADATA = gql`
       id
       login
       name
+    }
+  }
+`
+
+export const SEARCH_USER_LOGINS = gql`
+  query SearchUserLogins($query: String!) {
+    searchUsers(query: $query) {
+      id
+      login
+      name
+      avatarUrl
+    }
+  }
+`
+
+export const GET_ENTITY_CONTRIBUTORS = gql`
+  query GetEntityContributors($projectKey: String, $chapterKey: String) {
+    entityContributors(projectKey: $projectKey, chapterKey: $chapterKey) {
+      id
+      login
+      name
+      avatarUrl
     }
   }
 `

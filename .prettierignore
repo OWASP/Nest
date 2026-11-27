@@ -8,6 +8,7 @@
 # Backend (djlint for templates; vendored static assets)
 backend/static/**
 backend/templates/**
+backend/src/**/templates/**
 
 # Docs (Zensical/Jinja overrides; Prettier mangles template attributes)
 docs/overrides/**

@@ -20,14 +20,17 @@ from apps.mentorship.api.internal.queries import (
     ProgramQuery,
 )
 from apps.nest.api.internal.mutations import NestMutations
+from apps.owasp.api.internal.mutations import CertificateMutation, OwaspMutations
 from apps.owasp.api.internal.queries import OwaspQuery
 
 
 @strawberry.type
 class Mutation(
     ApiMutations,
+    CertificateMutation,
     ModuleMutation,
     NestMutations,
+    OwaspMutations,
     ProgramMutation,
 ):
     """Schema mutations."""

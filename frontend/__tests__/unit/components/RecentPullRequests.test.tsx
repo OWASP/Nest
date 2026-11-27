@@ -117,4 +117,31 @@ describe('RecentPullRequests', () => {
     render(<RecentPullRequests data={minimalData} />)
     expect(screen.getByText('Recent Pull Requests').parentElement).toHaveClass('flex')
   })
+
+  describe('showBadge', () => {
+    it.each([
+      ['merged', { state: 'closed', mergedAt: '2024-06-02T12:00:00Z' }, 'bg-[#8657E5]'],
+      ['open', { state: 'open', mergedAt: undefined }, 'bg-[#238636]'],
+      ['closed', { state: 'closed', mergedAt: undefined }, 'bg-[#DA3633]'],
+      ['unknown', { state: undefined, mergedAt: undefined }, 'bg-[#DA3633]'],
+    ])('renders the "%s" badge', (label, overrides, badgeClass) => {
+      render(<RecentPullRequests data={[{ ...minimalData[0], ...overrides }]} showBadge />)
+
+      const badge = screen.getByText(label)
+      expect(badge).toHaveClass('rounded-full', badgeClass)
+    })
+
+    it('does not render a badge by default', () => {
+      render(<RecentPullRequests data={minimalData} />)
+      expect(screen.queryByText('merged')).not.toBeInTheDocument()
+      expect(screen.queryByText('open')).not.toBeInTheDocument()
+    })
+  })
+
+  it('hides the title when bare is true', () => {
+    render(<RecentPullRequests data={minimalData} bare />)
+    expect(screen.queryByText('Recent Pull Requests')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /Recent Pull Requests/i })).not.toBeInTheDocument()
+    expect(screen.getByText('Test Pull Request')).toBeInTheDocument()
+  })
 })
