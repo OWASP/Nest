@@ -326,6 +326,63 @@ class TestProcessModule:
         assert num_linked == 1
         existing_task.save.assert_called_once()
 
+    @pytest.mark.parametrize("github_assigned_at", [datetime(2024, 5, 1, tzinfo=dt.UTC), None])
+    @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+    @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+    def test_process_module_restarts_unassigned_task(
+        self, mock_issue, mock_task, command, github_assigned_at
+    ):
+        """An unassigned task restarts when the same user is assigned again on GitHub."""
+        mock_task.Status = Task.Status
+
+        mock_repo = MagicMock()
+        mock_repo.id = 10
+        mock_repo.name = "repo"
+        mock_module = MagicMock()
+        mock_module.labels = ["label-a"]
+        mock_module.project.repositories.all.return_value = [mock_repo]
+
+        assignee = MagicMock()
+        assignee.login = "user1"
+        issue = MagicMock(id=1, number=1, state="open", repository=mock_repo)
+        issue.assignees.first.return_value = assignee
+
+        mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+        mock_issue_chain.prefetch_related.return_value.distinct.return_value = make_qs(
+            [issue], exist=True
+        )
+
+        existing_task = MagicMock(
+            module=mock_module,
+            status=Task.Status.UNASSIGNED,
+            assigned_at=datetime(2023, 1, 1, tzinfo=dt.UTC),
+            deadline_at=datetime(2023, 2, 1, tzinfo=dt.UTC),
+        )
+        mock_task.objects.get_or_create.return_value = (existing_task, False)
+
+        with (
+            patch(
+                "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+            ),
+            patch.object(command, "_extract_repo_full_name", return_value="owner/repo"),
+            patch.object(command, "_get_last_assigned_date", return_value=github_assigned_at),
+        ):
+            command._process_module(
+                module=mock_module,
+                repo_label_to_issue_ids={(10, "label-a"): {1}},
+                gh_client=MagicMock(),
+                repo_cache={},
+                verbosity=1,
+            )
+
+        assert existing_task.status == Task.Status.IN_PROGRESS
+        assert existing_task.deadline_at is None
+        if github_assigned_at:
+            assert existing_task.assigned_at == github_assigned_at
+        else:
+            assert existing_task.assigned_at > datetime(2023, 1, 1, tzinfo=dt.UTC)
+        existing_task.save.assert_called_once()
+
     @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
     @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
     def test_process_module_repo_cache_miss_and_failure(self, mock_issue, mock_task, command):

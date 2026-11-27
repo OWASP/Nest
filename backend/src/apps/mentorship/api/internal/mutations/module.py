@@ -8,9 +8,12 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from github.GithubException import GithubException
 from graphql import GraphQLError
+from requests.exceptions import RequestException
 from strawberry.relay import GlobalID
 
+from apps.github.auth import get_github_client
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -19,7 +22,7 @@ from apps.mentorship.api.internal.nodes.module import (
     UpdateModuleInput,
 )
 from apps.mentorship.api.internal.utils import get_issue_pk
-from apps.mentorship.models import Mentor, Module, Program
+from apps.mentorship.models import Mentee, MenteeModule, Mentor, Module, Program
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
@@ -33,9 +36,71 @@ NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
 NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines."
 NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
 NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
+GITHUB_NOT_CONFIGURED_MSG = "GitHub integration is not configured."
+GITHUB_UNREACHABLE_MSG = "Could not reach GitHub. Please try again."
+ISSUE_REPOSITORY_MISMATCH_MSG = "Issue repository does not belong to the module's project."
 NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG = "You can only set deadlines for issues assigned to you."
 
 logger = logging.getLogger(__name__)
+
+
+def get_github_issue(module: Module, issue_id: GlobalID) -> tuple:
+    """Get local issue and GitHub issue objects for a module issue."""
+    issue = (
+        module.issues.select_related("repository", "repository__owner")
+        .filter(pk=get_issue_pk(issue_id))
+        .first()
+    )
+    if issue is None:
+        raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
+
+    if not issue.repository:
+        msg = "Issue has no repository."
+        raise GraphQLError(msg)
+
+    if not issue.repository.owner:
+        msg = "Issue repository has no owner."
+        raise GraphQLError(msg)
+
+    # Module issues are refreshed by a sync, so they can outlive a project change.
+    if not module.project.repositories.filter(pk=issue.repository.pk).exists():
+        raise GraphQLError(ISSUE_REPOSITORY_MISMATCH_MSG)
+
+    try:
+        gh_client = get_github_client()
+    except ValueError as e:
+        raise GraphQLError(GITHUB_NOT_CONFIGURED_MSG) from e
+
+    gh_repository = gh_client.get_repo(issue.repository.path)
+    gh_issue = gh_repository.get_issue(number=issue.number)
+
+    return issue, gh_issue
+
+
+def is_github_assignee(gh_issue, user_login: str) -> bool:
+    """Return whether the user is currently assigned to the GitHub issue."""
+    return user_login.lower() in {assignee.login.lower() for assignee in gh_issue.assignees}
+
+
+def is_deadline_in_module_range(module: Module, deadline_at: datetime) -> bool:
+    """Return whether the deadline falls within the module's start and end dates."""
+    return module.started_at.date() <= deadline_at.date() <= module.ended_at.date()
+
+
+def undo_github_assignment_change(gh_issue, user_login: str, *, assigned: bool) -> None:
+    """Restore the GitHub assignee state after the local update failed."""
+    try:
+        if assigned:
+            gh_issue.add_to_assignees(user_login)
+        else:
+            gh_issue.remove_from_assignees(user_login)
+    except Exception:
+        logger.exception("Failed to revert GitHub assignee change for '%s'", user_login)
+        return
+
+    # The call above refreshes the assignees from GitHub's response.
+    if is_github_assignee(gh_issue, user_login) != assigned:
+        logger.error("GitHub did not revert the assignee change for '%s'", user_login)
 
 
 def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
@@ -147,7 +212,6 @@ class ModuleMutation:
         return module
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    @transaction.atomic
     def assign_issue_to_user(
         self,
         info: strawberry.Info,
@@ -157,7 +221,7 @@ class ModuleMutation:
         issue_id: GlobalID,
         user_login: str,
     ) -> ModuleNode:
-        """Assign an issue to a user by updating Issue.assignees within the module scope."""
+        """Assign an issue to a user by updating Issue.assignees and creating a Task."""
         user = info.context.request.user
 
         module = (
@@ -175,18 +239,103 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
-        issue = module.issues.filter(pk=get_issue_pk(issue_id)).first()
-        if issue is None:
-            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
+        was_assigned = None
+        try:
+            issue, gh_issue = get_github_issue(module, issue_id)
+            was_assigned = is_github_assignee(gh_issue, user_login)
+            gh_issue.add_to_assignees(user_login)
+        except GithubException as e:
+            logger.warning("Failed to assign issue on GitHub", exc_info=True)
+            msg = f"Failed to assign issue on GitHub (status {e.status})."
+            raise GraphQLError(msg) from e
+        except RequestException as e:
+            # The request may have reached GitHub before the connection failed.
+            if was_assigned is False:
+                undo_github_assignment_change(gh_issue, user_login, assigned=False)
+            raise GraphQLError(GITHUB_UNREACHABLE_MSG) from e
 
-        issue.assignees.add(gh_user)
+        # GitHub ignores users it cannot assign and still reports success.
+        if not is_github_assignee(gh_issue, user_login):
+            msg = (
+                f"GitHub did not assign this issue to '{user_login}'. "
+                "The user may not be assignable in this repository."
+            )
+            raise GraphQLError(msg)
 
-        IssueUserInterest.objects.filter(module=module, issue_id=issue.id, user=gh_user).delete()
+        try:
+            with transaction.atomic():
+                issue.assignees.add(gh_user)
+                now = timezone.now()
+                mentee, _ = Mentee.objects.get_or_create(github_user=gh_user)
+
+                MenteeModule.objects.get_or_create(
+                    mentee=mentee,
+                    module=module,
+                    defaults={
+                        "started_at": module.started_at or now,
+                        "ended_at": module.ended_at,
+                    },
+                )
+
+                # A Task is unique per issue and assignee, whichever module it started in.
+                task, created = Task.objects.get_or_create(
+                    issue=issue,
+                    assignee=gh_user,
+                    defaults={
+                        "assigned_at": now,
+                        "module": module,
+                        "status": Task.Status.IN_PROGRESS,
+                    },
+                )
+
+                if not created:
+                    update_fields = []
+                    if task.module != module:
+                        task.module = module
+                        update_fields.append("module")
+                        # A deadline set in another module may not fit this one.
+                        if task.deadline_at and not is_deadline_in_module_range(
+                            module, task.deadline_at
+                        ):
+                            task.deadline_at = None
+                            update_fields.append("deadline_at")
+
+                    # A Task kept as history starts over: an unassigned one, or a
+                    # completed one whose user is assigned again to an open issue.
+                    restart = task.status == Task.Status.UNASSIGNED or (
+                        task.status == Task.Status.COMPLETED
+                        and not was_assigned
+                        and issue.state.lower() != "closed"
+                    )
+                    if restart or task.assigned_at is None:
+                        task.assigned_at = now
+                        update_fields.append("assigned_at")
+
+                    if restart:
+                        task.deadline_at = None
+                        if "deadline_at" not in update_fields:
+                            update_fields.append("deadline_at")
+
+                    # A Task created by setting a deadline starts as TODO.
+                    if restart or task.status == Task.Status.TODO:
+                        task.status = Task.Status.IN_PROGRESS
+                        update_fields.append("status")
+
+                    if update_fields:
+                        task.save(update_fields=update_fields)
+
+                IssueUserInterest.objects.filter(
+                    module=module, issue_id=issue.id, user=gh_user
+                ).delete()
+        except Exception:
+            # Keep GitHub in line with the portal when the local update fails.
+            if not was_assigned:
+                undo_github_assignment_change(gh_issue, user_login, assigned=False)
+            raise
 
         return module
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    @transaction.atomic
     def unassign_issue_from_user(
         self,
         info: strawberry.Info,
@@ -196,7 +345,7 @@ class ModuleMutation:
         issue_id: GlobalID,
         user_login: str,
     ) -> ModuleNode:
-        """Unassign an issue from a user by updating Issue.assignees within the module scope."""
+        """Unassign an issue from a user and mark the related Task as unassigned."""
         user = info.context.request.user
 
         module = (
@@ -214,12 +363,39 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
-        issue = module.issues.filter(pk=get_issue_pk(issue_id)).first()
-        if issue is None:
-            msg = "Issue not found in this module."
-            raise ObjectDoesNotExist(msg)
+        was_assigned = None
+        try:
+            issue, gh_issue = get_github_issue(module, issue_id)
+            was_assigned = is_github_assignee(gh_issue, user_login)
+            gh_issue.remove_from_assignees(user_login)
+        except GithubException as e:
+            logger.warning("Failed to unassign issue on GitHub", exc_info=True)
+            msg = f"Failed to unassign issue on GitHub (status {e.status})."
+            raise GraphQLError(msg) from e
+        except RequestException as e:
+            # The request may have reached GitHub before the connection failed.
+            if was_assigned:
+                undo_github_assignment_change(gh_issue, user_login, assigned=True)
+            raise GraphQLError(GITHUB_UNREACHABLE_MSG) from e
 
-        issue.assignees.remove(gh_user)
+        if is_github_assignee(gh_issue, user_login):
+            msg = f"GitHub did not unassign this issue from '{user_login}'."
+            raise GraphQLError(msg)
+
+        try:
+            with transaction.atomic():
+                issue.assignees.remove(gh_user)
+
+                task = Task.objects.filter(issue=issue, assignee=gh_user).first()
+                # A completed Task stays completed: it records finished work.
+                if task and task.status != Task.Status.COMPLETED:
+                    task.status = Task.Status.UNASSIGNED
+                    task.save(update_fields=["status"])
+        except Exception:
+            # Keep GitHub in line with the portal when the local update fails.
+            if was_assigned:
+                undo_github_assignment_change(gh_issue, user_login, assigned=True)
+            raise
 
         return module
 
@@ -281,21 +457,29 @@ class ModuleMutation:
         if timezone.is_naive(normalized_deadline):
             normalized_deadline = timezone.make_aware(normalized_deadline)
 
-        if not module.started_at.date() <= normalized_deadline.date() <= module.ended_at.date():
+        if not is_deadline_in_module_range(module, normalized_deadline):
             raise ValidationError(message=DEADLINE_OUT_OF_RANGE_MSG)
 
         now = timezone.now()
         tasks_to_update: list[Task] = []
         for assignee in assignees:
-            task, _created = Task.objects.get_or_create(
-                module=module, issue=issue, assignee=assignee
+            # A Task is unique per issue and assignee, whichever module it started in.
+            task, _created = Task.objects.select_for_update().get_or_create(
+                issue=issue, assignee=assignee, defaults={"module": module}
             )
-            if task.assigned_at is None:
+            if task.module != module:
+                task.module = module
+            if task.status == Task.Status.UNASSIGNED:
+                task.status = Task.Status.IN_PROGRESS
+                task.assigned_at = now
+            elif task.assigned_at is None:
                 task.assigned_at = now
             task.deadline_at = normalized_deadline
             tasks_to_update.append(task)
 
-        Task.objects.bulk_update(tasks_to_update, ["assigned_at", "deadline_at"])
+        Task.objects.bulk_update(
+            tasks_to_update, ["assigned_at", "deadline_at", "module", "status"]
+        )
 
         return module
 
@@ -341,7 +525,7 @@ class ModuleMutation:
 
         tasks_to_update: list[Task] = []
         for assignee in assignees:
-            task = Task.objects.filter(module=module, issue=issue, assignee=assignee).first()
+            task = Task.objects.filter(issue=issue, assignee=assignee).first()
             if task and task.deadline_at is not None:
                 task.deadline_at = None
                 tasks_to_update.append(task)

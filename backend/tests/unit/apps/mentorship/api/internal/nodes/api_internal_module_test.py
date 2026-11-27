@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import strawberry
+from django.db.models import F
 from strawberry.relay import GlobalID
 
 from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH
@@ -12,6 +13,7 @@ from apps.mentorship.api.internal.nodes.module import (
     ModuleNode,
     UpdateModuleInput,
 )
+from apps.mentorship.models.task import Task
 
 
 def _call_module_resolver(instance: object, name: str, *args: object, **kwargs: object) -> object:
@@ -168,9 +170,8 @@ class TestModuleNodeResolvers:
             patch("apps.mentorship.models.task.Task.objects") as mock_task_objects,
             patch("apps.github.models.user.User.objects") as mock_user_objects,
         ):
-            mock_task_filter_related = (
-                mock_task_objects.filter.return_value.select_related.return_value
-            )
+            task_qs = mock_task_objects.filter.return_value.exclude.return_value
+            mock_task_filter_related = task_qs.select_related.return_value
             mock_task_filter_related.values_list.return_value.distinct.return_value = [
                 "assignee_id_1"
             ]
@@ -180,7 +181,13 @@ class TestModuleNodeResolvers:
             assert len(mentees) == 1
             mock_module_node.issues.filter.assert_called_once_with(pk=123)
             mock_task_objects.filter.assert_called_once_with(
-                module=mock_module_node, issue_id__in=["issue_id_1"], assignee__isnull=False
+                module=mock_module_node,
+                issue_id__in=["issue_id_1"],
+                assignee__isnull=False,
+                issue__assignees=F("assignee"),
+            )
+            mock_task_objects.filter.return_value.exclude.assert_called_once_with(
+                status=Task.Status.UNASSIGNED
             )
             mock_user_objects.filter.assert_called_once_with(id__in=["assignee_id_1"])
             mock_user_objects.filter.return_value.order_by.assert_called_once_with("login")
@@ -305,7 +312,9 @@ class TestModuleNodeResolvers:
     def test_module_node_task_deadline(self, mock_module_node):
         """Test task_deadline method."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by.return_value
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by.return_value
+            )
             mock_task_order_by.values_list.return_value.first.return_value = datetime(
                 2025, 10, 26, tzinfo=UTC
             )
@@ -315,11 +324,16 @@ class TestModuleNodeResolvers:
             mock_task_objects.filter.assert_called_once_with(
                 module=mock_module_node, issue_id=101, deadline_at__isnull=False
             )
+            mock_task_objects.filter.return_value.exclude.assert_called_once_with(
+                status=Task.Status.UNASSIGNED
+            )
 
     def test_module_node_task_deadline_none(self, mock_module_node):
         """Test task_deadline when no deadline is found."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by
+            )
             mock_task_order_by.return_value.values_list.return_value.first.return_value = None
 
             deadline = mock_module_node.mock_task_deadline(issue_id=GlobalID("IssueNode", "101"))
@@ -350,7 +364,9 @@ class TestModuleNodeResolvers:
     def test_module_node_task_assigned_at(self, mock_module_node):
         """Test task_assigned_at method."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by
+            )
             mock_task_order_by.return_value.values_list.return_value.first.return_value = datetime(
                 2025, 9, 15, tzinfo=UTC
             )
@@ -362,11 +378,16 @@ class TestModuleNodeResolvers:
             mock_task_objects.filter.assert_called_once_with(
                 module=mock_module_node, issue_id=202, assigned_at__isnull=False
             )
+            mock_task_objects.filter.return_value.exclude.assert_called_once_with(
+                status=Task.Status.UNASSIGNED
+            )
 
     def test_module_node_task_assigned_at_none(self, mock_module_node):
         """Test task_assigned_at when no assignment timestamp is found."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_task_order_by = mock_task_objects.filter.return_value.order_by.return_value
+            mock_task_order_by = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by.return_value
+            )
             mock_task_order_by.values_list.return_value.first.return_value = None
 
             assigned_at = mock_module_node.mock_task_assigned_at(
@@ -441,9 +462,8 @@ class TestModuleNodeResolvers:
                 {"issue_id": 102, "assigned_at": datetime(2025, 9, 17, tzinfo=UTC)},
             ]
 
-            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
-                deadline_data
-            )
+            task_qs = mock_task_objects.filter.return_value.exclude.return_value
+            task_qs.order_by.return_value.values.return_value = deadline_data
 
             mock_qs = (
                 mock_module_node.issues.select_related.return_value.prefetch_related.return_value
@@ -454,18 +474,15 @@ class TestModuleNodeResolvers:
             ]
 
             filter_mock = mock_task_objects.filter
-            filter_mock.side_effect = [
-                MagicMock(
-                    order_by=MagicMock(
-                        return_value=MagicMock(values=MagicMock(return_value=deadline_data))
-                    )
-                ),
-                MagicMock(
-                    order_by=MagicMock(
-                        return_value=MagicMock(values=MagicMock(return_value=assigned_data))
-                    )
-                ),
-            ]
+            deadline_qs = MagicMock()
+            deadline_qs.exclude.return_value.order_by.return_value.values.return_value = (
+                deadline_data
+            )
+            assigned_qs = MagicMock()
+            assigned_qs.exclude.return_value.order_by.return_value.values.return_value = (
+                assigned_data
+            )
+            filter_mock.side_effect = [deadline_qs, assigned_qs]
 
             info = MagicMock()
             info.context.task_deadlines_by_issue = {}
@@ -475,6 +492,8 @@ class TestModuleNodeResolvers:
                 mock_module_node, "issues", info, limit=20, offset=0, label=None
             )
             assert len(issues_list) == 2
+            deadline_qs.exclude.assert_called_once_with(status=Task.Status.UNASSIGNED)
+            assigned_qs.exclude.assert_called_once_with(status=Task.Status.UNASSIGNED)
 
             assert info.context.task_deadlines_by_issue[101] == datetime(2025, 10, 26, tzinfo=UTC)
             assert info.context.task_deadlines_by_issue[102] == datetime(2025, 10, 28, tzinfo=UTC)

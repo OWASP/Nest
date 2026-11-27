@@ -106,6 +106,7 @@ class IssueNode(strawberry.relay.Node):
                 issue=root,
                 deadline_at__isnull=False,
             )
+            .exclude(status=Task.Status.UNASSIGNED)
             .order_by("-assigned_at")
             .values_list("deadline_at", flat=True)
             .first()

@@ -25,6 +25,7 @@ class Task(TimestampedModel):
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
         IN_REVIEW = "IN_REVIEW", "In Review"
         COMPLETED = "COMPLETED", "Completed"
+        UNASSIGNED = "UNASSIGNED", "Unassigned"
 
     assigned_at = models.DateTimeField(
         blank=True,

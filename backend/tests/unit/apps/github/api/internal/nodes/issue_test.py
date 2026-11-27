@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
+from apps.mentorship.models.task import Task
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -210,7 +211,9 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_info.context.task_deadlines_by_issue = None
 
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_query = mock_task_objects.filter.return_value.order_by.return_value
+            mock_query = (
+                mock_task_objects.filter.return_value.exclude.return_value.order_by.return_value
+            )
             mock_query.values_list.return_value.first.return_value = expected_date
 
             field = self._get_field_by_name("task_deadline", IssueNode)
@@ -218,4 +221,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
             assert result == expected_date
             mock_task_objects.filter.assert_called_once_with(
                 issue=mock_issue, deadline_at__isnull=False
+            )
+            mock_task_objects.filter.return_value.exclude.assert_called_once_with(
+                status=Task.Status.UNASSIGNED
             )
