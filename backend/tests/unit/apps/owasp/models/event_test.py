@@ -96,6 +96,24 @@ class TestEventModel:
         """Day-only range ends roll into the next month when needed."""
         assert Event.parse_dates(dates, start_date) == expected_result
 
+    @pytest.mark.parametrize("start_date", ["2025-10-31", date(2025, 10, 31)])
+    @pytest.mark.parametrize(
+        ("dates", "expected_end"),
+        [
+            ("October 31 - 2", date(2025, 11, 2)),
+            ("October 31 - 2nd", date(2025, 11, 2)),
+            ("October 31 - 31st", date(2025, 10, 31)),
+        ],
+    )
+    def test_from_dict_day_only_dates(self, start_date, dates, expected_end):
+        event = Event(key="test-event")
+        event.from_dict(
+            "Global",
+            {"name": "Test Event", "start-date": start_date, "dates": dates},
+        )
+        assert event.start_date == date(2025, 10, 31)
+        assert event.end_date == expected_end
+
     def test_parse_dates_iso_format_invalid(self):
         """Test parse_dates with invalid ISO-like single date returns None."""
         result = Event.parse_dates("0000-00-00", date(2025, 5, 26))
