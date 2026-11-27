@@ -110,6 +110,22 @@ class TestEventModel:
     def test_parse_dates_uppercase_ordinals(self, dates, start_date, expected_end):
         assert Event.parse_dates(dates, start_date) == expected_end
 
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 31 - 2ND 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 1 - 2 2025", date(2025, 10, 1), date(2025, 10, 2)),
+            ("October 1 - 2nd 2025", date(2025, 10, 1), date(2025, 10, 2)),
+            ("December 30 - 2ND 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("January 31 - 29 2024", date(2024, 1, 31), date(2024, 2, 29)),
+            ("January 31 - 30 2025", date(2025, 1, 31), None),
+            ("October 31 - 2ND   2025", date(2025, 10, 31), date(2025, 11, 2)),
+        ],
+    )
+    def test_parse_dates_year_without_comma(self, dates, start_date, expected_end):
+        assert Event.parse_dates(dates, start_date) == expected_end
+
     @pytest.mark.parametrize("start_date", ["2025-10-31", date(2025, 10, 31)])
     @pytest.mark.parametrize(
         ("dates", "expected_end"),
