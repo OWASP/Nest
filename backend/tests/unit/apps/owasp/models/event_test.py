@@ -74,6 +74,28 @@ class TestEventModel:
         result = Event.parse_dates(dates, start_date)
         assert result == expected_result
 
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_result"),
+        [
+            ("October 31 - 2, 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("December 30 - 2", date(2025, 12, 30), date(2026, 1, 2)),
+            ("October 31 - 2nd", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2nd", date(2025, 12, 30), date(2026, 1, 2)),
+            ("December 30 - 2nd, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("January 31 - 1st", date(2025, 1, 31), date(2025, 2, 1)),
+            ("March 31 - 3rd", date(2025, 3, 31), date(2025, 4, 3)),
+            ("April 30 - 4th", date(2025, 4, 30), date(2025, 5, 4)),
+            ("January 31 - 29", date(2024, 1, 31), date(2024, 2, 29)),
+            ("October 31–2nd", date(2025, 10, 31), date(2025, 11, 2)),  # noqa: RUF001
+            ("October 31—2nd", date(2025, 10, 31), date(2025, 11, 2)),
+        ],
+    )
+    def test_parse_dates_day_only_rollover(self, dates, start_date, expected_result):
+        """Day-only range ends roll into the next month when needed."""
+        assert Event.parse_dates(dates, start_date) == expected_result
+
     def test_parse_dates_iso_format_invalid(self):
         """Test parse_dates with invalid ISO-like single date returns None."""
         result = Event.parse_dates("0000-00-00", date(2025, 5, 26))
