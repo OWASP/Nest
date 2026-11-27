@@ -66,9 +66,23 @@ const ModuleForm = ({
   validationErrors,
 }: ModuleFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [localValidationErrors, setLocalValidationErrors] = useState<ValidationErrors>(
+    validationErrors ?? {}
+  )
+
+  useEffect(() => {
+    setLocalValidationErrors(validationErrors ?? {})
+  }, [validationErrors])
 
   const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
+    if (localValidationErrors[name]) {
+      setLocalValidationErrors((prev) => {
+        const next = { ...prev }
+        delete next[name]
+        return next
+      })
+    }
   }
 
   const handleSelectChange = (keys: React.Key | Set<React.Key> | 'all') => {
@@ -88,8 +102,8 @@ const ModuleForm = ({
   }
 
   const validateNameLocal = (value: string): string | undefined => {
-    if (validationErrors?.name) {
-      return validationErrors.name
+    if (localValidationErrors?.name) {
+      return localValidationErrors.name
     }
     return validateName(value)
   }
@@ -123,7 +137,7 @@ const ModuleForm = ({
         validator: () => validateExperienceLevel(formData.experienceLevel),
       },
     ],
-    [formData, touched, validationErrors]
+    [formData, touched, localValidationErrors]
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -185,7 +199,7 @@ const ModuleForm = ({
                     handleInputChange('name', value)
                     setTouched((prev) => ({ ...prev, name: true }))
                   }}
-                  error={errors.name || validationErrors?.name}
+                  error={errors.name || localValidationErrors?.name}
                   touched={touched.name}
                   required
                   className="w-full min-w-0 lg:col-span-2"

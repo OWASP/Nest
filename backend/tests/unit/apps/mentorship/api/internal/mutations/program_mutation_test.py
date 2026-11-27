@@ -36,6 +36,13 @@ def _make_info(user):
     return info
 
 
+def _mock_program_conflict(mock_program, value=None, *, exclude=False):
+    queryset = mock_program.objects.all.return_value
+    if exclude:
+        queryset = queryset.exclude.return_value
+    queryset.filter.return_value.values_list.return_value.first.return_value = value
+
+
 class TestResolveAdminsFromLogins:
     """Tests for resolve_admins_from_logins helper function."""
 
@@ -140,6 +147,7 @@ class TestCreateProgram:
 
         mock_admin_obj = MagicMock()
         mock_admin.objects.get_or_create.return_value = (mock_admin_obj, False)
+        _mock_program_conflict(mock_program)
 
         mock_prog = MagicMock()
         mock_program.objects.create.return_value = mock_prog
@@ -174,6 +182,7 @@ class TestCreateProgram:
 
         mock_admin_obj = MagicMock()
         mock_admin.objects.get_or_create.return_value = (mock_admin_obj, True)
+        _mock_program_conflict(mock_program)
         mock_program.objects.create.return_value = MagicMock()
 
         result = mutation.create_program(info, input_data)
@@ -204,6 +213,7 @@ class TestCreateProgram:
         mock_admin_obj = MagicMock()
         mock_admin_obj.nest_user = None  # No nest_user yet
         mock_admin.objects.get_or_create.return_value = (mock_admin_obj, True)
+        _mock_program_conflict(mock_program)
         mock_program.objects.create.return_value = MagicMock()
 
         mutation.create_program(info, input_data)
@@ -281,6 +291,135 @@ class TestCreateProgram:
         with pytest.raises(ValidationError, match="End date must be after start date"):
             mutation.create_program(info, input_data)
 
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_create_program_duplicate_name(self, mock_program, mutation):
+        """Test GraphQLError when a program with the exact same name already exists."""
+        user = MagicMock()
+        user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.name = "Web Security"
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+
+        _mock_program_conflict(mock_program, "Web Security")
+
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_program(info, input_data)
+
+        assert "A program with this name already exists." in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+        mock_program.objects.create.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_create_program_slug_collision(self, mock_program, mutation):
+        """Test GraphQLError when a different name produces an already-used key."""
+        user = MagicMock()
+        user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.name = "Web-Security"
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+
+        _mock_program_conflict(mock_program, "Web Security")
+
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_program(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+        mock_program.objects.create.assert_not_called()
+
+    def test_create_program_empty_slug(self, mutation):
+        """Test GraphQLError when program name produces an empty slug."""
+        user = MagicMock()
+        user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.name = "---"
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_program(info, input_data)
+
+        assert "at least one letter or number" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+
+    @pytest.mark.parametrize(
+        "error_message",
+        [
+            'duplicate key value violates unique constraint "mentorship_programs_key_key"',
+            (
+                "duplicate key value violates unique constraint "
+                '"mentorship_programs_key_2e4d5f8a_uniq"'
+            ),
+            "UNIQUE constraint failed: mentorship_programs.key",
+        ],
+    )
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_create_program_key_integrity_error(self, mock_program, mutation, error_message):
+        """Test GraphQLError fallback when create violates key uniqueness at DB level."""
+        user = MagicMock()
+        user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.name = "Web-Security"
+        input_data.description = "Desc"
+        input_data.mentees_limit = 5
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+        input_data.domains = []
+        input_data.tags = []
+
+        _mock_program_conflict(mock_program)
+        mock_program.objects.create.side_effect = IntegrityError(error_message)
+
+        with pytest.raises(GraphQLError) as raised:
+            mutation.create_program(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_create_program_unrecognized_integrity_error_reraises(self, mock_program, mutation):
+        """Test unrecognized IntegrityError is re-raised."""
+        user = MagicMock()
+        user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.name = "Web Security"
+        input_data.description = "Desc"
+        input_data.mentees_limit = 5
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+        input_data.domains = []
+        input_data.tags = []
+
+        _mock_program_conflict(mock_program)
+        mock_program.objects.create.side_effect = IntegrityError("other db failure")
+
+        with pytest.raises(IntegrityError, match="other db failure"):
+            mutation.create_program(info, input_data)
+
 
 class TestUpdateProgram:
     """Tests for ProgramMutation.update_program."""
@@ -307,6 +446,7 @@ class TestUpdateProgram:
         mock_prog = MagicMock()
         mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+        _mock_program_conflict(mock_program, exclude=True)
         mock_resolve.return_value = {MagicMock()}
 
         result = mutation.update_program(info, input_data)
@@ -389,6 +529,7 @@ class TestUpdateProgram:
         mock_prog = MagicMock()
         mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+        _mock_program_conflict(mock_program, exclude=True)
         mock_prog.save.side_effect = IntegrityError(
             'duplicate key value violates unique constraint "mentorship_programs_name_key"'
         )
@@ -399,6 +540,70 @@ class TestUpdateProgram:
         assert "name already exists" in str(raised.value)
         assert raised.value.extensions.get("code") == "VALIDATION_ERROR"
         assert raised.value.extensions.get("field") == "name"
+
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_update_program_slug_collision(self, mock_program, mutation):
+        """GraphQLError when updated name generates a key used by another program."""
+        user = MagicMock()
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.key = "prog-1"
+        input_data.name = "Web-Security"
+        input_data.description = "Updated desc"
+        input_data.mentees_limit = 10
+        input_data.started_at = None
+        input_data.ended_at = None
+        input_data.domains = None
+        input_data.tags = None
+        input_data.status = None
+        input_data.admin_logins = None
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+        _mock_program_conflict(mock_program, "Web Security", exclude=True)
+
+        with pytest.raises(GraphQLError) as raised:
+            mutation.update_program(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
+        mock_prog.save.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_update_program_duplicate_key_integrity_error(self, mock_program, mutation):
+        """GraphQLError when update save violates unique key constraint."""
+        user = MagicMock()
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.key = "prog-1"
+        input_data.name = "Web-Security"
+        input_data.description = "Updated desc"
+        input_data.mentees_limit = 10
+        input_data.started_at = None
+        input_data.ended_at = None
+        input_data.domains = None
+        input_data.tags = None
+        input_data.status = None
+        input_data.admin_logins = None
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+        _mock_program_conflict(mock_program, exclude=True)
+        mock_prog.save.side_effect = IntegrityError(
+            "UNIQUE constraint failed: mentorship_programs.key"
+        )
+
+        with pytest.raises(GraphQLError) as raised:
+            mutation.update_program(info, input_data)
+
+        assert "web-security" in str(raised.value)
+        assert "already in use" in str(raised.value)
+        assert raised.value.extensions == {"code": "VALIDATION_ERROR", "field": "name"}
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_program_with_none_dates(self, mock_program, mutation):
@@ -421,6 +626,7 @@ class TestUpdateProgram:
         mock_prog = MagicMock()
         mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+        _mock_program_conflict(mock_program, exclude=True)
 
         result = mutation.update_program(info, input_data)
 
@@ -449,6 +655,7 @@ class TestUpdateProgram:
         mock_prog = MagicMock()
         mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+        _mock_program_conflict(mock_program, exclude=True)
 
         result = mutation.update_program(info, input_data)
 

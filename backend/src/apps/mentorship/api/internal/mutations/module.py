@@ -11,6 +11,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 from strawberry.relay import GlobalID
 
+from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -80,11 +81,53 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
     return started_at, ended_at
 
 
-def _handle_module_save_integrity_error(exc: IntegrityError) -> None:
+def _module_key_conflict_message(key: str = "") -> str:
+    """Build a clear validation message when a module name collides on key."""
+    if key:
+        return (
+            f"This name produces the key '{key}', which is already in use by another module "
+            "in this program. Please choose a different name."
+        )
+    return (
+        "This name produces a key that is already in use by another module in this program. "
+        "Please choose a different name."
+    )
+
+
+def _validate_module_name_uniqueness(
+    program: Program, name: str, *, exclude_pk: int | None = None
+) -> str:
+    """Validate that a module name produces a unique, non-empty key within its program."""
+    key = slugify(name)
+    if not key:
+        msg = "Module name must contain at least one letter or number."
+        raise GraphQLError(msg, extensions={"code": "VALIDATION_ERROR", "field": "name"})
+
+    queryset = Module.objects.filter(program=program, key=key)
+    if exclude_pk is not None:
+        queryset = queryset.exclude(pk=exclude_pk)
+
+    conflicting_name = queryset.values_list("name", flat=True).first()
+    if conflicting_name is not None:
+        msg = (
+            "This module name already exists in this program."
+            if conflicting_name == name
+            else _module_key_conflict_message(key)
+        )
+        raise GraphQLError(msg, extensions={"code": "VALIDATION_ERROR", "field": "name"})
+
+    return key
+
+
+def _handle_module_save_integrity_error(exc: IntegrityError, *, key: str = "") -> None:
     """Translate module save IntegrityError to GraphQLError for known constraints."""
-    error_message = str(exc)
-    if "unique_module_key_in_program" in error_message:
-        msg = "This module name already exists in this program."
+    db_exc = exc.__cause__ or exc
+    error_message = str(db_exc)
+    if "unique_module_key_in_program" in error_message or (
+        "mentorship_modules.program_id" in error_message
+        and "mentorship_modules.key" in error_message
+    ):
+        msg = _module_key_conflict_message(key)
         raise GraphQLError(
             msg,
             extensions={"code": "VALIDATION_ERROR", "field": "name"},
@@ -119,6 +162,8 @@ class ModuleMutation:
             program.ended_at,
         )
 
+        module_key = _validate_module_name_uniqueness(program, input_data.name)
+
         try:
             with transaction.atomic():
                 module = Module.objects.create(
@@ -135,7 +180,7 @@ class ModuleMutation:
                     project=project,
                 )
         except IntegrityError as e:
-            _handle_module_save_integrity_error(e)
+            _handle_module_save_integrity_error(e, key=module_key)
 
         if module.experience_level not in program.experience_levels:
             program.experience_levels.append(module.experience_level)
@@ -414,6 +459,10 @@ class ModuleMutation:
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
 
+        module_key = _validate_module_name_uniqueness(
+            module.program, input_data.name, exclude_pk=module.pk
+        )
+
         if input_data.mentor_logins is not None:
             mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
             module.mentors.set(mentors_to_set)
@@ -422,7 +471,7 @@ class ModuleMutation:
             with transaction.atomic():
                 module.save()
         except IntegrityError as e:
-            _handle_module_save_integrity_error(e)
+            _handle_module_save_integrity_error(e, key=module_key)
 
         if module.experience_level not in module.program.experience_levels:
             module.program.experience_levels.append(module.experience_level)
