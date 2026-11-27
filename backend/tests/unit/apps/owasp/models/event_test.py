@@ -143,6 +143,33 @@ class TestEventModel:
     def test_parse_dates_explicit_end_year(self, dates, start_date, expected_end):
         assert Event.parse_dates(dates, start_date) == expected_end
 
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 31 - 2, Monday", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2nd, Monday", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2, Friday", date(2025, 12, 30), date(2026, 1, 2)),
+            ("October 1 - 2, Monday", date(2025, 10, 1), date(2025, 10, 2)),
+            ("October 31 - 2, event ends", date(2025, 10, 31), None),
+            ("October 31 - 2 Monday", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2, FRI", date(2025, 12, 30), date(2026, 1, 2)),
+            ("October 31 - 2ND 2026 Wed", date(2025, 10, 31), date(2026, 11, 2)),
+            ("October 31 - 2, Monday extra", date(2025, 10, 31), None),
+            ("October 31 - 2, 2026 event ends", date(2025, 10, 31), None),
+            ("October 31 - 2 Nov, 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2 Nov, 2026", date(2025, 10, 31), date(2026, 11, 2)),
+            ("October 31 - 2, 2026 Monday", date(2025, 10, 31), date(2026, 11, 2)),
+            ("December 30 - 2ND 2027, Saturday", date(2025, 12, 30), date(2027, 1, 2)),
+            ("January 31 - 29, 2024 Thursday", date(2025, 1, 31), date(2024, 2, 29)),
+            ("January 31 - 30, Monday", date(2025, 1, 31), None),
+            ("October 31 - 32, Monday", date(2025, 10, 31), None),
+            ("October 31 - 2, 0000 Monday", date(2025, 10, 31), None),
+        ],
+    )
+    def test_parse_dates_day_only_trailing_text(self, dates, start_date, expected_end):
+        """Legacy comma annotations must not bypass rollover or an explicit year."""
+        assert Event.parse_dates(dates, start_date) == expected_end
+
     @pytest.mark.parametrize("start_date", ["2025-10-31", date(2025, 10, 31)])
     @pytest.mark.parametrize(
         ("dates", "expected_end"),
