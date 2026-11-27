@@ -210,6 +210,8 @@ class Event(BulkSaveModel, TimestampedModel):
 
         """
         start_date = data["start-date"]
+        if isinstance(start_date, str):
+            start_date = parser.parse(start_date).date()
         fields = {
             "category": {
                 "AppSec Days": Event.Category.APPSEC_DAYS,
@@ -219,9 +221,7 @@ class Event(BulkSaveModel, TimestampedModel):
             "description": data.get("optional-text", ""),
             "end_date": Event.parse_dates(data.get("dates", ""), start_date),
             "name": data["name"],
-            "start_date": parser.parse(start_date).date()
-            if isinstance(start_date, str)
-            else start_date,
+            "start_date": start_date,
             "url": normalize_url(data.get("url", "")) or "",
         }
 
