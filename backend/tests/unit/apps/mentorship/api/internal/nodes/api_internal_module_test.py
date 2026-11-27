@@ -12,6 +12,7 @@ from apps.mentorship.api.internal.nodes.module import (
     ModuleNode,
     UpdateModuleInput,
 )
+from apps.mentorship.models.task import Task
 
 
 def _call_module_resolver(instance: object, name: str, *args: object, **kwargs: object) -> object:
@@ -181,6 +182,9 @@ class TestModuleNodeResolvers:
             mock_task_objects.filter.assert_called_once_with(
                 module=mock_module_node, issue_id__in=["issue_id_1"], assignee__isnull=False
             )
+            mock_task_objects.filter.return_value.exclude.assert_called_once_with(
+                status=Task.Status.UNASSIGNED
+            )
             mock_user_objects.filter.assert_called_once_with(id__in=["assignee_id_1"])
             mock_user_objects.filter.return_value.order_by.assert_called_once_with("login")
 
@@ -316,6 +320,9 @@ class TestModuleNodeResolvers:
             mock_task_objects.filter.assert_called_once_with(
                 module=mock_module_node, issue_id=101, deadline_at__isnull=False
             )
+            mock_task_objects.filter.return_value.exclude.assert_called_once_with(
+                status=Task.Status.UNASSIGNED
+            )
 
     def test_module_node_task_deadline_none(self, mock_module_node):
         """Test task_deadline when no deadline is found."""
@@ -366,6 +373,9 @@ class TestModuleNodeResolvers:
             assert assigned_at == datetime(2025, 9, 15, tzinfo=UTC)
             mock_task_objects.filter.assert_called_once_with(
                 module=mock_module_node, issue_id=202, assigned_at__isnull=False
+            )
+            mock_task_objects.filter.return_value.exclude.assert_called_once_with(
+                status=Task.Status.UNASSIGNED
             )
 
     def test_module_node_task_assigned_at_none(self, mock_module_node):
@@ -478,6 +488,8 @@ class TestModuleNodeResolvers:
                 mock_module_node, "issues", info, limit=20, offset=0, label=None
             )
             assert len(issues_list) == 2
+            deadline_qs.exclude.assert_called_once_with(status=Task.Status.UNASSIGNED)
+            assigned_qs.exclude.assert_called_once_with(status=Task.Status.UNASSIGNED)
 
             assert info.context.task_deadlines_by_issue[101] == datetime(2025, 10, 26, tzinfo=UTC)
             assert info.context.task_deadlines_by_issue[102] == datetime(2025, 10, 28, tzinfo=UTC)
