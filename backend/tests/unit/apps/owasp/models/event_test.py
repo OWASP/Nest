@@ -96,6 +96,20 @@ class TestEventModel:
         """Day-only range ends roll into the next month when needed."""
         assert Event.parse_dates(dates, start_date) == expected_result
 
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 31 - 2ND, 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2ND", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2Nd, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("January 31 - 1ST", date(2025, 1, 31), date(2025, 2, 1)),
+            ("March 31 - 3RD", date(2025, 3, 31), date(2025, 4, 3)),
+            ("April 30 - 4TH", date(2025, 4, 30), date(2025, 5, 4)),
+        ],
+    )
+    def test_parse_dates_uppercase_ordinals(self, dates, start_date, expected_end):
+        assert Event.parse_dates(dates, start_date) == expected_end
+
     @pytest.mark.parametrize("start_date", ["2025-10-31", date(2025, 10, 31)])
     @pytest.mark.parametrize(
         ("dates", "expected_end"),
