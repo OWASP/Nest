@@ -122,8 +122,6 @@ class Event(BulkSaveModel, TimestampedModel):
         if not dates:
             return None
 
-        max_day_length = 2
-
         # Normalize dashes (hyphen, en-dash, em-dash).
         clean_dates = re.sub(r"[\-\–\—]", "-", dates)  # noqa: RUF001
 
@@ -143,7 +141,9 @@ class Event(BulkSaveModel, TimestampedModel):
                 if day_match:
                     end_day = int(day_match.group(1))
                     day_only_match = re.fullmatch(
-                        r"\d{1,2}(?:st|nd|rd|th)?(?:(?:,\s*|\s+)(\d{4}))?",
+                        r"\d{1,2}(?:st|nd|rd|th)?(?:(?:,\s*|\s+)(\d{4}))?"
+                        r"(?:(?:,\s*|\s+)(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|"
+                        r"Mon|Tue|Wed|Thu|Fri|Sat|Sun))?",
                         end_str,
                         re.IGNORECASE,
                     )
@@ -157,8 +157,6 @@ class Event(BulkSaveModel, TimestampedModel):
                             if not explicit_year:
                                 end_year += start_date.month == months_in_year
                         return start_date.replace(year=end_year, month=end_month, day=end_day)
-                    if len(end_str) <= max_day_length or "," in end_str:
-                        return start_date.replace(day=end_day)
 
                 end_date = parser.parse(
                     end_str, default=datetime.combine(start_date, datetime.min.time())
