@@ -1,0 +1,34 @@
+name: License check
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - feature/**
+      - main
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: license-check-${{ github.ref }}
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-fossology-license-check:
+    name: FOSSology
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04  # The FOSSology scanner image is amd64 only.
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run FOSSology license check
+        run: make compliance-check
+    timeout-minutes: 5
