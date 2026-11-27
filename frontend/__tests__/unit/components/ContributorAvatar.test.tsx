@@ -252,7 +252,7 @@ describe('ContributorAvatar', () => {
         projectKey: 'test-key',
         projectName: 'Test-Project',
         contributionsCount: 10,
-      } as unknown as Contributor
+      } as Contributor
 
       // We need to mock the component behavior by providing avatarUrl separately
       // Since the component always expects avatarUrl, we test the edge case
@@ -298,14 +298,14 @@ describe('ContributorAvatar', () => {
     })
 
     it('handles contributor with null name falling back to login', () => {
-      const contributorWithNullName: Contributor = {
+      const contributorWithNullName = {
         id: 'contributor-null-name',
         login: 'loginonly',
-        name: null as unknown as string,
+        name: null,
         avatarUrl: 'https://github.com/loginonly.png',
         contributionsCount: 3,
         projectKey: 'test-key',
-      }
+      } as Contributor
       render(<ContributorAvatar contributor={contributorWithNullName} uniqueKey="null-name-test" />)
       const tooltip = screen.getByTestId('avatar-tooltip-loginonly-null-name-test')
       expect(tooltip).toHaveAttribute('title', '3 contributions by loginonly')
@@ -350,7 +350,7 @@ describe('ContributorAvatar', () => {
         projectKey: 'test-key',
         extraField: 'should be ignored',
         anotherField: 123,
-      } as unknown as Contributor
+      } as Contributor
       render(<ContributorAvatar contributor={contributorWithExtras} uniqueKey="extras-test" />)
       expect(screen.getByTestId('contributor-avatar')).toBeInTheDocument()
       const tooltip = screen.getByTestId('avatar-tooltip-extrauser-extras-test')

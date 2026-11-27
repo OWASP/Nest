@@ -38,6 +38,12 @@ jest.mock('@/components/MarkdownWrapper', () => {
   )
 })
 
+jest.mock('components/SubscribeButton', () => {
+  return function MockSubscribeButton() {
+    return <button data-testid="subscribe-button">Subscribe</button>
+  }
+})
+
 describe('Committees Component', () => {
   beforeEach(() => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
@@ -72,7 +78,14 @@ describe('Committees Component', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for committees...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for committees...')
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

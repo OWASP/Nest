@@ -63,7 +63,7 @@ const UsersPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:mt-0 lg:grid-cols-3 xl:grid-cols-4">
         {users?.map((user) => (
           <div key={user.key}>{renderUserCard(user)}</div>
         ))}

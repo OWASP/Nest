@@ -188,7 +188,7 @@ describe('<RecentIssues />', () => {
   })
 
   it('renders with null data', () => {
-    render(<RecentIssues data={null as unknown as Issue[]} />)
+    render(<RecentIssues data={null as Issue[]} />)
     expect(screen.getByText('Nothing to display.')).toBeInTheDocument()
   })
 

@@ -50,11 +50,11 @@ describe('SnapshotCard', () => {
   })
 
   it('handles missing startAt or endAt (conditional rendering) - timezone safe', () => {
-    const { rerender } = render(<SnapshotCard {...defaultProps} startAt={0} />)
+    const { rerender } = render(<SnapshotCard {...defaultProps} startAt={undefined} />)
     const onlyEnd = formatDate(defaultProps.endAt)
     expect(screen.getByText(new RegExp(onlyEnd))).toBeInTheDocument()
 
-    rerender(<SnapshotCard {...defaultProps} endAt={0} />)
+    rerender(<SnapshotCard {...defaultProps} endAt={undefined} />)
     const onlyStart = formatDate(defaultProps.startAt)
     expect(screen.getByText(new RegExp(onlyStart))).toBeInTheDocument()
   })

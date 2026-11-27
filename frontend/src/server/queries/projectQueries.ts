@@ -6,6 +6,12 @@ export const GET_PROJECT_DATA = gql`
       contributionData
       contributionStats
       contributorsCount
+      entityChannels {
+        id
+        name
+        externalId
+        platform
+      }
       entityLeaders {
         description
         id
@@ -177,6 +183,7 @@ export const SEARCH_PROJECTS = gql`
   query SearchProjectNames($query: String!) {
     searchProjects(query: $query) {
       id
+      key
       name
     }
   }

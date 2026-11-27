@@ -1,46 +1,65 @@
+import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
+import { IsChapterLeaderDocument } from 'types/__generated__/chapterQueries.generated'
 import {
+  IsMenteeDocument,
   IsMentorDocument,
   IsProjectLeaderDocument,
 } from 'types/__generated__/mentorshipQueries.generated'
 import { ExtendedProfile, ExtendedSession } from 'types/auth'
 import { IS_GITHUB_AUTH_ENABLED, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from 'utils/env.server'
 
-async function checkIfProjectLeader(login: string): Promise<boolean> {
+// Shared login-time role check: run the query and extract the boolean, wrapping
+// failures with a role-specific message so query options and error handling stay
+// in one place for all roles.
+async function checkRole<TData>(
+  document: TypedDocumentNode<TData, { login: string }>,
+  login: string,
+  getValue: (data: TData | null | undefined) => boolean,
+  roleLabel: string
+): Promise<boolean> {
   try {
     const client = await apolloClient
     const { data } = await client.query({
-      query: IsProjectLeaderDocument,
+      query: document,
       variables: { login },
       fetchPolicy: 'no-cache',
     })
-    return data?.isProjectLeader ?? false
+    return getValue(data)
   } catch (err) {
     throw new Error(
-      `Failed to fetch project leader status: ${err instanceof Error ? err.message : String(err)}`,
+      `Failed to fetch ${roleLabel} status: ${err instanceof Error ? err.message : String(err)}`,
       { cause: err }
     )
   }
 }
 
-async function checkIfMentor(login: string): Promise<boolean> {
-  try {
-    const client = await apolloClient
-    const { data } = await client.query({
-      query: IsMentorDocument,
-      variables: { login },
-      fetchPolicy: 'no-cache',
-    })
-    return data?.isMentor ?? false
-  } catch (err) {
-    throw new Error(
-      `Failed to fetch mentor status: ${err instanceof Error ? err.message : String(err)}`,
-      { cause: err }
-    )
-  }
-}
+const checkIfProjectLeader = (login: string) =>
+  checkRole(
+    IsProjectLeaderDocument,
+    login,
+    (data) => data?.isProjectLeader ?? false,
+    'project leader'
+  )
+
+const checkIfChapterLeader = (login: string) =>
+  checkRole(
+    IsChapterLeaderDocument,
+    login,
+    (data) => data?.isChapterLeader ?? false,
+    'chapter leader'
+  )
+
+// A failed chapter leader lookup is retried on later session reads, at most this often.
+const CHAPTER_LEADER_RETRY_INTERVAL_MS = 5 * 60 * 1000
+
+const checkIfMentor = (login: string) =>
+  checkRole(IsMentorDocument, login, (data) => data?.isMentor ?? false, 'mentor')
+
+const checkIfMentee = (login: string) =>
+  checkRole(IsMenteeDocument, login, (data) => data?.isMentee ?? false, 'mentee')
 
 const providers = []
 
@@ -81,10 +100,37 @@ const authOptions: AuthOptions = {
         const login = (profile as ExtendedProfile).login
         token.login = login
 
-        const isLeader = await checkIfProjectLeader(login)
-        const isMentor = await checkIfMentor(login)
+        const [isLeader, isChapterLeader, isMentor, isMentee] = await Promise.all([
+          checkIfProjectLeader(login),
+          // A failed lookup leaves the flag unset so the next session refresh retries it
+          // instead of failing sign-in.
+          checkIfChapterLeader(login).catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to fetch chapter leader status during sign-in:', err)
+            return undefined
+          }),
+          checkIfMentor(login),
+          checkIfMentee(login),
+        ])
         token.isLeader = isLeader
+        token.isChapterLeader = isChapterLeader
         token.isMentor = isMentor
+        token.isMentee = isMentee
+        token.chapterLeaderRetryAt =
+          isChapterLeader === undefined ? Date.now() + CHAPTER_LEADER_RETRY_INTERVAL_MS : undefined
+      } else if (
+        token.login &&
+        typeof token.isChapterLeader !== 'boolean' &&
+        Date.now() >= ((token.chapterLeaderRetryAt as number | undefined) ?? 0)
+      ) {
+        try {
+          token.isChapterLeader = await checkIfChapterLeader(token.login as string)
+          token.chapterLeaderRetryAt = undefined
+        } catch (err) {
+          token.chapterLeaderRetryAt = Date.now() + CHAPTER_LEADER_RETRY_INTERVAL_MS
+          // eslint-disable-next-line no-console
+          console.warn('Failed to fetch chapter leader status; will retry later:', err)
+        }
       }
 
       if (trigger === 'update' && session) {
@@ -101,7 +147,9 @@ const authOptions: AuthOptions = {
         const extSession = session as ExtendedSession
         extSession.user!.login = token.login as string
         extSession.user!.isMentor = token.isMentor as boolean
+        extSession.user!.isMentee = token.isMentee as boolean
         extSession.user!.isLeader = token.isLeader as boolean
+        extSession.user!.isChapterLeader = token.isChapterLeader as boolean
         extSession.user!.isOwaspStaff = token.isOwaspStaff as boolean
       }
       return session

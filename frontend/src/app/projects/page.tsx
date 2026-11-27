@@ -9,6 +9,7 @@ import { getFilteredIcons } from 'utils/utility'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
+import SubscribeButton from 'components/SubscribeButton'
 
 const ProjectsPage = () => {
   const {
@@ -32,7 +33,14 @@ const ProjectsPage = () => {
 
   const router = useRouter()
   const renderProjectCard = (project: Project) => {
-    const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
+    const params: string[] = [
+      'forksCount',
+      'starsCount',
+      'contributorsCount',
+      'openIssuesCount',
+      'openPullRequestsCount',
+      'updatedAt',
+    ]
     const filteredIcons = getFilteredIcons(project, params)
     const handleButtonClick = () => {
       router.push(`/projects/${project.key}`)
@@ -48,6 +56,15 @@ const ProjectsPage = () => {
       <Card
         button={submitButton}
         cardKey={project.key ?? ''}
+        extraAction={
+          project.objectID ? (
+            <SubscribeButton
+              entityType="project"
+              entityId={String(project.objectID)}
+              entityName={project.name}
+            />
+          ) : undefined
+        }
         icons={filteredIcons}
         key={project.key ?? project.name}
         level={level[`${project.level as keyof typeof level}`]}

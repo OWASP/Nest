@@ -1,8 +1,19 @@
-import { withSentryConfig } from '@sentry/nextjs'
+import { existsSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { withSentryConfig } from '@sentry/nextjs/config'
 import type { NextConfig } from 'next'
 
+const frontendDir = path.dirname(fileURLToPath(import.meta.url))
+const repositoryRoot = path.join(frontendDir, '..')
+const repositoryPackageJson = path.join(repositoryRoot, 'package.json')
+
 const forceStandalone = process.env.FORCE_STANDALONE === 'yes'
+const isEnd2End = Boolean(process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL)
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
+const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
+const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
 
 const headers = [
   { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
@@ -18,7 +29,10 @@ const headers = [
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  async headers() {
+  experimental: {
+    useTypeScriptCli: true,
+  },
+  headers() {
     return [
       {
         headers,
@@ -51,27 +65,34 @@ const nextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader
   poweredByHeader: false,
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
-  productionBrowserSourceMaps: true,
+  productionBrowserSourceMaps: (isStaging || isProduction) && !isEnd2End,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   transpilePackages: ['@react-leaflet/core', 'leaflet', 'react-leaflet', 'react-leaflet-cluster'],
+  ...(isEnd2End ? { skipTrailingSlashRedirect: true } : {}),
   rewrites: process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL
-    ? async () => [
-        {
-          source: '/csrf',
-          destination: `${process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL}/csrf/`,
-        },
-        {
-          source: '/graphql',
-          destination: `${process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL}/graphql/`,
-        },
-      ]
+    ? async () => {
+        const backendBase = process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL
+        return [
+          { source: '/csrf/', destination: `${backendBase}/csrf/` },
+          { source: '/graphql/', destination: `${backendBase}/graphql/` },
+        ]
+      }
     : undefined,
-  ...(isLocal && !forceStandalone ? {} : { output: 'standalone' }),
+  ...(isLocal && !forceStandalone
+    ? {}
+    : {
+        output: 'standalone',
+        // GraphQL v17 ESM exports resolve to index.mjs; standalone tracing omits them,
+        // causing SSR failures in Docker/e2e. See also nodeLinker: hoisted in pnpm-workspace.yaml.
+        outputFileTracingIncludes: {
+          '/*': ['./node_modules/graphql/**/*.mjs', './node_modules/graphql/index.mjs'],
+        },
+      }),
+  ...(existsSync(repositoryPackageJson) ? { outputFileTracingRoot: repositoryRoot } : {}),
 }
 
 export default withSentryConfig(nextConfig, {
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-  disableLogger: false,
   org: 'owasp-org',
   project: 'nest-frontend',
   release: {
@@ -79,6 +100,11 @@ export default withSentryConfig(nextConfig, {
   },
   silent: isLocal,
   telemetry: false,
+  webpack: {
+    treeshake: {
+      removeDebugLogging: false,
+    },
+  },
   widenClientFileUpload: true,
   ...(process.env.NEXT_SENTRY_AUTH_TOKEN
     ? {

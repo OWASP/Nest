@@ -1,6 +1,9 @@
 import { createEvent, DateArray, EventAttributes } from 'ics'
 import type { CalendarEvent } from 'types/calendar'
 
+/**
+ * Create a downloadable all-day calendar file covering the event's inclusive dates.
+ */
 export default function getIcsFileUrl(event: CalendarEvent): Promise<string> {
   return new Promise((resolve, reject) => {
     if (globalThis.window === undefined) {
@@ -8,23 +11,20 @@ export default function getIcsFileUrl(event: CalendarEvent): Promise<string> {
       return
     }
     const parseDate = (date: string): DateArray => {
-      // ISO date string
       const d = new Date(date)
-      return [d.getFullYear(), d.getMonth() + 1, d.getDate()]
+      return [d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()]
     }
 
-    const getEndDate = (start: DateArray, end: DateArray): DateArray => {
-      if (start.join('-') === end.join('-')) {
-        const [y, m, d] = end
-        const nextDay = new Date(y, m - 1, d + 1)
-        return [nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate()]
-      }
-      return end
+    /** Convert an inclusive event end date to the exclusive ICS end date. */
+    const getExclusiveEndDate = (end: DateArray): DateArray => {
+      const [y, m, d] = end
+      const nextDay = new Date(Date.UTC(y, m - 1, d + 1))
+      return [nextDay.getUTCFullYear(), nextDay.getUTCMonth() + 1, nextDay.getUTCDate()]
     }
 
     const startArray = parseDate(event.startDate)
     const rawEndArray = parseDate(event.endDate ?? event.startDate)
-    const finalEndArray = getEndDate(startArray, rawEndArray)
+    const finalEndArray = getExclusiveEndDate(rawEndArray)
 
     const eventAttributes: EventAttributes = {
       start: startArray,

@@ -10,6 +10,15 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
+jest.mock('react-apexcharts', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      return <div data-testid="mock-apexcharts">Mock ApexChart</div>
+    },
+  }
+})
+
 const mockRouter = {
   push: jest.fn(),
 }
@@ -19,6 +28,12 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(() => '/chapters/test-chapter'),
   useRouter: jest.fn(() => mockRouter),
 }))
+
+jest.mock('components/SubscribeButton', () => {
+  return function MockSubscribeButton() {
+    return <button data-testid="subscribe-button">Subscribe</button>
+  }
+})
 
 describe.each([
   { theme: 'light', name: 'light' },

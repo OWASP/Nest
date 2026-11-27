@@ -6,6 +6,12 @@ export const GET_CHAPTER_DATA = gql`
       contributionData
       contributionStats
       id
+      entityChannels {
+        id
+        name
+        externalId
+        platform
+      }
       entityLeaders {
         id
         description
@@ -53,5 +59,21 @@ export const GET_CHAPTER_METADATA = gql`
 export const GET_CHAPTER_COUNTRIES = gql`
   query GetChapterCountries {
     chapterCountries
+  }
+`
+
+export const SEARCH_CHAPTERS = gql`
+  query SearchChapterNames($query: String!) {
+    searchChapters(query: $query) {
+      id
+      key
+      name
+    }
+  }
+`
+
+export const IS_CHAPTER_LEADER = gql`
+  query IsChapterLeader($login: String!) {
+    isChapterLeader(login: $login)
   }
 `

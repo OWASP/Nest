@@ -1,4 +1,8 @@
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
+import {
+  extractGraphQLErrors,
+  isForbiddenGraphQLError,
+  isAccessDeniedGraphQLError,
+} from 'utils/helpers/handleGraphQLError'
 
 describe('extractGraphQLErrors', () => {
   describe('ApolloError-like errors with graphQLErrors', () => {
@@ -112,6 +116,45 @@ describe('extractGraphQLErrors', () => {
       expect(result.unmappedErrors).toEqual(['Field-level error without code.'])
     })
 
+    it('maps field errors for additional codes when fieldErrorCodes is provided', () => {
+      const error = {
+        graphQLErrors: [
+          {
+            message: "GitHub user 'ghost' not found.",
+            extensions: { code: 'NOT_FOUND', field: 'recipientLogins' },
+          },
+          {
+            message: 'Forbidden.',
+            extensions: { code: 'FORBIDDEN', field: 'projectKey' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error, new Set(['VALIDATION_ERROR', 'NOT_FOUND']))
+
+      expect(result.hasValidationErrors).toBe(true)
+      expect(result.validationErrors).toEqual({
+        recipientLogins: "GitHub user 'ghost' not found.",
+      })
+      expect(result.unmappedErrors).toEqual(['Forbidden.'])
+    })
+
+    it('does not map NOT_FOUND field errors by default', () => {
+      const error = {
+        graphQLErrors: [
+          {
+            message: "GitHub user 'ghost' not found.",
+            extensions: { code: 'NOT_FOUND', field: 'recipientLogins' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.unmappedErrors).toEqual(["GitHub user 'ghost' not found."])
+    })
+
     it('separates validation errors from unmapped errors', () => {
       const error = {
         graphQLErrors: [
@@ -198,5 +241,127 @@ describe('extractGraphQLErrors', () => {
       expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual([])
     })
+  })
+
+  describe('Apollo Client v4 CombinedGraphQLErrors (errors property)', () => {
+    it('extracts validation errors from errors array', () => {
+      const error = {
+        errors: [
+          {
+            message: 'A program with this name already exists.',
+            extensions: { code: 'VALIDATION_ERROR', field: 'name' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(true)
+      expect(result.validationErrors).toEqual({
+        name: 'A program with this name already exists.',
+      })
+      expect(result.unmappedErrors).toEqual([])
+    })
+
+    it('puts non-validation errors into unmappedErrors', () => {
+      const error = {
+        errors: [
+          {
+            message: 'Internal server error.',
+            extensions: { code: 'INTERNAL_ERROR' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
+      expect(result.unmappedErrors).toEqual(['Internal server error.'])
+    })
+
+    it('handles empty errors array', () => {
+      const error = { errors: [] }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
+      expect(result.unmappedErrors).toEqual([])
+    })
+  })
+})
+
+describe('isForbiddenGraphQLError', () => {
+  it('returns true when graphQLErrors includes FORBIDDEN', () => {
+    const error = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+    }
+    expect(isForbiddenGraphQLError(error)).toBe(true)
+  })
+
+  it('returns true when errors array includes FORBIDDEN (Apollo combined shape)', () => {
+    const error = {
+      errors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+    }
+    expect(isForbiddenGraphQLError(error)).toBe(true)
+  })
+
+  it('returns true if any nested error is FORBIDDEN', () => {
+    const error = {
+      graphQLErrors: [
+        { message: 'Other', extensions: { code: 'BAD_REQUEST' } },
+        { message: 'No access', extensions: { code: 'FORBIDDEN' } },
+      ],
+    }
+    expect(isForbiddenGraphQLError(error)).toBe(true)
+  })
+
+  it('returns false when GraphQL errors exist but none are FORBIDDEN', () => {
+    const error = {
+      graphQLErrors: [{ message: 'Not found', extensions: { code: 'NOT_FOUND' } }],
+    }
+    expect(isForbiddenGraphQLError(error)).toBe(false)
+  })
+
+  it('returns false when there are no GraphQL error arrays', () => {
+    expect(isForbiddenGraphQLError(new Error('network'))).toBe(false)
+    expect(isForbiddenGraphQLError(null)).toBe(false)
+    expect(isForbiddenGraphQLError({})).toBe(false)
+  })
+})
+
+describe('isAccessDeniedGraphQLError', () => {
+  it('returns true for FORBIDDEN via GraphQL errors', () => {
+    expect(
+      isAccessDeniedGraphQLError({
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      })
+    ).toBe(true)
+  })
+
+  it('returns true for UNAUTHENTICATED', () => {
+    expect(
+      isAccessDeniedGraphQLError({
+        graphQLErrors: [{ message: 'Sign in', extensions: { code: 'UNAUTHENTICATED' } }],
+      })
+    ).toBe(true)
+  })
+
+  it('returns true when networkError status is 401 or 403', () => {
+    expect(
+      isAccessDeniedGraphQLError({ networkError: { statusCode: 401, message: 'Unauthorized' } })
+    ).toBe(true)
+    expect(
+      isAccessDeniedGraphQLError({ networkError: { statusCode: 403, message: 'Forbidden' } })
+    ).toBe(true)
+  })
+
+  it('returns false for unrelated GraphQL errors', () => {
+    expect(
+      isAccessDeniedGraphQLError({
+        graphQLErrors: [{ message: 'Bad', extensions: { code: 'INTERNAL_SERVER_ERROR' } }],
+      })
+    ).toBe(false)
   })
 })

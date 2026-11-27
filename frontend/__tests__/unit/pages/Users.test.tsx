@@ -65,7 +65,14 @@ describe('UsersPage Component', () => {
 
     // Check loaded state
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for members...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for members...')
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -85,6 +92,18 @@ describe('UsersPage Component', () => {
 
     const viewButtons = screen.getAllByText('View Details')
     expect(viewButtons).toHaveLength(2)
+  })
+
+  test('adds mobile-only spacing between search and the user grid', async () => {
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+    })
+
+    // SearchBar has no vertical padding below md, so the grid provides the gap itself
+    const grid = screen.getByText('John Doe').closest('.grid')
+    expect(grid).toHaveClass('mt-4', 'md:mt-0')
   })
 
   test('displays "No Users found" when there are no users', async () => {

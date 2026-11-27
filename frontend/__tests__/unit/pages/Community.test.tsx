@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import React from 'react'
 import CommunityPage from 'app/community/page'
 
@@ -62,6 +62,7 @@ jest.mock('utils/communityData', () => ({
     {
       title: 'Test Engagement',
       description: 'Test Engagement Description',
+      href: '/test-engagement',
     },
   ],
   journeySteps: [
@@ -103,7 +104,7 @@ describe('CommunityPage', () => {
     expect(screen.getByText('Test Description')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Test Chapter/i })
     expect(link).toHaveAttribute('href', '/test-chapter')
-    expect(screen.getByTestId('icon-chevron-right')).toBeInTheDocument()
+    expect(within(link).getByTestId('icon-chevron-right')).toBeInTheDocument()
   })
 
   test('renders Ways to Engage section correctly', () => {
@@ -149,5 +150,26 @@ describe('CommunityPage', () => {
       'href',
       '/contribute'
     )
+  })
+})
+
+describe('Community engagement links', () => {
+  it('renders internal links without rel or target attributes', () => {
+    render(<CommunityPage />)
+    const internalLink = screen.getByRole('link', { name: /contributing to a project/i })
+    expect(internalLink).not.toHaveAttribute('rel')
+    expect(internalLink).not.toHaveAttribute('target')
+  })
+
+  it('renders external links with rel and target attributes', () => {
+    render(<CommunityPage />)
+    const externalLinks = screen.getAllByRole('link').filter((l) => {
+      const href = l.getAttribute('href') ?? ''
+      return href.startsWith('https')
+    })
+    externalLinks.forEach((link) => {
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(link).toHaveAttribute('target', '_blank')
+    })
   })
 })

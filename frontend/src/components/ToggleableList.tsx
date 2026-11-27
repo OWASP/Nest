@@ -12,6 +12,7 @@ const ToggleableList = ({
   icon,
   limit = 10,
   isDisabled = false,
+  className = '',
 }: {
   entityKey: string
   items: string[]
@@ -19,6 +20,7 @@ const ToggleableList = ({
   limit?: number
   icon?: IconType
   isDisabled?: boolean
+  className?: string
 }) => {
   const [showAll, setShowAll] = useState(false)
   const router = useRouter()
@@ -34,7 +36,7 @@ const ToggleableList = ({
     }
   }
   return (
-    <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+    <div className={`rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
       <h2 className="mb-4 text-2xl font-semibold">
         <div className="flex items-center">
           <div className="flex flex-row items-center gap-2">

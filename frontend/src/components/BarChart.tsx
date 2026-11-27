@@ -3,6 +3,7 @@ import { useTheme } from 'next-themes'
 import React from 'react'
 import type { IconType } from 'react-icons'
 import { ApexBarChartDataSeries } from 'types/healthMetrics'
+import { toApexTooltipTheme } from 'utils/toApexTooltipTheme'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
@@ -19,7 +20,7 @@ const BarChart: React.FC<{
   requirements: number[]
   reverseColors?: boolean[]
 }> = ({ title, days, icon, requirements, labels, reverseColors }) => {
-  const { theme } = useTheme()
+  const { theme, resolvedTheme } = useTheme()
   let themeColor = '#1E1E2C'
   let redColor = '#FF7875'
   let greenColor = '#73D13D'
@@ -67,7 +68,7 @@ const BarChart: React.FC<{
             },
           },
           tooltip: {
-            theme: theme,
+            theme: toApexTooltipTheme(resolvedTheme),
           },
           dataLabels: {
             formatter: (
@@ -76,27 +77,15 @@ const BarChart: React.FC<{
             ): string => {
               const idx = opts?.dataPointIndex ?? 0
               const requirement = requirements[idx]
+              const displayVal: string | number = Array.isArray(val) ? val[0] : val
               if (requirement !== undefined) {
-                const displayVal = typeof val === 'number' ? val : Array.isArray(val) ? val[0] : val
                 return `${displayVal} / ${requirement}`
               }
-              return typeof val === 'number'
-                ? String(val)
-                : Array.isArray(val)
-                  ? String(val[0])
-                  : String(val)
+              return String(displayVal)
             },
           },
           colors: [
-            function ({
-              value,
-              dataPointIndex,
-              _,
-            }: {
-              value: number
-              dataPointIndex: number
-              _: unknown
-            }) {
+            function ({ value, dataPointIndex }: { value: number; dataPointIndex: number }) {
               const requirement = requirements[dataPointIndex]
               if (reverseColors?.[dataPointIndex]) {
                 if (value < requirement * 0.75) {

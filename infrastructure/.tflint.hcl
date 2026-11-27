@@ -34,6 +34,8 @@ rule "terraform_naming_convention" {
 
 rule "terraform_required_providers" {
   enabled = true
+  source  = true
+  version = true
 }
 
 rule "terraform_required_version" {

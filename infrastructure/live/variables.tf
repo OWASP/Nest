@@ -10,6 +10,39 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
+variable "auto_scaling_cpu_target" {
+  description = "Target average CPU utilization percentage for ECS service auto scaling."
+  type        = number
+  default     = 70
+
+  validation {
+    condition     = var.auto_scaling_cpu_target >= 1 && var.auto_scaling_cpu_target <= 100
+    error_message = "auto_scaling_cpu_target must be between 1 and 100."
+  }
+}
+
+variable "auto_scaling_scale_in_cooldown" {
+  description = "Cooldown period in seconds after an ECS service scale-in activity."
+  type        = number
+  default     = 300
+
+  validation {
+    condition     = var.auto_scaling_scale_in_cooldown >= 0
+    error_message = "auto_scaling_scale_in_cooldown must be >= 0."
+  }
+}
+
+variable "auto_scaling_scale_out_cooldown" {
+  description = "Cooldown period in seconds after an ECS service scale-out activity."
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = var.auto_scaling_scale_out_cooldown >= 0
+    error_message = "auto_scaling_scale_out_cooldown must be >= 0."
+  }
+}
+
 variable "backend_desired_count" {
   description = "The desired number of backend tasks."
   type        = number
@@ -45,6 +78,12 @@ variable "backend_use_fargate_spot" {
   default     = true
 }
 
+variable "create_shared_data_bucket" {
+  description = "Whether to create the shared public data S3 bucket."
+  type        = bool
+  default     = false
+}
+
 variable "db_allocated_storage" {
   description = "The allocated storage for the RDS database in GB."
   type        = number
@@ -66,7 +105,7 @@ variable "db_deletion_protection" {
 variable "db_engine_version" {
   description = "The version of the PostgreSQL engine."
   type        = string
-  default     = "16.10"
+  default     = "16.13"
 }
 
 variable "db_instance_class" {
@@ -127,6 +166,12 @@ variable "django_configuration" {
   type        = string
 }
 
+variable "django_release_version" {
+  description = "The Django release version."
+  type        = string
+  default     = "0.0.0"
+}
+
 variable "django_settings_module" {
   description = "The location of the Django settings module to use (e.g., settings.staging, settings.production)."
   type        = string
@@ -137,15 +182,15 @@ variable "domain_name" {
   type        = string
 }
 
+variable "enable_additional_parameters" {
+  description = "Whether to enable additional parameters (e.g. for production)."
+  type        = bool
+  default     = false
+}
+
 variable "enable_cron_tasks" {
   description = "Whether to enable scheduled cron tasks."
   type        = bool
-}
-
-variable "enable_nat_gateway" {
-  description = "Whether to enable a NAT Gateway."
-  type        = bool
-  default     = true
 }
 
 variable "enable_rds_proxy" {
@@ -310,6 +355,12 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
+}
+
+variable "slack_bot_token_suffix" {
+  description = "The Suffix for the Slack bot token."
+  type        = string
+  default     = "T04T40NHX"
 }
 
 variable "tasks_use_fargate_spot" {

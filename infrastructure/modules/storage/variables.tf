@@ -4,6 +4,12 @@ variable "common_tags" {
   default     = {}
 }
 
+variable "create_shared_data_bucket" {
+  description = "Whether to create the shared public data S3 bucket."
+  type        = bool
+  default     = false
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string

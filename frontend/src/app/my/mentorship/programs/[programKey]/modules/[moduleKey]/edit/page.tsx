@@ -4,13 +4,13 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -37,11 +37,29 @@ const EditModulePage = () => {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
   })
+
+  const currentUserLogin = sessionData?.user?.login
+
+  const isAdmin = useMemo(
+    () =>
+      data?.managementProgram?.admins?.some(
+        (admin: { login: string }) => admin.login === currentUserLogin
+      ),
+    [data?.managementProgram?.admins, currentUserLogin]
+  )
+
+  const isMentor = useMemo(
+    () =>
+      data?.managementModule?.mentors?.some(
+        (mentor: { login: string }) => mentor.login === currentUserLogin
+      ),
+    [data?.managementModule?.mentors, currentUserLogin]
+  )
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
@@ -50,22 +68,13 @@ const EditModulePage = () => {
 
     if (
       queryError ||
-      !data?.getProgram ||
-      !data?.getModule ||
+      !data?.managementProgram ||
+      !data?.managementModule ||
       sessionStatus === 'unauthenticated'
     ) {
       setAccessStatus('denied')
       return
     }
-
-    const currentUserLogin = sessionData?.user?.login
-    const isAdmin = data.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === currentUserLogin
-    )
-
-    const isMentor = data.getModule.mentors?.some(
-      (mentor: { login: string }) => mentor.login === currentUserLogin
-    )
 
     if (isAdmin || isMentor) {
       setAccessStatus('allowed')
@@ -80,17 +89,18 @@ const EditModulePage = () => {
       })
       setTimeout(() => router.replace(`/my/mentorship/programs/${programKey}`), 1500)
     }
-  }, [sessionStatus, sessionData, queryLoading, data, programKey, queryError, router])
+  }, [sessionStatus, queryLoading, queryError, data, programKey, router, isAdmin, isMentor])
 
   useEffect(() => {
-    if (accessStatus === 'allowed' && data?.getModule) {
-      const m = data.getModule
+    if (accessStatus === 'allowed' && data?.managementModule) {
+      const m = data.managementModule
       setFormData({
         description: m.description || '',
         domains: (m.domains || []).join(', '),
         endedAt: formatDateForInput(m.endedAt),
         experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
         labels: (m.labels || []).join(', '),
+        menteeCanManageDeadlines: m.menteeCanManageDeadlines ?? false,
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
         name: m.name || '',
         projectId: m.projectId || '',
@@ -107,11 +117,6 @@ const EditModulePage = () => {
     setValidationErrors({})
 
     try {
-      const currentUserLogin = sessionData?.user?.login
-      const isAdmin = data?.getProgram?.admins?.some(
-        (admin: { login: string }) => admin.login === currentUserLogin
-      )
-
       const input: UpdateModuleInput = {
         description: formData!.description,
         domains: parseCommaSeparated(formData!.domains),
@@ -119,6 +124,7 @@ const EditModulePage = () => {
         experienceLevel: formData!.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
         labels: parseCommaSeparated(formData!.labels),
+        menteeCanManageDeadlines: formData!.menteeCanManageDeadlines,
         name: formData!.name,
         programKey: programKey,
         projectId: formData!.projectId,
@@ -133,7 +139,9 @@ const EditModulePage = () => {
 
       const result = await updateModule({
         awaitRefetchQueries: true,
-        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        refetchQueries: [
+          { query: GetManagementProgramAndModulesDocument, variables: { programKey } },
+        ],
         variables: { input },
       })
       const updatedModuleKey = result.data?.updateModule?.key || moduleKey
@@ -184,12 +192,17 @@ const EditModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       submitText="Save"
-      isEdit
       validationErrors={validationErrors}
       minDate={
-        data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
+        data?.managementProgram?.startedAt
+          ? formatDateForInput(data.managementProgram.startedAt)
+          : undefined
       }
-      maxDate={data?.getProgram?.endedAt ? formatDateForInput(data.getProgram.endedAt) : undefined}
+      maxDate={
+        data?.managementProgram?.endedAt
+          ? formatDateForInput(data.managementProgram.endedAt)
+          : undefined
+      }
     />
   )
 }

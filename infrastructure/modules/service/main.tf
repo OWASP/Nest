@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.14.0"
+  required_version = "~> 1.17.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.71.0"
     }
   }
 }
@@ -15,7 +15,14 @@ locals {
   container_definition = merge(
     {
       essential = true
-      image     = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+      healthCheck = {
+        command     = ["CMD-SHELL", "wget --spider http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1"]
+        interval    = 30
+        retries     = 3
+        startPeriod = 100
+        timeout     = 5
+      }
+      image = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -115,6 +122,10 @@ resource "aws_ecs_task_definition" "main" {
   memory                   = var.container_memory
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
+  runtime_platform {
+    cpu_architecture        = "ARM64"
+    operating_system_family = "LINUX"
+  }
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-task-def"
   })
@@ -145,9 +156,9 @@ resource "aws_ecs_service" "main" {
   }
 
   network_configuration {
-    assign_public_ip = var.assign_public_ip
+    assign_public_ip = false
     security_groups  = [var.security_group_id]
-    subnets          = var.subnet_ids
+    subnets          = var.private_subnet_ids
   }
 }
 
@@ -169,9 +180,9 @@ resource "aws_appautoscaling_policy" "cpu" {
   service_namespace  = aws_appautoscaling_target.main[0].service_namespace
 
   target_tracking_scaling_policy_configuration {
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 60
-    target_value       = 70.0
+    scale_in_cooldown  = var.auto_scaling_scale_in_cooldown
+    scale_out_cooldown = var.auto_scaling_scale_out_cooldown
+    target_value       = var.auto_scaling_cpu_target
 
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"

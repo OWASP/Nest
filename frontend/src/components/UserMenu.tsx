@@ -1,5 +1,6 @@
 'use client'
 
+import { useLazyQuery } from '@apollo/client/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
@@ -7,6 +8,8 @@ import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { FaGithub } from 'react-icons/fa'
+
+import { GetMyCertificateDocument } from 'types/__generated__/certificateQueries.generated'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -19,7 +22,19 @@ export default function UserMenu({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
   const isProjectLeader = session?.user?.isLeader
+  const isChapterLeader = session?.user?.isChapterLeader
+  const isMentor = session?.user?.isMentor
+  const isMentee = session?.user?.isMentee
   const isOwaspStaff = session?.user?.isOwaspStaff
+  // Anyone involved in mentorship — as a leader, mentor, or mentee — gets the entry point.
+  const canAccessMentorship = isProjectLeader || isMentor || isMentee
+
+  // Refresh on every open so certificates issued or revoked during the session show up.
+  const [getMyCertificate, { data: certificateData }] = useLazyQuery(GetMyCertificateDocument, {
+    fetchPolicy: 'cache-and-network',
+  })
+  const hasCertificate =
+    !!certificateData?.myCertificates && certificateData.myCertificates.length > 0
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -66,7 +81,12 @@ export default function UserMenu({
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (!isOpen && status === 'authenticated') {
+            getMyCertificate()
+          }
+          setIsOpen((prev) => !prev)
+        }}
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
@@ -89,7 +109,7 @@ export default function UserMenu({
           id={dropdownId}
           className="absolute top-full right-0 z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
-          {isProjectLeader && (
+          {canAccessMentorship && (
             <Link
               href="/my/mentorship"
               className={userMenuItemClasses}
@@ -108,6 +128,30 @@ export default function UserMenu({
               Project Health Dashboard
             </Link>
           )}
+
+          {hasCertificate && (
+            <Link
+              href="/my/certificates"
+              className={userMenuItemClasses}
+              onClick={() => setIsOpen(false)}
+            >
+              My Certificates
+            </Link>
+          )}
+
+          {(isProjectLeader || isChapterLeader) && (
+            <Link
+              href="/my/certificates/issue"
+              className={userMenuItemClasses}
+              onClick={() => setIsOpen(false)}
+            >
+              Issue Certificates
+            </Link>
+          )}
+
+          <Link href="/settings" className={userMenuItemClasses} onClick={() => setIsOpen(false)}>
+            Settings
+          </Link>
 
           <button
             type="button"

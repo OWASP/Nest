@@ -53,14 +53,14 @@ output "frontend_url" {
   value       = "https://${var.domain_name}"
 }
 
-output "nat_gateway_enabled" {
-  description = "Whether a NAT Gateway is enabled."
-  value       = var.enable_nat_gateway
-}
-
 output "private_subnet_ids" {
   description = "A list of private subnet IDs."
   value       = module.networking.private_subnet_ids
+}
+
+output "shared_data_bucket_name" {
+  description = "S3 bucket for shared public data (e.g. nest.dump)."
+  value       = module.storage.shared_data_bucket_name
 }
 
 output "tasks_cluster_name" {
@@ -74,6 +74,6 @@ output "tasks_security_group_id" {
 }
 
 output "tasks_subnet_ids" {
-  description = "A list of public or private subnet IDs for ECS tasks."
-  value       = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  description = "A list of private subnet IDs for ECS tasks."
+  value       = module.networking.private_subnet_ids
 }

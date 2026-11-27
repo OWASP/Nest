@@ -1,0 +1,50 @@
+name: CodeQL Actions
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - feature/**
+      - main
+    paths:
+      - .github/actions/**
+      - .github/workflows/**
+  push:
+    branches:
+      - main
+    paths:
+      - .github/actions/**
+      - .github/workflows/**
+
+concurrency:
+  cancel-in-progress: true
+  group: code-ql-actions-${{ github.ref }}
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  run-code-ql:
+    name: CodeQL Actions
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066  # v4.39.3
+        with:
+          languages: actions
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066  # v4.39.3
+        with:
+          category: /language:actions
+    timeout-minutes: 5

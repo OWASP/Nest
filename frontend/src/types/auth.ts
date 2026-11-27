@@ -2,6 +2,7 @@ import type { Session } from 'next-auth'
 
 export type ExtendedProfile = {
   isLeader?: boolean
+  isChapterLeader?: boolean
   login: string
 }
 
@@ -12,6 +13,8 @@ export type ExtendedSession = Session & {
     expires?: string
     image?: string
     isLeader?: boolean
+    isChapterLeader?: boolean
+    isMentee?: boolean
     isMentor?: boolean
     isOwaspStaff?: boolean
     login?: string
@@ -23,6 +26,7 @@ export function hasExtendedUser(session: Session | null): session is Session & {
   user: {
     login?: string
     isLeader?: boolean
+    isMentor?: boolean
   }
 } {
   return !!session && !!session.user

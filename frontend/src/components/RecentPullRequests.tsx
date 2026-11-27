@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import React, { JSX } from 'react'
 import { FaCalendar, FaCodePullRequest, FaFolderOpen } from 'react-icons/fa6'
 import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
@@ -10,21 +10,53 @@ import { TruncatedText } from 'components/TruncatedText'
 interface RecentPullRequestsProps {
   data: PullRequest[]
   showAvatar?: boolean
+  showBadge?: boolean
+  showSingleColumn?: boolean
+  bare?: boolean
 }
 
-const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvatar = true }) => {
+const getBadgeClass = (pr: PullRequest) => {
+  if (pr.mergedAt) {
+    return 'bg-[#8657E5] text-white'
+  }
+  if (pr.state === 'open') {
+    return 'bg-[#238636] text-white'
+  }
+  return 'bg-[#DA3633] text-white'
+}
+
+const getPullRequestBadge = (pr: PullRequest): JSX.Element => (
+  <span className={`ml-2 shrink-0 rounded-full px-2 py-1 text-xs font-medium ${getBadgeClass(pr)}`}>
+    {pr.mergedAt ? 'merged' : (pr.state ?? 'unknown')}
+  </span>
+)
+
+const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
+  data,
+  showAvatar = true,
+  showBadge = false,
+  showSingleColumn = true,
+  bare = false,
+}) => {
   const router = useRouter()
 
   return (
     <ItemCardList
       title={
-        <div className="flex items-center gap-2">
-          <AnchorTitle title="Recent Pull Requests" />
-        </div>
+        bare ? undefined : (
+          <div className="flex items-center gap-2">
+            <AnchorTitle title="Recent Pull Requests" />
+          </div>
+        )
       }
       data={data}
       icon={FaCodePullRequest}
       showAvatar={showAvatar}
+      showSingleColumn={showSingleColumn}
+      bare={bare}
+      renderBadge={
+        showBadge ? (item) => getPullRequestBadge(item as unknown as PullRequest) : undefined
+      }
       renderDetails={(item) => (
         <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
           <div className="mr-4 flex items-center">

@@ -14,12 +14,6 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "enable_nat_gateway" {
-  description = "Whether to enable a NAT Gateway."
-  type        = bool
-  default     = true
-}
-
 variable "enable_vpc_cloudwatch_logs_endpoint" {
   description = "Whether to create CloudWatch Logs VPC endpoint."
   type        = bool

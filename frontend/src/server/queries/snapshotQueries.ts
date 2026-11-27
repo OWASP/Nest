@@ -1,14 +1,61 @@
 import { gql } from '@apollo/client'
 
+export const SNAPSHOT_PULL_REQUEST_FIELDS = gql`
+  fragment SnapshotPullRequestFields on PullRequestNode {
+    id
+    author {
+      avatarUrl
+      id
+      login
+      name
+    }
+    createdAt
+    mergedAt
+    organizationName
+    repositoryName
+    state
+    title
+    url
+  }
+`
+
+export const SNAPSHOT_ISSUE_FIELDS = gql`
+  fragment SnapshotIssueFields on IssueNode {
+    id
+    author {
+      avatarUrl
+      id
+      login
+      name
+    }
+    createdAt
+    isMerged
+    organizationName
+    repositoryName
+    state
+    title
+    url
+  }
+`
+
 export const GET_SNAPSHOT_DETAILS = gql`
-  query GetSnapshotDetails($key: String!) {
+  query GetSnapshotDetails(
+    $key: String!
+    $prLimit: Int = 6
+    $prOffset: Int = 0
+    $issueLimit: Int = 6
+    $issueOffset: Int = 0
+    $eventsLimit: Int = 100
+    $postsLimit: Int = 100
+    $usersLimit: Int = 100
+  ) {
     snapshot(key: $key) {
       id
       endAt
       key
       startAt
       title
-      newReleases {
+      releases {
         id
         name
         organizationName
@@ -23,7 +70,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
           name
         }
       }
-      newProjects {
+      projects {
         id
         key
         name
@@ -41,7 +88,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
           name
         }
       }
-      newChapters {
+      chapters {
         id
         key
         name
@@ -64,6 +111,92 @@ export const GET_SNAPSHOT_DETAILS = gql`
         }
         isActive
       }
+      events(limit: $eventsLimit) {
+        id
+        category
+        endDate
+        key
+        name
+        startDate
+        suggestedLocation
+        summary
+        url
+      }
+      posts(limit: $postsLimit) {
+        id
+        authorImageUrl
+        authorName
+        publishedAt
+        title
+        url
+      }
+      pullRequests(limit: $prLimit, offset: $prOffset) {
+        ...SnapshotPullRequestFields
+      }
+      issues(limit: $issueLimit, offset: $issueOffset) {
+        ...SnapshotIssueFields
+      }
+      users(limit: $usersLimit) {
+        id
+        avatarUrl
+        login
+        name
+        createdAt
+      }
+    }
+  }
+  ${SNAPSHOT_PULL_REQUEST_FIELDS}
+  ${SNAPSHOT_ISSUE_FIELDS}
+`
+
+export const SNAPSHOT_FEEDBACK_FIELDS = gql`
+  fragment SnapshotFeedbackFields on SnapshotFeedbackNode {
+    id
+    avatarUrl
+    comment
+    createdAt
+    login
+    rating
+    updatedAt
+    username
+  }
+`
+
+export const GET_SNAPSHOT_FEEDBACK = gql`
+  query GetSnapshotFeedback($key: String!, $limit: Int = 10, $offset: Int = 0) {
+    snapshot(key: $key) {
+      id
+      averageRating
+      feedbackCount
+      myFeedback {
+        ...SnapshotFeedbackFields
+      }
+      feedback(limit: $limit, offset: $offset) {
+        ...SnapshotFeedbackFields
+      }
+    }
+  }
+  ${SNAPSHOT_FEEDBACK_FIELDS}
+`
+
+export const SUBMIT_SNAPSHOT_FEEDBACK = gql`
+  mutation SubmitSnapshotFeedback($inputData: SubmitSnapshotFeedbackInput!) {
+    submitSnapshotFeedback(inputData: $inputData) {
+      ok
+      message
+      feedback {
+        ...SnapshotFeedbackFields
+      }
+    }
+  }
+  ${SNAPSHOT_FEEDBACK_FIELDS}
+`
+
+export const DELETE_SNAPSHOT_FEEDBACK = gql`
+  mutation DeleteSnapshotFeedback($snapshotKey: String!) {
+    deleteSnapshotFeedback(snapshotKey: $snapshotKey) {
+      ok
+      message
     }
   }
 `
@@ -77,14 +210,78 @@ export const GET_SNAPSHOT_DETAILS_METADATA = gql`
   }
 `
 
+export const GET_SNAPSHOT_PULL_REQUESTS = gql`
+  query GetSnapshotPullRequests($key: String!, $limit: Int = 6, $offset: Int = 0) {
+    snapshot(key: $key) {
+      id
+      pullRequests(limit: $limit, offset: $offset) {
+        ...SnapshotPullRequestFields
+      }
+    }
+  }
+  ${SNAPSHOT_PULL_REQUEST_FIELDS}
+`
+
+export const GET_SNAPSHOT_ISSUES = gql`
+  query GetSnapshotIssues($key: String!, $limit: Int = 6, $offset: Int = 0) {
+    snapshot(key: $key) {
+      id
+      issues(limit: $limit, offset: $offset) {
+        ...SnapshotIssueFields
+      }
+    }
+  }
+  ${SNAPSHOT_ISSUE_FIELDS}
+`
+
+export const GET_SNAPSHOT_ENTITY_PULL_REQUESTS = gql`
+  query GetSnapshotEntityPullRequests(
+    $key: String!
+    $limit: Int = 6
+    $offset: Int = 0
+    $repositoryNames: [String!]
+  ) {
+    snapshot(key: $key) {
+      id
+      pullRequests(limit: $limit, offset: $offset, repositoryNames: $repositoryNames) {
+        ...SnapshotPullRequestFields
+      }
+    }
+  }
+  ${SNAPSHOT_PULL_REQUEST_FIELDS}
+`
+
+export const GET_SNAPSHOT_ENTITY_ISSUES = gql`
+  query GetSnapshotEntityIssues(
+    $key: String!
+    $limit: Int = 6
+    $offset: Int = 0
+    $repositoryNames: [String!]
+  ) {
+    snapshot(key: $key) {
+      id
+      issues(limit: $limit, offset: $offset, repositoryNames: $repositoryNames) {
+        ...SnapshotIssueFields
+      }
+    }
+  }
+  ${SNAPSHOT_ISSUE_FIELDS}
+`
+
 export const GET_COMMUNITY_SNAPSHOTS = gql`
-  query GetCommunitySnapshots {
-    snapshots(limit: 12) {
+  query GetCommunitySnapshots(
+    $limit: Int = 12
+    $offset: Int = 0
+    $startAtGte: String
+    $startAtLte: String
+  ) {
+    snapshots(limit: $limit, offset: $offset, startAtGte: $startAtGte, startAtLte: $startAtLte) {
       id
       key
       title
       startAt
       endAt
     }
+    snapshotsCount(startAtGte: $startAtGte, startAtLte: $startAtLte)
   }
 `

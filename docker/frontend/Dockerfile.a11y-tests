@@ -1,0 +1,27 @@
+FROM node:24.21-alpine3.24@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
+
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    FORCE_COLOR=1 \
+    NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_HOME="/pnpm"
+
+ENV PATH="$PNPM_HOME:$PATH" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000
+
+WORKDIR /app
+
+COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    corepack install && corepack enable pnpm && \
+    pnpm install --frozen-lockfile && \
+    chown node:node /app
+
+COPY __tests__/a11y __tests__/a11y
+COPY __tests__/mockData __tests__/mockData
+COPY __tests__/jest.setup.ts __tests__/jest.setup.ts
+COPY jest.config.ts tsconfig.json ./
+COPY public public
+COPY src src
+
+USER node

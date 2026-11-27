@@ -1,14 +1,14 @@
 terraform {
-  required_version = "~> 1.14.0"
+  required_version = "~> 1.17.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.71.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.8.0"
+      version = "~> 3.9.0"
     }
   }
 }
@@ -39,6 +39,15 @@ resource "aws_iam_policy" "fixtures_read_only" {
     }]
   })
   tags = var.common_tags
+}
+
+module "shared_data_bucket" {
+  count  = var.create_shared_data_bucket ? 1 : 0
+  source = "./modules/shared-data-bucket"
+
+  common_tags = merge(var.common_tags, {
+    Purpose = "owasp-nest-shared-data"
+  })
 }
 
 module "static_bucket" {

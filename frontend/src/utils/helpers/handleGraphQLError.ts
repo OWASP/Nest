@@ -5,20 +5,41 @@ interface GraphQLErrorLike {
   extensions?: Record<string, unknown>
 }
 
-interface ApolloErrorLike {
-  graphQLErrors: GraphQLErrorLike[]
-}
+function getGraphQLErrors(error: unknown): GraphQLErrorLike[] | null {
+  if (typeof error !== 'object' || error === null) return null
 
-function isApolloErrorLike(error: unknown): error is ApolloErrorLike {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
+  let candidates: unknown[] | null = null
+  if ('errors' in error && Array.isArray((error as { errors: unknown }).errors)) {
+    candidates = (error as { errors: unknown[] }).errors
+  } else if (
     'graphQLErrors' in error &&
-    Array.isArray((error as ApolloErrorLike).graphQLErrors)
+    Array.isArray((error as { graphQLErrors: unknown }).graphQLErrors)
+  ) {
+    candidates = (error as { graphQLErrors: unknown[] }).graphQLErrors
+  }
+
+  if (!candidates || candidates.length === 0) return null
+
+  const gqlErrors = candidates.filter(
+    (item): item is GraphQLErrorLike =>
+      typeof item === 'object' &&
+      item !== null &&
+      typeof (item as GraphQLErrorLike).message === 'string'
   )
+
+  return gqlErrors.length > 0 ? gqlErrors : null
 }
 
-export function extractGraphQLErrors(error: unknown): {
+const DEFAULT_FIELD_ERROR_CODES: ReadonlySet<string> = new Set(['VALIDATION_ERROR'])
+
+/**
+ * Split GraphQL errors into field errors (keyed by `extensions.field`) and the rest.
+ * Only errors whose `extensions.code` is in `fieldErrorCodes` are mapped to fields.
+ */
+export function extractGraphQLErrors(
+  error: unknown,
+  fieldErrorCodes: ReadonlySet<string> = DEFAULT_FIELD_ERROR_CODES
+): {
   validationErrors: ValidationErrors
   hasValidationErrors: boolean
   unmappedErrors: string[]
@@ -26,10 +47,15 @@ export function extractGraphQLErrors(error: unknown): {
   const validationErrors: ValidationErrors = {}
   const unmappedErrors: string[] = []
 
-  if (isApolloErrorLike(error)) {
-    for (const gqlError of error.graphQLErrors) {
+  const gqlErrors = getGraphQLErrors(error)
+  if (gqlErrors) {
+    for (const gqlError of gqlErrors) {
       const extensions = gqlError.extensions as { code?: string; field?: unknown } | undefined
-      if (extensions?.code === 'VALIDATION_ERROR' && typeof extensions.field === 'string') {
+      if (
+        typeof extensions?.code === 'string' &&
+        fieldErrorCodes.has(extensions.code) &&
+        typeof extensions.field === 'string'
+      ) {
         validationErrors[extensions.field] = gqlError.message
       } else {
         unmappedErrors.push(gqlError.message)
@@ -41,4 +67,38 @@ export function extractGraphQLErrors(error: unknown): {
 
   const hasValidationErrors = Object.keys(validationErrors).length > 0
   return { validationErrors, hasValidationErrors, unmappedErrors }
+}
+
+/** True when GraphQL errors include extensions.code FORBIDDEN (e.g. mentorship management ACL). */
+export function isForbiddenGraphQLError(error: unknown): boolean {
+  const gqlErrors = getGraphQLErrors(error)
+  return (
+    gqlErrors?.some((e) => (e.extensions as { code?: string } | undefined)?.code === 'FORBIDDEN') ??
+    false
+  )
+}
+
+const ACCESS_DENIED_GQL_CODES = new Set(['UNAUTHENTICATED', 'AUTHENTICATION_REQUIRED'])
+
+/** True for auth/forbidden signals (GraphQL ACL, auth codes, or HTTP 401/403 on networkError). */
+export function isAccessDeniedGraphQLError(error: unknown): boolean {
+  if (isForbiddenGraphQLError(error)) return true
+
+  const gqlErrors = getGraphQLErrors(error)
+  if (
+    gqlErrors?.some((e) =>
+      ACCESS_DENIED_GQL_CODES.has(
+        String((e.extensions as { code?: string } | undefined)?.code ?? '')
+      )
+    )
+  ) {
+    return true
+  }
+
+  if (typeof error === 'object' && error !== null && 'networkError' in error) {
+    const status = (error as { networkError?: { statusCode?: number } }).networkError?.statusCode
+    if (status === 401 || status === 403) return true
+  }
+
+  return false
 }

@@ -1,0 +1,129 @@
+from unittest.mock import MagicMock, patch
+
+import pytest
+from django.test import override_settings
+
+from apps.slack.commands.owasp import Owasp
+
+
+class TestOwaspHandler:
+    @pytest.fixture
+    def mock_command(self):
+        return {
+            "text": "",
+            "user_id": "U123456",
+        }
+
+    @pytest.fixture
+    def mock_client(self):
+        client = MagicMock()
+        client.conversations_open.return_value = {"channel": {"id": "C123456"}}
+        return client
+
+    @pytest.mark.parametrize(
+        ("command_text", "expected_help"),
+        [
+            ("", True),
+            ("-h", True),
+            ("invalid_command", False),
+        ],
+    )
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_owasp_handler(self, mock_client, mock_command, command_text, expected_help):
+        mock_command["text"] = command_text
+        Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        if expected_help:
+            assert any("chapters" in str(block) for block in blocks)
+            assert any("committees" in str(block) for block in blocks)
+            assert any("projects" in str(block) for block in blocks)
+            assert any("report" in str(block) for block in blocks)
+        elif "invalid_command" in command_text:
+            assert any("is not supported" in str(block) for block in blocks)
+
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_owasp_handler_when_commands_disabled(self, mock_client, mock_command):
+        Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        mock_client.chat_postMessage.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "subcommand", ["chapters", "committees", "contribute", "gsoc", "leaders", "projects"]
+    )
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_owasp_subcommands(self, subcommand, mock_client, mock_command):
+        mock_command["text"] = f"{subcommand} test"
+        with patch.object(Owasp, "find_command") as mock_find_command:
+            mock_find_command.return_value = MagicMock(
+                handler=lambda _, command, client, *_args, **_kwargs: client.chat_postMessage(
+                    channel=client.conversations_open(users=command["user_id"])["channel"]["id"],
+                    blocks=[
+                        {
+                            "type": "section",
+                            "text": {"type": "mrkdwn", "text": f"{subcommand} called"},
+                        }
+                    ],
+                )
+            )
+
+            Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
+            blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+            assert blocks[0]["text"]["text"] == f"{subcommand} called"
+
+    def test_find_command_returns_command_instance(self):
+        """Test find_command returns a command instance for valid command."""
+        owasp = Owasp()
+        result = owasp.find_command("chapters")
+        assert result is not None
+        assert result.__class__.__name__ == "Chapters"
+
+    def test_find_command_returns_none_for_empty_string(self):
+        """Test find_command returns None for empty command name."""
+        owasp = Owasp()
+        result = owasp.find_command("")
+        assert result is None
+
+    def test_find_command_returns_none_for_invalid_command(self):
+        """Test find_command returns None for invalid command."""
+        owasp = Owasp()
+        result = owasp.find_command("nonexistent")
+        assert result is None
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_owasp_forwards_respond_to_subcommand(self, mock_client, mock_command):
+        """Test /owasp report forwards Bolt respond when present."""
+        mock_command["text"] = "report"
+        respond = MagicMock()
+        subcommand = MagicMock()
+        subcommand.command_name = "/report"
+        with patch.object(Owasp, "find_command", return_value=subcommand):
+            Owasp().handler(
+                ack=MagicMock(),
+                command=mock_command,
+                client=mock_client,
+                respond=respond,
+            )
+
+        subcommand.handler.assert_called_once()
+        assert subcommand.handler.call_args.kwargs["respond"] is respond
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_owasp_does_not_forward_respond_to_other_subcommands(self, mock_client, mock_command):
+        """Test /owasp non-report subcommands are called without respond."""
+        mock_command["text"] = "chapters"
+        respond = MagicMock()
+        subcommand = MagicMock()
+        subcommand.command_name = "/chapters"
+        with patch.object(Owasp, "find_command", return_value=subcommand):
+            Owasp().handler(
+                ack=MagicMock(),
+                command=mock_command,
+                client=mock_client,
+                respond=respond,
+            )
+
+        subcommand.handler.assert_called_once()
+        args, kwargs = subcommand.handler.call_args
+        assert len(args) == 3
+        assert args[1] is mock_command
+        assert args[2] is mock_client
+        assert "respond" not in kwargs

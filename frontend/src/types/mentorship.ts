@@ -1,6 +1,7 @@
 import type { Contributor } from 'types/contributor'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
+import type { PullRequest } from 'types/pullRequest'
 // eslint-disable-next-line no-restricted-imports
 import { ExperienceLevelEnum, ProgramStatusEnum } from './__generated__/graphql'
 
@@ -51,6 +52,10 @@ export type Module = {
   startedAt: string | number
   status?: ProgramStatusEnum
   tags?: string[] | null
+  recentPullRequests?: PullRequest[]
+  projectId?: string | null
+  projectName?: string | null
+  userRole?: string | null
 }
 
 export type ModuleFormData = {
@@ -64,6 +69,7 @@ export type ModuleFormData = {
   labels: string
   projectName: string
   projectId: string
+  menteeCanManageDeadlines: boolean
   mentorLogins: string
 }
 

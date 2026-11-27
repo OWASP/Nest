@@ -6,6 +6,7 @@ import type { Milestone } from 'types/milestone'
 import type { Organization } from 'types/organization'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+import type { ContributionStats } from 'utils/contributionDataUtils'
 
 export type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
 
@@ -21,13 +22,7 @@ export type Project = {
   createdAt?: string
   contributorsCount?: number
   contributionData?: Record<string, number>
-  contributionStats?: {
-    commits: number
-    issues: number
-    pullRequests: number
-    releases: number
-    total: number
-  }
+  contributionStats?: ContributionStats
   description?: string
   entityLeaders?: Leader[]
   forksCount?: number
@@ -39,7 +34,9 @@ export type Project = {
   leaders?: string[]
   level?: string
   name: string
+  objectID?: string
   openIssuesCount?: number
+  openPullRequestsCount?: number
   organizations?: string
   repositoriesCount?: number
   starsCount?: number

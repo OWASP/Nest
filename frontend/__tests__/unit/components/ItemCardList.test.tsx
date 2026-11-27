@@ -630,7 +630,7 @@ describe('ItemCardList Component', () => {
 
     it('renders custom renderDetails content', () => {
       const customRenderDetails = (item: {
-        createdAt: number
+        createdAt: string
         commentsCount: number
         organizationName: string
         publishedAt: number
@@ -896,7 +896,7 @@ describe('ItemCardList Component', () => {
       const issueNoLogin = {
         ...mockIssue,
         author: authorNoLogin,
-      } as unknown as Issue
+      } as Issue
 
       render(
         <ItemCardList
@@ -1016,6 +1016,44 @@ describe('ItemCardList Component', () => {
       const itemLink = links.find((l) => l.getAttribute('href') === 'https://example.com/empty')
       expect(itemLink).toBeInTheDocument()
       expect(itemLink).toHaveTextContent('')
+    })
+  })
+
+  describe('bare and renderBadge props', () => {
+    it('renders content without the SecondaryCard wrapper when bare is true', () => {
+      render(<ItemCardList {...defaultProps} bare />)
+
+      expect(screen.queryByTestId('secondary-card')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('card-title')).not.toBeInTheDocument()
+      expect(screen.queryByText('Test Title')).not.toBeInTheDocument()
+      expect(screen.getByTestId('truncated-text')).toHaveTextContent('Test Issue Title')
+      expect(screen.getByTestId('render-details')).toBeInTheDocument()
+    })
+
+    it('renders the empty state without the SecondaryCard wrapper when bare is true', () => {
+      render(<ItemCardList {...defaultProps} data={[]} bare />)
+
+      expect(screen.queryByTestId('secondary-card')).not.toBeInTheDocument()
+      expect(screen.getByText('Nothing to display.')).toBeInTheDocument()
+    })
+
+    it('renders renderBadge output beside the item title', () => {
+      const renderBadge = jest.fn(() => <span data-testid="item-badge">open</span>)
+
+      render(<ItemCardList {...defaultProps} renderBadge={renderBadge} />)
+
+      const badge = screen.getByTestId('item-badge')
+      const titleHeading = screen.getByTestId('truncated-text').closest('h3')
+      expect(titleHeading).toBeInTheDocument()
+      expect(titleHeading?.nextElementSibling).toBe(badge)
+      expect(renderBadge).toHaveBeenCalledWith(mockIssue)
+    })
+
+    it('does not render a badge when renderBadge is not provided', () => {
+      render(<ItemCardList {...defaultProps} />)
+
+      const titleHeading = screen.getByTestId('truncated-text').closest('h3')
+      expect(titleHeading?.nextElementSibling).toBeNull()
     })
   })
 })

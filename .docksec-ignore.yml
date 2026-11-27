@@ -1,0 +1,5 @@
+ignores:
+  - id: DS002
+    reason: >-
+      Scanner and tool images run as root. Trivy DS-0002 covers application
+      Dockerfiles that omit USER.
