@@ -144,7 +144,7 @@ class Event(BulkSaveModel, TimestampedModel):
                     end_day = int(day_match.group(1))
                     end_date = start_date
                     if end_day < start_date.day and re.fullmatch(
-                        r"\d{1,2}(?:st|nd|rd|th)?(?:,\s*\d{4})?", end_str
+                        r"\d{1,2}(?:st|nd|rd|th)?(?:,\s*\d{4})?", end_str, re.IGNORECASE
                     ):
                         months_in_year = 12
                         end_date = start_date.replace(
