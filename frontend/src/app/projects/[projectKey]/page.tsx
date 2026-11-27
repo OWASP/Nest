@@ -15,8 +15,8 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
-import { getContributionStats } from 'utils/contributionDataUtils'
-import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getContributionDateRange, getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate } from 'utils/dateFormatter'
 import { getLinkableEntityChannels } from 'utils/entityChannels'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import Contributions from 'components/cards/Contributions'
@@ -33,6 +33,7 @@ import EntityChannelLinks from 'components/EntityChannelLinks'
 import HealthMetrics from 'components/HealthMetrics'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
+import SubscribeButton from 'components/SubscribeButton'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
@@ -125,21 +126,23 @@ const ProjectDetailsPage = () => {
     },
   ]
 
-  const { startDate, endDate } = getDateRange({ years: 1 })
-
   const contributionStats = getContributionStats(
     project.contributionStats,
     project.contributionData
   )
+  const contributionRange = getContributionDateRange(contributionStats, project.contributionData)
 
   return (
     <PageWrapper>
-      <Header
-        title={project.name}
-        isActive={project.isActive}
-        isArchived={false}
-        showHealthMetrics={true}
-      />
+      <div className="flex items-center justify-between">
+        <Header
+          title={project.name}
+          isActive={project.isActive}
+          isArchived={false}
+          showHealthMetrics={true}
+        />
+        <SubscribeButton entityType="project" entityId={project.id} entityName={project.name} />
+      </div>
 
       <Summary summary={project.summary} />
 
@@ -158,8 +161,8 @@ const ProjectDetailsPage = () => {
         }
         contributionStats={contributionStats}
         contributionData={project.contributionData}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={contributionRange?.startDate}
+        endDate={contributionRange?.endDate}
         title="Project Contribution Activity"
       />
 

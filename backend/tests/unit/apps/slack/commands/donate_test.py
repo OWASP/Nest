@@ -67,7 +67,7 @@ class TestDonateHandler:
 
         assert blocks[0]["type"] == "section"
         assert blocks[0]["text"]["type"] == "mrkdwn"
-        assert "501(c)(3) non-profit organization" in blocks[0]["text"]["text"]
+        assert "501(c)(3) not-for-profit organization" in blocks[0]["text"]["text"]
         assert "OWASP Donations Policy" in blocks[0]["text"]["text"]
 
         assert blocks[1]["type"] == "divider"

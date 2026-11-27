@@ -33,6 +33,7 @@ Ghsas
 Golovanova
 Hackbright
 Héllo
+ICN
 Illia
 Ime
 Iyonsi
@@ -97,6 +98,7 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+asvs
 atheris
 attisdropped
 bangbang
@@ -110,6 +112,7 @@ collectstatic
 coraza
 corsheaders
 credentialless
+crp
 csrfguard
 csrfprotector
 csrftoken
@@ -130,6 +133,8 @@ ephemerals
 euo
 facebookexternalhit
 fdp
+fossology
+fossologyscanner
 fpr
 gamesec
 geocoders
@@ -187,15 +192,18 @@ millify
 misconfig
 mkv
 mpim
+mso
 navlink
 nestbot
 ngx
 nohup
 noinput
+nomos
 nosniff
 notab
 nspname
 numfmt
+ojo
 openblas
 opencre
 openstreetmap
@@ -260,6 +268,7 @@ unhover
 unrs
 usefixtures
 vcodec
+vml
 webgoat
 winsrdf
 wrk

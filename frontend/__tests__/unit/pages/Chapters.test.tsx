@@ -45,6 +45,12 @@ jest.mock('@/components/MarkdownWrapper', () => {
   )
 })
 
+jest.mock('components/SubscribeButton', () => {
+  return function MockSubscribeButton() {
+    return <button data-testid="subscribe-button">Subscribe</button>
+  }
+})
+
 describe('ChaptersPage Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { expectBreadCrumbsToBeVisible, getGapBelowSearch } from '@e2e/helpers/expects'
 import { mockUserData } from '@mockData/mockUserData'
 import { test, expect } from '@playwright/test'
 
@@ -51,6 +51,11 @@ test.describe('Users Page', () => {
     await userButton.waitFor({ state: 'visible' })
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('2k')).toBeVisible()
+  })
+
+  test('leaves a 16px gap between search and the first user card', async ({ page }) => {
+    const userCard = page.getByRole('button', { name: 'John Doe' })
+    expect(await getGapBelowSearch(page, userCard)).toBe(16)
   })
 
   test('breadcrumb renders correct segments on /members', async ({ page }) => {

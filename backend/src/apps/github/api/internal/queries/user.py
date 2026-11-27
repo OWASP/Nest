@@ -2,11 +2,21 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Case, IntegerField, Q, Value, When
 
+from apps.common.constants import (
+    MAX_SEARCH_QUERY_LENGTH,
+    MIN_SEARCH_QUERY_LENGTH,
+    SEARCH_LIMIT,
+)
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.user import USER_BADGES_PREFETCH, UserNode
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
+from apps.nest.api.internal.permissions import IsAuthenticated
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -55,4 +65,64 @@ class UserQuery:
             User.objects.filter(has_public_member_page=True, login=login)
             .prefetch_related(USER_BADGES_PREFETCH)
             .first()
+        )
+
+    @strawberry_django.field(permission_classes=[IsAuthenticated])
+    def search_users(self, query: str) -> list[UserNode]:
+        """Search GitHub users by login or name."""
+        cleaned_query = query.strip()
+        if (
+            len(cleaned_query) < MIN_SEARCH_QUERY_LENGTH
+            or len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH
+        ):
+            return []
+
+        # Return the queryset so the optimizer can apply the selected fields' hints.
+        return User.objects.filter(
+            Q(has_public_member_page=True),
+            Q(login__icontains=cleaned_query) | Q(name__icontains=cleaned_query),
+        ).order_by("login")[:SEARCH_LIMIT]
+
+    @strawberry_django.field(permission_classes=[IsAuthenticated])
+    def entity_contributors(
+        self,
+        project_key: str | None = None,
+        chapter_key: str | None = None,
+        limit: int = 15,
+    ) -> list[UserNode]:
+        """Fetch top human contributors for a project or chapter."""
+        clean_project_key = (project_key or "").strip().removeprefix("www-project-")
+        clean_chapter_key = (chapter_key or "").strip().removeprefix("www-chapter-")
+
+        if not clean_project_key and not clean_chapter_key:
+            return []
+
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        logins = [
+            c["login"]
+            for c in RepositoryContributor.get_top_contributors(
+                chapter=clean_chapter_key or None,
+                limit=normalized_limit,
+                project=clean_project_key or None,
+                # Filter opted-out users before the limit so they're replaced by the next
+                # eligible contributors instead of shrinking the result.
+                public_members_only=True,
+            )
+        ]
+        if not logins:
+            return []
+
+        # Keep the contributor ranking in the database ordering and return a queryset so the
+        # optimizer can apply the selected fields' hints. Opted-out users are excluded, as in
+        # the other user resolvers.
+        contributor_rank = Case(
+            *(When(login=login, then=Value(rank)) for rank, login in enumerate(logins)),
+            output_field=IntegerField(),
+        )
+        return (
+            User.objects.filter(has_public_member_page=True, login__in=logins)
+            .annotate(contributor_rank=contributor_rank)
+            .order_by("contributor_rank")
         )

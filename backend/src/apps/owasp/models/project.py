@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
@@ -375,7 +375,7 @@ class Project(
         return self.pull_requests.filter(state="open").count()
 
     @property
-    def owasp_page_last_updated_at(self) -> datetime.datetime | None:
+    def owasp_page_last_updated_at(self) -> dt.datetime | None:
         """Get the last updated timestamp of the project's OWASP page.
 
         Returns:
@@ -419,7 +419,7 @@ class Project(
         return self.pull_requests.count()
 
     @property
-    def pull_request_last_created_at(self) -> datetime.datetime | None:
+    def pull_request_last_created_at(self) -> dt.datetime | None:
         """Get the most recent pull request creation timestamp.
 
         Returns:
@@ -477,7 +477,7 @@ class Project(
             int: Count of releases published recently.
 
         """
-        recent_period = timezone.now() - datetime.timedelta(days=60)
+        recent_period = timezone.now() - dt.timedelta(days=60)
         return self.published_releases.filter(
             published_at__gte=recent_period,
         ).count()
@@ -494,23 +494,23 @@ class Project(
 
     @property
     def unanswered_issues_count(self) -> int:
-        """Get the number of issues with no comments.
+        """Get the number of open issues with no comments.
 
         Returns:
-            int: Count of issues where `comments_count` equals zero.
+            int: Count of open issues where `comments_count` equals zero.
 
         """
-        return self.issues.filter(comments_count=0).count()
+        return self.issues.filter(comments_count=0, state="open").count()
 
     @property
     def unassigned_issues_count(self) -> int:
-        """Get the number of issues with no assignees.
+        """Get the number of open issues with no assignees.
 
         Returns:
-            int: Count of issues where no user is assigned.
+            int: Count of open issues where no user is assigned.
 
         """
-        return self.issues.filter(assignees__isnull=True).count()
+        return self.issues.filter(assignees__isnull=True, state="open").count()
 
     def deactivate(self) -> None:
         """Deactivate project."""

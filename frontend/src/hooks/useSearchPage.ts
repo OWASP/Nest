@@ -188,6 +188,11 @@ export function useSearchPage<T>({
 
   // Fetch data when state changes
   useEffect(() => {
+    // Abort the previous request when any dependency changes or the component unmounts,
+    // so a slow, outdated response can never overwrite the results of the latest one.
+    const controller = new AbortController()
+    const { signal } = controller
+
     setIsLoaded(false)
 
     const fetchData = async () => {
@@ -208,8 +213,12 @@ export function useSearchPage<T>({
           searchQuery,
           currentPage,
           hitsPerPage,
-          [...stableFacetFilters]
+          [...stableFacetFilters],
+          signal
         )
+
+        // Guard against a response that settled before the abort could take effect.
+        if (signal.aborted) return
 
         if ('hits' in response) {
           setItems(response.hits)
@@ -218,12 +227,15 @@ export function useSearchPage<T>({
           handleAppError(response)
         }
       } catch (error) {
+        if (signal.aborted) return
         handleAppError(error)
       }
       setIsLoaded(true)
     }
 
     fetchData()
+
+    return () => controller.abort()
   }, [
     currentPage,
     searchQuery,

@@ -11,6 +11,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   showContributors = true,
   showSocial = true,
   showActionButton = true,
+  showExtraActionButton = false,
   numIcons = 3,
 }) => {
   const NUM_CONTRIBUTORS = 8
@@ -81,7 +82,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
               )}
             </div>
 
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-2">
+              {showExtraActionButton && <Skeleton className="h-9 w-[100px]" />}
               {showActionButton && <Skeleton className="h-9 w-[100px]" />}
             </div>
           </div>

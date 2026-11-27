@@ -7,6 +7,35 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
+// Like next/link, run the caller's onClick first and record whether it prevented navigation.
+// The shared mock in jest.setup prevents every click up front, which would hide that.
+const mockLinkNavigationPrevented = jest.fn()
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({
+    children,
+    href,
+    onClick,
+    ...props
+  }: {
+    children: React.ReactNode
+    href: string
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
+  }) => (
+    <a
+      href={href}
+      {...props}
+      onClick={(e) => {
+        onClick?.(e)
+        mockLinkNavigationPrevented(e.defaultPrevented)
+        e.preventDefault()
+      }}
+    >
+      {children}
+    </a>
+  ),
+}))
+
 describe('ActionButton', () => {
   afterEach(() => {
     cleanup()
@@ -110,5 +139,89 @@ describe('ActionButton', () => {
     fireEvent.mouseLeave(button)
     expect(button).toBeInTheDocument()
     expect(button).toHaveTextContent('Test Button')
+  })
+
+  describe('Link component branches (when url is provided)', () => {
+    it('renders enabled link with target="_blank" and rel="noopener noreferrer"', () => {
+      render(
+        <ActionButton url="https://example.com" tooltipLabel="Open Site">
+          Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link', { name: 'Open Site' })
+      expect(link).toHaveAttribute('href', 'https://example.com')
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(link).toHaveAttribute('aria-disabled', 'false')
+      expect(link).not.toHaveAttribute('tabindex')
+      expect(link).not.toHaveClass('opacity-50', 'cursor-not-allowed')
+    })
+
+    it('renders disabled link with href="#", no target/rel, tabIndex -1, and aria-disabled="true"', () => {
+      render(
+        <ActionButton url="https://example.com" isDisabled={true} tooltipLabel="Disabled Link">
+          Disabled Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link', { name: 'Disabled Link' })
+      expect(link).toHaveAttribute('href', '#')
+      expect(link).not.toHaveAttribute('target')
+      expect(link).not.toHaveAttribute('rel')
+      expect(link).toHaveAttribute('aria-disabled', 'true')
+      expect(link).toHaveAttribute('tabindex', '-1')
+      expect(link).toHaveClass('opacity-50', 'cursor-not-allowed', 'pointer-events-none')
+    })
+
+    it('does not run handlers or navigate when a disabled link is activated', () => {
+      const mockOnClick = jest.fn()
+      const mockOnKeyDown = jest.fn()
+      render(
+        <ActionButton
+          url="https://example.com"
+          isDisabled={true}
+          onClick={mockOnClick}
+          onKeyDown={mockOnKeyDown}
+        >
+          Disabled Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link')
+      fireEvent.click(link)
+      fireEvent.keyDown(link, { key: 'Enter', code: 'Enter' })
+
+      expect(mockLinkNavigationPrevented).toHaveBeenCalledWith(true)
+      expect(mockOnClick).not.toHaveBeenCalled()
+      expect(mockOnKeyDown).not.toHaveBeenCalled()
+    })
+
+    it('does not prevent navigation when an enabled link is clicked', () => {
+      const mockOnClick = jest.fn()
+      render(
+        <ActionButton url="https://example.com" onClick={mockOnClick}>
+          Enabled Link Text
+        </ActionButton>
+      )
+
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockLinkNavigationPrevented).toHaveBeenCalledWith(false)
+      expect(mockOnClick).toHaveBeenCalledTimes(1)
+    })
+
+    it('triggers onKeyDown handler when key is pressed on link', () => {
+      const mockOnKeyDown = jest.fn()
+      render(
+        <ActionButton url="https://example.com" onKeyDown={mockOnKeyDown}>
+          Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link')
+      fireEvent.keyDown(link, { key: 'Enter', code: 'Enter' })
+      expect(mockOnKeyDown).toHaveBeenCalledTimes(1)
+    })
   })
 })

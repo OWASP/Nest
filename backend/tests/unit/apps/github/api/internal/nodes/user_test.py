@@ -25,8 +25,10 @@ class TestUserNode(GraphQLNodeBaseTest):
             "bio",
             "company",
             "contribution_data",
+            "contribution_score",
             "contributions_count",
             "created_at",
+            "current_certificate",
             "email",
             "first_owasp_contribution_at",
             "followers_count",
@@ -43,6 +45,7 @@ class TestUserNode(GraphQLNodeBaseTest):
             "name",
             "public_repositories_count",
             "releases_count",
+            "tier",
             "updated_at",
             "url",
         }
@@ -291,3 +294,102 @@ class TestUserNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result == ""
+
+    def test_current_certificate_uses_prefetched_certificates(self):
+        """Test current_certificate returns the first prefetched active certificate."""
+        latest_certificate = Mock()
+        older_certificate = Mock()
+        mock_user = Mock()
+        mock_user.user_certificates = [latest_certificate, older_certificate]
+
+        field = self._get_field_by_name("current_certificate", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result is latest_certificate
+        mock_user.certificates.filter.assert_not_called()
+
+    def test_current_certificate_prefetched_empty(self):
+        """Test current_certificate returns None when the prefetched list is empty."""
+        mock_user = Mock()
+        mock_user.user_certificates = []
+
+        field = self._get_field_by_name("current_certificate", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result is None
+        mock_user.certificates.filter.assert_not_called()
+
+    def test_current_certificate_falls_back_to_query_without_prefetch(self):
+        """Test current_certificate queries active certificates when not prefetched."""
+        certificate = Mock()
+        mock_user = Mock(spec=["certificates"])
+        mock_queryset = mock_user.certificates.filter.return_value
+        mock_queryset.order_by.return_value.first.return_value = certificate
+
+        field = self._get_field_by_name("current_certificate", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result is certificate
+        mock_user.certificates.filter.assert_called_once_with(is_revoked=False)
+        mock_queryset.order_by.assert_called_once_with("-issued_at")
+        mock_queryset.order_by.return_value.first.assert_called_once_with()
+
+    def test_current_certificate_fallback_without_certificates(self):
+        """Test current_certificate fallback returns None when the user has no certificate."""
+        mock_user = Mock(spec=["certificates"])
+        mock_queryset = mock_user.certificates.filter.return_value
+        mock_queryset.order_by.return_value.first.return_value = None
+
+        field = self._get_field_by_name("current_certificate", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result is None
+
+    def test_contribution_score_without_score(self):
+        """Test contribution_score returns None when the user has no score."""
+        mock_user = Mock(spec=[])
+
+        field = self._get_field_by_name("contribution_score", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result is None
+
+    def test_contribution_score_with_none_score(self):
+        """Test contribution_score returns None when the score relation is None."""
+        mock_user = Mock()
+        mock_user.contribution_score = None
+
+        field = self._get_field_by_name("contribution_score", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result is None
+
+    def test_contribution_score_with_score(self):
+        """Test contribution_score returns the score value."""
+        mock_user = Mock()
+        mock_user.contribution_score.value = 275
+
+        field = self._get_field_by_name("contribution_score", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result == 275
+
+    def test_tier_without_score(self):
+        """Test tier returns None when the user has no score."""
+        mock_user = Mock(spec=[])
+
+        field = self._get_field_by_name("tier", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result is None
+
+    def test_tier_with_score(self):
+        """Test tier returns the human-readable tier label."""
+        mock_user = Mock()
+        mock_user.contribution_score.get_tier_display.return_value = "Level 3"
+
+        field = self._get_field_by_name("tier", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+
+        assert result == "Level 3"
+        mock_user.contribution_score.get_tier_display.assert_called_once_with()

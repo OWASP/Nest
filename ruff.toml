@@ -11,6 +11,7 @@ src = [
   ".github/scripts",
   "infrastructure/scripts",
   "infrastructure/tests",
+  "tools/compliance",
   "tools/security",
   "tools/tests",
 ]
@@ -70,6 +71,7 @@ ignore = [
   "D103",   # https://docs.astral.sh/ruff/rules/undocumented-public-function/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
+  "ICN001", # https://docs.astral.sh/ruff/rules/unconventional-import-alias/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
 "backend/src/apps/api/rest/**/*.py" = [
@@ -89,11 +91,14 @@ ignore = [
 ".github/scripts/*.py" = [
   "INP001", # Standalone CI scripts; not importable packages.
 ]
+"tools/compliance/*.py" = [
+  "INP001", # Standalone maintainer scripts; not importable packages.
+]
 "tools/security/*.py" = [
   "INP001", # Standalone maintainer scripts; not importable packages.
 ]
 
 [lint.isort]
 detect-same-package = false
-known-first-party = ["apps", "docker_compose_check", "docksec_scan", "renew_security_txt", "scripts", "serve", "tests"]
+known-first-party = ["apps", "docker_compose_check", "docksec_scan", "fossology_license_check", "renew_security_txt", "scripts", "serve", "tests"]
 known-third-party = ["github"]

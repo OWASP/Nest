@@ -1,4 +1,4 @@
-FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:53a670f691b0bd348aa9f97a512918611ed960132c0fc124a12c2bc49ddec20a
+FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:6ccbb6b02fcbb8e07d15680e933a6d835cdb579636032cec7d256d0f25d483e4
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

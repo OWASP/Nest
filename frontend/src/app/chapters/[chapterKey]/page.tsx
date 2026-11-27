@@ -6,8 +6,8 @@ import { useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
 import type { Chapter } from 'types/chapter'
-import { getContributionStats } from 'utils/contributionDataUtils'
-import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getContributionDateRange, getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate } from 'utils/dateFormatter'
 import { getLinkableEntityChannels } from 'utils/entityChannels'
 import Contributions from 'components/cards/Contributions'
 import Contributors from 'components/cards/Contributors'
@@ -20,6 +20,7 @@ import Tags from 'components/cards/Tags'
 import EntityChannelLinks from 'components/EntityChannelLinks'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
+import SubscribeButton from 'components/SubscribeButton'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
@@ -89,16 +90,18 @@ export default function ChapterDetailsPage() {
       : []),
   ]
 
-  const { startDate, endDate } = getDateRange({ years: 1 })
-
   const contributionStats = getContributionStats(
     chapter.contributionStats,
     chapter.contributionData
   )
+  const contributionRange = getContributionDateRange(contributionStats, chapter.contributionData)
 
   return (
     <PageWrapper>
-      <Header title={chapter.name} isActive={chapter.isActive} isArchived={false} />
+      <div className="flex items-center justify-between">
+        <Header title={chapter.name} isActive={chapter.isActive} isArchived={false} />
+        <SubscribeButton entityType="chapter" entityId={chapter.id} entityName={chapter.name} />
+      </div>
 
       <Summary summary={chapter.summary} />
 
@@ -124,8 +127,8 @@ export default function ChapterDetailsPage() {
         }
         contributionStats={contributionStats}
         contributionData={chapter.contributionData}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={contributionRange?.startDate}
+        endDate={contributionRange?.endDate}
         title="Chapter Contribution Activity"
       />
 
