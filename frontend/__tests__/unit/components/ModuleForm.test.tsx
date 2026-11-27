@@ -664,6 +664,44 @@ describe('ModuleForm', () => {
       )
     })
 
+    it('clears mutation error for name field when name input changes', async () => {
+      const user = userEvent.setup()
+      const { rerender } = render(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+        />
+      )
+
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      rerender(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+          validationErrors={{
+            name: "This name produces the key 'test-module', which is already in use by another module in this program.",
+          }}
+        />
+      )
+
+      expect(screen.getByTestId('module-name-error')).toBeInTheDocument()
+
+      const nameInput = screen.getByLabelText('Name')
+      await user.type(nameInput, ' 2')
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('module-name-error')).not.toBeInTheDocument()
+      })
+    })
+
     it('does not display mutation error when validationErrors is empty', () => {
       renderModuleForm({
         formData: validFormData,
