@@ -122,8 +122,6 @@ class Event(BulkSaveModel, TimestampedModel):
         if not dates:
             return None
 
-        max_day_length = 2
-
         # Normalize dashes (hyphen, en-dash, em-dash).
         clean_dates = re.sub(r"[\-\–\—]", "-", dates)  # noqa: RUF001
 
@@ -141,9 +139,24 @@ class Event(BulkSaveModel, TimestampedModel):
 
                 day_match = re.match(r"^(\d{1,2})", end_str)
                 if day_match:
-                    day_value = day_match.group(1)
-                    if len(end_str) <= max_day_length or "," in end_str:
-                        return start_date.replace(day=int(day_value))
+                    end_day = int(day_match.group(1))
+                    day_only_match = re.fullmatch(
+                        r"\d{1,2}(?:st|nd|rd|th)?(?:(?:,\s*|\s+)(\d{4}))?"
+                        r"(?:(?:,\s*|\s+)(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|"
+                        r"Mon|Tue|Wed|Thu|Fri|Sat|Sun))?",
+                        end_str,
+                        re.IGNORECASE,
+                    )
+                    if day_only_match:
+                        explicit_year = day_only_match.group(1)
+                        end_year = int(explicit_year) if explicit_year else start_date.year
+                        end_month = start_date.month
+                        if end_day < start_date.day:
+                            months_in_year = 12
+                            end_month = start_date.month % months_in_year + 1
+                            if not explicit_year:
+                                end_year += start_date.month == months_in_year
+                        return start_date.replace(year=end_year, month=end_month, day=end_day)
 
                 end_date = parser.parse(
                     end_str, default=datetime.combine(start_date, datetime.min.time())
@@ -199,6 +212,8 @@ class Event(BulkSaveModel, TimestampedModel):
 
         """
         start_date = data["start-date"]
+        if isinstance(start_date, str):
+            start_date = parser.parse(start_date).date()
         fields = {
             "category": {
                 "AppSec Days": Event.Category.APPSEC_DAYS,
@@ -208,9 +223,7 @@ class Event(BulkSaveModel, TimestampedModel):
             "description": data.get("optional-text", ""),
             "end_date": Event.parse_dates(data.get("dates", ""), start_date),
             "name": data["name"],
-            "start_date": parser.parse(start_date).date()
-            if isinstance(start_date, str)
-            else start_date,
+            "start_date": start_date,
             "url": normalize_url(data.get("url", "")) or "",
         }
 

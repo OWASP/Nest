@@ -74,6 +74,122 @@ class TestEventModel:
         result = Event.parse_dates(dates, start_date)
         assert result == expected_result
 
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_result"),
+        [
+            ("October 31 - 2, 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("December 30 - 2", date(2025, 12, 30), date(2026, 1, 2)),
+            ("October 31 - 2nd", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2nd", date(2025, 12, 30), date(2026, 1, 2)),
+            ("December 30 - 2nd, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("January 31 - 1st", date(2025, 1, 31), date(2025, 2, 1)),
+            ("March 31 - 3rd", date(2025, 3, 31), date(2025, 4, 3)),
+            ("April 30 - 4th", date(2025, 4, 30), date(2025, 5, 4)),
+            ("January 31 - 29", date(2024, 1, 31), date(2024, 2, 29)),
+            ("October 31–2nd", date(2025, 10, 31), date(2025, 11, 2)),  # noqa: RUF001
+            ("October 31—2nd", date(2025, 10, 31), date(2025, 11, 2)),
+        ],
+    )
+    def test_parse_dates_day_only_rollover(self, dates, start_date, expected_result):
+        """Day-only range ends roll into the next month when needed."""
+        assert Event.parse_dates(dates, start_date) == expected_result
+
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 31 - 2ND, 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2ND", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2Nd, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("January 31 - 1ST", date(2025, 1, 31), date(2025, 2, 1)),
+            ("March 31 - 3RD", date(2025, 3, 31), date(2025, 4, 3)),
+            ("April 30 - 4TH", date(2025, 4, 30), date(2025, 5, 4)),
+        ],
+    )
+    def test_parse_dates_uppercase_ordinals(self, dates, start_date, expected_end):
+        assert Event.parse_dates(dates, start_date) == expected_end
+
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 31 - 2ND 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 1 - 2 2025", date(2025, 10, 1), date(2025, 10, 2)),
+            ("October 1 - 2nd 2025", date(2025, 10, 1), date(2025, 10, 2)),
+            ("December 30 - 2ND 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("January 31 - 29 2024", date(2024, 1, 31), date(2024, 2, 29)),
+            ("January 31 - 30 2025", date(2025, 1, 31), None),
+            ("October 31 - 2ND   2025", date(2025, 10, 31), date(2025, 11, 2)),
+        ],
+    )
+    def test_parse_dates_year_without_comma(self, dates, start_date, expected_end):
+        assert Event.parse_dates(dates, start_date) == expected_end
+
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 1 - 2 2026", date(2025, 10, 1), date(2026, 10, 2)),
+            ("October 1 - 2nd, 2026", date(2025, 10, 1), date(2026, 10, 2)),
+            ("October 31 - 2ND 2026", date(2025, 10, 31), date(2026, 11, 2)),
+            ("October 31 - 2, 2026", date(2025, 10, 31), date(2026, 11, 2)),
+            ("December 30 - 2ND, 2027", date(2025, 12, 30), date(2027, 1, 2)),
+            ("December 30 - 2 2027", date(2025, 12, 30), date(2027, 1, 2)),
+            ("February 1 - 29 2028", date(2025, 2, 1), date(2028, 2, 29)),
+            ("February 1 - 29 2026", date(2024, 2, 1), None),
+            ("October 1 - 2 0000", date(2025, 10, 1), None),
+        ],
+    )
+    def test_parse_dates_explicit_end_year(self, dates, start_date, expected_end):
+        assert Event.parse_dates(dates, start_date) == expected_end
+
+    @pytest.mark.parametrize(
+        ("dates", "start_date", "expected_end"),
+        [
+            ("October 31 - 2, Monday", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2nd, Monday", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2, Friday", date(2025, 12, 30), date(2026, 1, 2)),
+            ("October 1 - 2, Monday", date(2025, 10, 1), date(2025, 10, 2)),
+            ("October 31 - 2, event ends", date(2025, 10, 31), None),
+            ("October 31 - 2 Monday", date(2025, 10, 31), date(2025, 11, 2)),
+            ("December 30 - 2, FRI", date(2025, 12, 30), date(2026, 1, 2)),
+            ("October 31 - 2ND 2026 Wed", date(2025, 10, 31), date(2026, 11, 2)),
+            ("October 31 - 2, Monday extra", date(2025, 10, 31), None),
+            ("October 31 - 2, 2026 event ends", date(2025, 10, 31), None),
+            ("October 31 - 2 Nov, 2025", date(2025, 10, 31), date(2025, 11, 2)),
+            ("October 31 - 2 Nov, 2026", date(2025, 10, 31), date(2026, 11, 2)),
+            ("October 31 - 2, 2026 Monday", date(2025, 10, 31), date(2026, 11, 2)),
+            ("December 30 - 2ND 2027, Saturday", date(2025, 12, 30), date(2027, 1, 2)),
+            ("January 31 - 29, 2024 Thursday", date(2025, 1, 31), date(2024, 2, 29)),
+            ("January 31 - 30, Monday", date(2025, 1, 31), None),
+            ("October 31 - 32, Monday", date(2025, 10, 31), None),
+            ("October 31 - 2, 0000 Monday", date(2025, 10, 31), None),
+        ],
+    )
+    def test_parse_dates_day_only_trailing_text(self, dates, start_date, expected_end):
+        """Legacy comma annotations must not bypass rollover or an explicit year."""
+        assert Event.parse_dates(dates, start_date) == expected_end
+
+    @pytest.mark.parametrize("start_date", ["2025-10-31", date(2025, 10, 31)])
+    @pytest.mark.parametrize(
+        ("dates", "expected_end"),
+        [
+            ("October 31 - 2", date(2025, 11, 2)),
+            ("October 31 - 2nd", date(2025, 11, 2)),
+            ("October 31 - 31st", date(2025, 10, 31)),
+            ("October 31 - 2ND 2026", date(2026, 11, 2)),
+            ("October 31 - 31st, 2026", date(2026, 10, 31)),
+        ],
+    )
+    def test_from_dict_day_only_dates(self, start_date, dates, expected_end):
+        event = Event(key="test-event")
+        event.from_dict(
+            "Global",
+            {"name": "Test Event", "start-date": start_date, "dates": dates},
+        )
+        assert event.start_date == date(2025, 10, 31)
+        assert event.end_date == expected_end
+
     def test_parse_dates_iso_format_invalid(self):
         """Test parse_dates with invalid ISO-like single date returns None."""
         result = Event.parse_dates("0000-00-00", date(2025, 5, 26))
