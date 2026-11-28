@@ -1,0 +1,539 @@
+"""Tests for snapshot subscription GraphQL mutations."""
+
+import uuid
+from unittest.mock import MagicMock, patch
+
+import pydantic as _pydantic
+import pytest
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+
+from apps.owasp.api.internal.mutations.snapshot_subscription import (
+    CreateSnapshotSubscriptionInput,
+    CreateSubscriptionPydanticInput,
+    FieldError,
+    SnapshotSubscriptionMutations,
+    SnapshotSubscriptionResult,
+    UnsubscribeTokenInput,
+    UnsubscribeTokenPydanticInput,
+    UpdateSnapshotSubscriptionInput,
+)
+from apps.owasp.models.snapshot_subscription import MAX_SUBSCRIPTIONS, SnapshotSubscription
+
+MOCK_TOKEN = "mock-unsubscribe-token"  # noqa: S105
+
+
+def mock_info():
+    """Create a mock GraphQL info object with authenticated user."""
+    info = MagicMock()
+    info.context.request.user = MagicMock(spec=True, pk=1)
+    return info
+
+
+class TestSnapshotSubscriptionResult:
+    """Test SnapshotSubscriptionResult type."""
+
+    def test_default_subscription_is_none(self):
+        """Test default subscription field is None."""
+        result = SnapshotSubscriptionResult(ok=True, message="test")
+        assert result.subscription is None
+
+    def test_result_with_subscription(self):
+        """Test result includes subscription when provided."""
+        mock_sub = MagicMock()
+        result = SnapshotSubscriptionResult(ok=True, message="test", subscription=mock_sub)
+        assert result.subscription == mock_sub
+
+    def test_error_result(self):
+        """Test error result without subscription."""
+        result = SnapshotSubscriptionResult(ok=False, message="error")
+        assert not result.ok
+        assert result.message == "error"
+        assert result.subscription is None
+
+    def test_result_with_code(self):
+        """Test result includes code field."""
+        result = SnapshotSubscriptionResult(ok=True, code="SUCCESS", message="done")
+        assert result.code == "SUCCESS"
+
+    def test_result_with_field_errors(self):
+        """Test result includes field_errors."""
+        error = FieldError(field="name", messages=["too long"])
+        result = SnapshotSubscriptionResult(
+            ok=False, code="VALIDATION_ERROR", message="too long", field_errors=[error]
+        )
+        assert result.field_errors is not None
+        assert len(result.field_errors) == 1
+        assert result.field_errors[0].field == "name"
+
+
+class TestCreateSnapshotSubscription:
+    """Test cases for createSnapshotSubscription mutation."""
+
+    @pytest.fixture
+    def mutations(self):
+        return SnapshotSubscriptionMutations()
+
+    @pytest.fixture(autouse=True)
+    def _mock_transaction(self):
+        """Disable transaction.atomic for tests."""
+        with (
+            patch("django.db.transaction.Atomic.__enter__", return_value=None),
+            patch("django.db.transaction.Atomic.__exit__", return_value=False),
+        ):
+            yield
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_validation_error(self, mock_create, mutations):
+        """Test create propagates ValidationError from clean()."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            include_chapters=False,
+            include_events=False,
+            include_issues=False,
+            include_posts=False,
+            include_projects=False,
+            include_pull_requests=False,
+            include_releases=False,
+            include_users=False,
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.clean.side_effect = ValidationError(
+            "Your subscription cannot be empty. Please choose something to follow."
+        )
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+        assert not result.ok
+        assert "subscription cannot be empty" in result.message
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_success(self, mock_create, mutations):
+        """Test successful subscription creation."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly", name="My Sub", include_chapters=True
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert result.ok
+        assert result.message == "Subscription created successfully."
+        assert result.subscription == mock_sub
+        mock_sub.set_m2m_fields.assert_called_once()
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_max_reached(self, mock_create, mutations):
+        """Test create fails when max subscriptions reached."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(frequency="weekly", include_chapters=True)
+        mock_create.side_effect = ValidationError(
+            f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached."
+        )
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert str(MAX_SUBSCRIPTIONS) in result.message
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_duplicate_setup(self, mock_create, mutations):
+        """Test create fails when duplicate setup exists."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly", name="Sub", include_chapters=True
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.validate_unique_setup.side_effect = ValidationError(
+            "A subscription with the same setup already exists."
+        )
+        mock_sub.clean.return_value = None
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert "same setup" in result.message
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_unknown_entity_ids(self, mock_create, mutations):
+        """Test create fails when selected entity IDs do not exist."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(frequency="weekly", project_ids=[999])
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.set_m2m_fields.side_effect = ValidationError(
+            "One or more selected projects could not be found."
+        )
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.message == "One or more selected projects could not be found."
+        mock_sub.set_m2m_fields.assert_called_once_with(
+            project_ids=[999], chapter_ids=None, committee_ids=None
+        )
+        mock_sub.clean.assert_not_called()
+
+    def test_name_too_long(self, mutations):
+        """Test create fails when name exceeds 100 characters via Pydantic validation."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            name="x" * 101,
+            include_chapters=True,
+        )
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "name"
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_name_whitespace_stripped(self, mock_create, mutations):
+        """Test create strips whitespace from name via Pydantic validator."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            name="  My Sub  ",
+            include_chapters=True,
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert result.ok
+        mock_create.assert_called_once()
+        call_kwargs = mock_create.call_args
+        assert call_kwargs.kwargs["name"] == "My Sub"
+
+    def test_invalid_frequency(self, mutations):
+        """Test create fails with invalid frequency via Pydantic validation."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="daily",
+            include_chapters=True,
+        )
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "frequency"
+
+
+class TestUpdateSnapshotSubscription:
+    """Test cases for updateSnapshotSubscription mutation."""
+
+    @pytest.fixture(autouse=True)
+    def _mock_transaction(self):
+        """Disable transaction.atomic for tests."""
+        with (
+            patch("django.db.transaction.Atomic.__enter__", return_value=None),
+            patch("django.db.transaction.Atomic.__exit__", return_value=False),
+        ):
+            yield
+
+    @pytest.fixture
+    def mutations(self):
+        return SnapshotSubscriptionMutations()
+
+    def test_not_found(self, mutations):
+        """Test update fails when subscription doesn't exist."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput()
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert result.message == "Subscription not found."
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
+
+    def test_clean_validation_error(self, mutations):
+        """Test update fails when clean() rejects the state."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(
+            include_chapters=False,
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.clean.side_effect = ValidationError(
+            "Your subscription cannot be empty. Please choose something to follow."
+        )
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert "subscription cannot be empty" in result.message
+
+    def test_success(self, mutations):
+        """Test successful subscription update."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(
+            frequency="monthly",
+            name="Updated Name",
+            include_chapters=False,
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert result.ok
+            assert result.message == "Subscription updated successfully."
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
+            mock_sub.update.assert_called_once()
+            mock_sub.set_m2m_fields.assert_called_once()
+            mock_sub.clean.assert_called_once()
+
+    def test_duplicate_setup_rejected(self, mutations):
+        """Test update rolls back when duplicate setup detected."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(frequency="monthly")
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.validate_unique_setup.side_effect = ValidationError(
+            "A subscription with the same setup already exists."
+        )
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert "same setup" in result.message
+
+    def test_unknown_entity_ids(self, mutations):
+        """Test update fails when selected entity IDs do not exist."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(chapter_ids=[999])
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.set_m2m_fields.side_effect = ValidationError(
+            "One or more selected chapters could not be found."
+        )
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert result.code == "VALIDATION_ERROR"
+            assert result.message == "One or more selected chapters could not be found."
+            mock_sub.clean.assert_not_called()
+
+    def test_name_too_long(self, mutations):
+        """Test update fails when name exceeds 100 characters via Pydantic."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(name="x" * 101)
+
+        result = mutations.update_snapshot_subscription(
+            info, subscription_id=1, input_data=input_data
+        )
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "name"
+
+    def test_name_whitespace_stripped(self, mutations):
+        """Test update strips whitespace from name via Pydantic."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(name="  Updated  ")
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert result.ok
+            mock_sub.update.assert_called_once()
+            call_kwargs = mock_sub.update.call_args
+            assert call_kwargs.kwargs["name"] == "Updated"
+
+    def test_invalid_frequency(self, mutations):
+        """Test update fails with invalid frequency via Pydantic."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(frequency="daily")
+
+        result = mutations.update_snapshot_subscription(
+            info, subscription_id=1, input_data=input_data
+        )
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "frequency"
+
+    def test_integrity_error(self, mutations):
+        """Test update fails on IntegrityError (duplicate name)."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(name="Duplicate Name")
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.update.side_effect = IntegrityError("duplicate key")
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert result.code == "ERROR"
+            assert "already exists" in result.message
+
+
+class TestDeleteSnapshotSubscription:
+    """Test cases for deleteSnapshotSubscription mutation."""
+
+    @pytest.fixture
+    def mutations(self):
+        return SnapshotSubscriptionMutations()
+
+    def test_not_found(self, mutations):
+        """Test delete fails when subscription doesn't exist."""
+        info = mock_info()
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
+            result = mutations.delete_snapshot_subscription(info, subscription_id=1)
+            assert not result.ok
+            assert result.message == "Subscription not found."
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
+
+    def test_success(self, mutations):
+        """Test successful subscription deletion."""
+        info = mock_info()
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.delete_snapshot_subscription(info, subscription_id=1)
+            assert result.ok
+            mock_objects.get.assert_called_once_with(id=1, user=info.context.request.user)
+            mock_sub.delete.assert_called_once()
+
+
+class TestUnsubscribeByToken:
+    """Test cases for unsubscribeByToken mutation."""
+
+    @pytest.fixture
+    def mutations(self):
+        return SnapshotSubscriptionMutations()
+
+    def test_invalid_token(self, mutations):
+        """Test unsubscribe fails with invalid token."""
+        input_data = UnsubscribeTokenInput(token="invalid")  # noqa: S106
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
+            result = mutations.unsubscribe_by_token(input_data=input_data)
+            assert not result.ok
+            assert result.message == "Invalid unsubscribe token."
+
+    def test_validation_error_token(self, mutations):
+        """Test unsubscribe fails with validation error."""
+        input_data = UnsubscribeTokenInput(token="not-a-uuid")  # noqa: S106
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.side_effect = ValidationError("Invalid UUID")
+            result = mutations.unsubscribe_by_token(input_data=input_data)
+            assert not result.ok
+            assert result.message == "Invalid unsubscribe token."
+
+    def test_success(self, mutations):
+        """Test successful unsubscribe by token."""
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        input_data = UnsubscribeTokenInput(token=str(uuid.uuid4()))
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.unsubscribe_by_token(input_data=input_data)
+            assert result.ok
+            assert result.message == "Successfully unsubscribed."
+            mock_sub.delete.assert_called_once()
+            mock_objects.get.assert_called_once_with(unsubscribe_token=input_data.token)
+
+    def test_empty_token(self, mutations):
+        """Test unsubscribe fails with empty token via Pydantic validation."""
+        input_data = UnsubscribeTokenInput(token="")
+        result = mutations.unsubscribe_by_token(input_data=input_data)
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "token"
+
+    def test_whitespace_only_token(self, mutations):
+        """Test unsubscribe fails with whitespace-only token via Pydantic validation."""
+        input_data = UnsubscribeTokenInput(token="   ")  # noqa: S106
+        result = mutations.unsubscribe_by_token(input_data=input_data)
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "token"
+
+
+class TestPydanticValidation:
+    """Test Pydantic validation directly on the input models."""
+
+    def test_create_input_strips_name(self):
+        """Test Pydantic strips whitespace from name."""
+        model = CreateSubscriptionPydanticInput(name="  hello  ", frequency="weekly")
+        assert model.name == "hello"
+
+    def test_create_input_rejects_long_name(self):
+        """Test Pydantic rejects name over 100 chars."""
+        with pytest.raises(_pydantic.ValidationError):
+            CreateSubscriptionPydanticInput(name="x" * 101, frequency="weekly")
+
+    def test_create_input_rejects_invalid_frequency(self):
+        """Test Pydantic rejects invalid frequency."""
+        with pytest.raises(_pydantic.ValidationError):
+            CreateSubscriptionPydanticInput(frequency="daily")
+
+    def test_create_input_normalizes_uppercase_frequency(self):
+        """Test Pydantic normalizes uppercase frequency to lowercase."""
+        model = CreateSubscriptionPydanticInput(frequency="WEEKLY")
+        assert model.frequency == "weekly"
+
+    def test_create_input_normalizes_mixed_case_frequency(self):
+        """Test Pydantic normalizes mixed-case frequency to lowercase."""
+        model = CreateSubscriptionPydanticInput(frequency="Monthly")
+        assert model.frequency == "monthly"
+
+    def test_unsubscribe_rejects_empty_token(self):
+        """Test Pydantic rejects empty token."""
+        with pytest.raises(_pydantic.ValidationError):
+            UnsubscribeTokenPydanticInput(token="")
+
+    def test_unsubscribe_rejects_whitespace_token(self):
+        """Test Pydantic rejects whitespace-only token."""
+        with pytest.raises(_pydantic.ValidationError):
+            UnsubscribeTokenPydanticInput(token="   ")  # noqa: S106

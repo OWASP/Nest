@@ -56,6 +56,33 @@ describe('FormTextarea', () => {
     expect(handleChange).toHaveBeenCalledTimes(1)
   })
 
+  it('is enabled and unbounded by default', () => {
+    render(<FormTextarea {...defaultProps} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toBeEnabled()
+    expect(textarea).not.toHaveAttribute('maxlength')
+  })
+
+  it('renders with disabled=true', () => {
+    render(<FormTextarea {...defaultProps} disabled={true} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toBeDisabled()
+    expect(textarea).toHaveClass('disabled:cursor-not-allowed')
+  })
+
+  it('applies disabled styling and attributes when disabled', () => {
+    const handleChange = jest.fn()
+    render(<FormTextarea {...defaultProps} disabled={true} onChange={handleChange} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toBeDisabled()
+    expect(textarea).toHaveClass('disabled:cursor-not-allowed')
+  })
+
+  it('renders with maxLength', () => {
+    render(<FormTextarea {...defaultProps} maxLength={100} />)
+    expect(screen.getByRole('textbox')).toHaveAttribute('maxlength', '100')
+  })
+
   it('links the character counter to the textarea for assistive technology', () => {
     render(<FormTextarea {...defaultProps} value="Hello" maxLength={280} showCharCount />)
     const textarea = screen.getByRole('textbox')

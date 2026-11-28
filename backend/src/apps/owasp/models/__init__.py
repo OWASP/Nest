@@ -12,6 +12,7 @@ from .crp.contribution_score import ContributionScore
 from .crp.leaderboard_snapshot import LeaderboardSnapshot
 from .crp.recognition_enums import EventTypeChoices, TierChoices
 from .crp.scoring_weight import ScoringWeight
+from .email_log import EmailLog
 from .entity_channel import EntityChannel
 from .entity_member import EntityMember
 from .event import Event
@@ -22,4 +23,6 @@ from .project import Project
 from .project_health_metrics import ProjectHealthMetrics
 from .project_health_requirements import ProjectHealthRequirements
 from .snapshot import Snapshot
+from .snapshot_feedback import SnapshotFeedback
+from .snapshot_subscription import SnapshotSubscription
 from .sponsor import Sponsor

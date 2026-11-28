@@ -431,6 +431,7 @@ describe('GlobalSearch', () => {
       expect(screen.queryByText('Stale Result')).not.toBeInTheDocument()
     })
   })
+
   test('clears suggestions when search query becomes empty', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
@@ -441,91 +442,206 @@ describe('GlobalSearch', () => {
       }
       return Promise.resolve({ hits: [], totalPages: 0 })
     })
+
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
+
     const input = screen.getByPlaceholderText('Search the OWASP community...')
     await userEvent.type(input, 'test')
+
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
     })
+
     await userEvent.clear(input)
+
     await waitFor(() => {
-      expect(screen.getByText(/Try searches like "OWASP", "London"/)).toBeInTheDocument()
+      expect(screen.getByText(EMPTY_STATE_EXAMPLES)).toBeInTheDocument()
     })
+    expect(screen.queryByText('Test Project')).not.toBeInTheDocument()
+    expect(screen.queryByRole('listitem')).not.toBeInTheDocument()
   })
 
   test('navigates to organization page when clicking an organization suggestion', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'organizations') {
         return Promise.resolve({
-          hits: [{ key: 'test-org', name: 'Test Org', login: 'test-org-login' }],
+          hits: [{ key: 'test-org', login: 'test-org-login', name: 'Test Org' }],
           totalPages: 1,
         })
       }
       return Promise.resolve({ hits: [], totalPages: 0 })
     })
+
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
+
     const input = screen.getByPlaceholderText('Search the OWASP community...')
     await userEvent.type(input, 'test')
+
     await waitFor(() => {
       expect(screen.getByText('Test Org')).toBeInTheDocument()
     })
+
     fireEvent.click(screen.getByText('Test Org'))
+
     expect(mockRouter.push).toHaveBeenCalledWith('/organizations/test-org-login')
   })
 
-  test('navigates with ArrowDown and Enter keyboard shortcuts', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
-      if (index === 'projects') {
-        return Promise.resolve({
-          hits: [{ key: 'test-project', name: 'Test Project' }],
-          totalPages: 1,
-        })
-      }
-      return Promise.resolve({ hits: [], totalPages: 0 })
-    })
-    render(<GlobalSearch />)
-    fireEvent.click(screen.getByLabelText('Open search'))
-    const input = screen.getByPlaceholderText('Search the OWASP community...')
-    await userEvent.type(input, 'test')
-    await waitFor(() => {
-      expect(screen.getByText('Test Project')).toBeInTheDocument()
-    })
-    fireEvent.keyDown(input, { key: 'ArrowDown' })
-    fireEvent.keyDown(input, { key: 'Enter' })
-    await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith('/projects/test-project')
-    })
-  })
-
-  test('navigates with ArrowUp keyboard shortcut', async () => {
+  test('keyboard navigation: ArrowDown, ArrowUp, and Enter', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
         return Promise.resolve({
           hits: [
-            { key: 'project-1', name: 'Project One' },
-            { key: 'project-2', name: 'Project Two' },
+            { key: 'proj-1', name: 'Project 1' },
+            { key: 'proj-2', name: 'Project 2' },
+          ],
+          totalPages: 1,
+        })
+      }
+      if (index === 'users') {
+        return Promise.resolve({
+          hits: [{ key: 'user-1', name: 'User 1' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
+      expect(screen.getByText('User 1')).toBeInTheDocument()
+    })
+
+    fireEvent.keyDown(document, { key: 'ArrowDown' })
+    fireEvent.keyDown(document, { key: 'ArrowDown' })
+    fireEvent.keyDown(document, { key: 'ArrowDown' })
+    fireEvent.keyDown(document, { key: 'ArrowDown' })
+    fireEvent.keyDown(document, { key: 'ArrowUp' })
+    fireEvent.keyDown(document, { key: 'ArrowUp' })
+    fireEvent.keyDown(document, { key: 'ArrowUp' })
+    fireEvent.keyDown(document, { key: 'Enter' })
+
+    expect(mockRouter.push).toHaveBeenCalledWith('/projects/proj-1')
+  })
+
+  test('focus trap works correctly within the modal', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'proj-1', name: 'Project 1' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
+    })
+
+    const algoliaLink = screen.getByLabelText('Search by Algolia (opens in a new tab)')
+    expect(algoliaLink).not.toBe(input)
+
+    input.focus()
+    expect(document.activeElement).toBe(input)
+
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(algoliaLink)
+
+    fireEvent.keyDown(document, { key: 'Tab' })
+    expect(document.activeElement).toBe(input)
+  })
+
+  test('focus trap handles multiple tab events to loop focus', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [
+            { key: 'proj-1', name: 'Project 1' },
+            { key: 'proj-2', name: 'Project 2' },
           ],
           totalPages: 1,
         })
       }
       return Promise.resolve({ hits: [], totalPages: 0 })
     })
+
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
+
     const input = screen.getByPlaceholderText('Search the OWASP community...')
     await userEvent.type(input, 'test')
+
     await waitFor(() => {
-      expect(screen.getByText('Project One')).toBeInTheDocument()
+      expect(screen.getByText('Project 2')).toBeInTheDocument()
     })
-    fireEvent.keyDown(input, { key: 'ArrowDown' })
-    fireEvent.keyDown(input, { key: 'ArrowDown' })
-    fireEvent.keyDown(input, { key: 'ArrowUp' })
-    fireEvent.keyDown(input, { key: 'Enter' })
+
+    const dialog = screen.getByRole('dialog')
+    const focusable = Array.from(
+      dialog.querySelectorAll<HTMLElement>('input, button, a, [tabindex]:not([tabindex="-1"])')
+    ).filter((el) => el.getAttribute('tabindex') !== '-1')
+
+    expect(focusable.length).toBeGreaterThanOrEqual(3)
+
+    const first = focusable[0]
+    const middle = focusable[1]
+    const last = focusable.at(-1)!
+    expect(first).not.toBe(last)
+
+    first.focus()
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(last)
+
+    fireEvent.keyDown(document, { key: 'Tab' })
+    expect(document.activeElement).toBe(first)
+
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(last)
+
+    middle.focus()
+    expect(fireEvent.keyDown(document, { key: 'Tab' })).toBe(true)
+    expect(document.activeElement).toBe(middle)
+  })
+
+  test('handles suggestion keyboard events (Space / Enter)', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'proj-1', name: 'Project 1' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith('/projects/project-1')
+      expect(screen.getByText('Project 1')).toBeInTheDocument()
     })
+
+    const suggestionBtn = screen.getByText('Project 1').closest('button')!
+
+    // Press space
+    fireEvent.keyDown(suggestionBtn, { key: ' ' })
+    expect(mockRouter.push).toHaveBeenCalledWith('/projects/proj-1')
   })
 
   test('navigates between suggestion groups with ArrowDown and ArrowUp', async () => {

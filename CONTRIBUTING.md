@@ -493,6 +493,24 @@ failure. The same command and configuration run in CI, in the dependency check j
 follows the existing non-blocking dependency check policy. It is also included in
 `make security-dependency-check`, `make security-dependency-scan`, and `make security-scan`.
 
+#### Running Compliance Checks Only
+
+```bash
+make compliance-check
+```
+
+This runs compliance checks for the repository. Today that is the
+[FOSSology](https://github.com/fossology/fossology) license scanners on files tracked by git
+(plus new files that are not ignored). The check is implemented in
+`tools/compliance/fossology_license_check.py`. It fails if the scanners detect a license that is
+not listed in `.fossology-allowlist.json`. Contents of archives (e.g. `.gz`, `.zip`) are not
+scanned. The scanner image is linux/amd64 only; the Python check passes `--platform linux/amd64`
+so local runs work on Apple Silicon via emulation. Add a license to the allowlist only if it is
+compatible with the project, and use `exclude` for exact paths that are false positives (findings
+in excluded paths are filtered out from the scanner results). `make/compliance.mk` is excluded
+because nomos misreads the interpreter token in that recipe as a license identifier. The same
+command runs in CI as the standalone License check workflow (not part of code checks).
+
 #### Running SAST Scans Only
 
 ```bash

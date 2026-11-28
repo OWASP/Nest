@@ -15,6 +15,7 @@ from .certificate import CertificateAdmin
 from .chapter import ChapterAdmin
 from .committee import CommitteeAdmin
 from .contribution_score import ContributionScoreAdmin
+from .email_log import EmailLogAdmin
 from .entity_channel import EntityChannelAdmin
 from .entity_member import EntityMemberAdmin
 from .event import EventAdmin
@@ -26,6 +27,8 @@ from .project import ProjectAdmin
 from .project_health_metrics import ProjectHealthMetricsAdmin
 from .scoring_weight import ScoringWeightAdmin
 from .snapshot import SnapshotAdmin
+from .snapshot_feedback import SnapshotFeedbackAdmin
+from .snapshot_subscription import SnapshotSubscriptionAdmin
 from .sponsor import SponsorAdmin
 
 admin.site.register(ProjectHealthRequirements)
