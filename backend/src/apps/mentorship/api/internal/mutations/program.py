@@ -4,11 +4,14 @@ import logging
 
 import strawberry
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import IntegrityError, transaction
-from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
+from apps.mentorship.api.internal.graphql_errors import (
+    MentorshipNotFoundError,
+    MentorshipPermissionDeniedError,
+    MentorshipValidationError,
+)
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
     CreateProgramInput,
@@ -45,7 +48,7 @@ def resolve_admins_from_logins(logins: list[str]) -> set:
         except GithubUser.DoesNotExist as e:
             msg = f"GitHub user '{login}' not found."
             logger.warning(msg, exc_info=True)
-            raise ValueError(msg) from e
+            raise MentorshipValidationError(msg, field="admin_logins") from e
 
     return admins
 
@@ -70,10 +73,7 @@ def _handle_program_save_integrity_error(exc: IntegrityError) -> None:
     else:
         raise exc
 
-    raise GraphQLError(
-        msg,
-        extensions={"code": "VALIDATION_ERROR", "field": field},
-    ) from exc
+    raise MentorshipValidationError(msg, field=field) from exc
 
 
 @strawberry.type
@@ -93,7 +93,7 @@ class ProgramMutation:
                 user.username,
                 input_data.name,
             )
-            raise PermissionDenied(msg)
+            raise MentorshipPermissionDeniedError(msg)
 
         if input_data.ended_at <= input_data.started_at:
             msg = "End date must be after start date."
@@ -103,7 +103,7 @@ class ProgramMutation:
                 input_data.name,
                 msg,
             )
-            raise ValidationError(msg)
+            raise MentorshipValidationError(msg, field="ended_at")
 
         try:
             program = Program.objects.create(
@@ -147,7 +147,7 @@ class ProgramMutation:
         except Program.DoesNotExist as err:
             msg = f"Program with key '{input_data.key}' not found."
             logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from err
+            raise MentorshipNotFoundError(msg) from err
 
         if not program.has_admin(user):
             msg = "You must be an admin of this program to update it."
@@ -156,7 +156,7 @@ class ProgramMutation:
                 user.username,
                 program.key,
             )
-            raise PermissionDenied(msg)
+            raise MentorshipPermissionDeniedError(msg)
 
         if (
             input_data.ended_at is not None
@@ -165,7 +165,7 @@ class ProgramMutation:
         ):
             msg = "End date must be after start date."
             logger.warning("Validation error updating program '%s': %s", program.key, msg)
-            raise ValidationError(msg)
+            raise MentorshipValidationError(msg, field="ended_at")
 
         field_mapping = {
             "name": input_data.name,
@@ -206,10 +206,10 @@ class ProgramMutation:
             program = Program.objects.select_for_update().get(key=input_data.key)
         except Program.DoesNotExist as e:
             msg = f"Program with key '{input_data.key}' not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise MentorshipNotFoundError(msg) from e
 
         if not program.has_admin(user):
-            raise PermissionDenied
+            raise MentorshipPermissionDeniedError("You must be an admin of this program to update its status.")
 
         program.status = input_data.status.value
         program.save()

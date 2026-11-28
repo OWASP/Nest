@@ -4,10 +4,14 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import IntegrityError
 from graphql import GraphQLError
 
+from apps.mentorship.api.internal.graphql_errors import (
+    MentorshipNotFoundError,
+    MentorshipPermissionDeniedError,
+    MentorshipValidationError,
+)
 from apps.mentorship.api.internal.mutations.program import (
     ProgramMutation,
     resolve_admins_from_logins,
@@ -102,12 +106,17 @@ class TestResolveAdminsFromLogins:
 
     @patch("apps.mentorship.api.internal.mutations.program.GithubUser")
     def test_resolve_github_user_not_found(self, mock_gh):
-        """Test ValueError when GitHub user not found."""
+        """Test MentorshipValidationError when GitHub user not found."""
         mock_gh.DoesNotExist = type("DoesNotExist", (Exception,), {})
         mock_gh.objects.get.side_effect = mock_gh.DoesNotExist
 
-        with pytest.raises(ValueError, match="GitHub user 'unknown' not found"):
+        with pytest.raises(MentorshipValidationError) as exc_info:
             resolve_admins_from_logins(["unknown"])
+
+        assert "GitHub user 'unknown' not found" in str(exc_info.value)
+        assert exc_info.value.extensions.get("code") == "VALIDATION_ERROR"
+        assert exc_info.value.extensions.get("field") == "admin_logins"
+
 
     def test_resolve_empty_logins(self):
         """Test resolving empty list returns empty set."""
@@ -212,7 +221,7 @@ class TestCreateProgram:
         mock_admin_obj.save.assert_called_once_with(update_fields=["nest_user"])
 
     def test_create_program_not_project_leader(self, mutation):
-        """Test PermissionDenied when user is not a project leader."""
+        """Test MentorshipPermissionDeniedError when user is not a project leader."""
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
@@ -225,13 +234,13 @@ class TestCreateProgram:
         input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
 
         with pytest.raises(
-            PermissionDenied,
+            MentorshipPermissionDeniedError,
             match=r"You must be a project leader to create a program\.",
         ):
             mutation.create_program(info, input_data)
 
     def test_create_program_no_github_user(self, mutation):
-        """Test PermissionDenied when nest user has no linked GitHub user."""
+        """Test MentorshipPermissionDeniedError when nest user has no linked GitHub user."""
         user = MagicMock()
         user.username = "testuser"
         user.github_user = None
@@ -243,13 +252,13 @@ class TestCreateProgram:
         input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
 
         with pytest.raises(
-            PermissionDenied,
+            MentorshipPermissionDeniedError,
             match=r"You must be a project leader to create a program\.",
         ):
             mutation.create_program(info, input_data)
 
     def test_create_program_end_before_start(self, mutation):
-        """Test ValidationError when end date is before start date."""
+        """Test MentorshipValidationError when end date is before start date."""
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
@@ -261,11 +270,14 @@ class TestCreateProgram:
         input_data.started_at = datetime(2025, 12, 31, tzinfo=UTC)
         input_data.ended_at = datetime(2025, 1, 1, tzinfo=UTC)
 
-        with pytest.raises(ValidationError, match="End date must be after start date"):
+        with pytest.raises(MentorshipValidationError) as exc_info:
             mutation.create_program(info, input_data)
 
+        assert "End date must be after start date" in str(exc_info.value)
+        assert exc_info.value.extensions.get("field") == "ended_at"
+
     def test_create_program_end_equals_start(self, mutation):
-        """Test ValidationError when end date equals start date."""
+        """Test MentorshipValidationError when end date equals start date."""
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
@@ -278,8 +290,12 @@ class TestCreateProgram:
         input_data.started_at = same_date
         input_data.ended_at = same_date
 
-        with pytest.raises(ValidationError, match="End date must be after start date"):
+        with pytest.raises(MentorshipValidationError) as exc_info:
             mutation.create_program(info, input_data)
+
+        assert "End date must be after start date" in str(exc_info.value)
+        assert exc_info.value.extensions.get("field") == "ended_at"
+
 
 
 class TestUpdateProgram:
@@ -317,7 +333,7 @@ class TestUpdateProgram:
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_program_not_found(self, mock_program, mutation):
-        """Test ObjectDoesNotExist when program not found."""
+        """Test MentorshipNotFoundError when program not found."""
         user = MagicMock()
         info = _make_info(user)
         input_data = MagicMock()
@@ -328,12 +344,12 @@ class TestUpdateProgram:
             mock_program.DoesNotExist
         )
 
-        with pytest.raises(ObjectDoesNotExist, match="Program with key 'bad' not found"):
+        with pytest.raises(MentorshipNotFoundError, match="Program with key 'bad' not found"):
             mutation.update_program(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_program_not_admin(self, mock_program, mutation):
-        """Test PermissionDenied when user is not an admin."""
+        """Test MentorshipPermissionDeniedError when user is not an admin."""
         user = MagicMock()
         user.username = "testuser"
         info = _make_info(user)
@@ -345,13 +361,13 @@ class TestUpdateProgram:
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         with pytest.raises(
-            PermissionDenied, match="You must be an admin of this program to update it"
+            MentorshipPermissionDeniedError, match="You must be an admin of this program to update it"
         ):
             mutation.update_program(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_program_invalid_dates(self, mock_program, mutation):
-        """Test ValidationError when end date is before start date."""
+        """Test MentorshipValidationError when end date is before start date."""
         user = MagicMock()
         user.username = "testuser"
         info = _make_info(user)
@@ -365,8 +381,11 @@ class TestUpdateProgram:
         mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
-        with pytest.raises(ValidationError, match="End date must be after start date"):
+        with pytest.raises(MentorshipValidationError) as exc_info:
             mutation.update_program(info, input_data)
+
+        assert "End date must be after start date" in str(exc_info.value)
+        assert exc_info.value.extensions.get("field") == "ended_at"
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_program_duplicate_name_integrity_error(self, mock_program, mutation):
@@ -481,7 +500,7 @@ class TestUpdateProgramStatus:
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_status_program_not_found(self, mock_program, mutation):
-        """Test ObjectDoesNotExist when program not found."""
+        """Test MentorshipNotFoundError when program not found."""
         user = MagicMock()
         info = _make_info(user)
         input_data = MagicMock()
@@ -492,12 +511,12 @@ class TestUpdateProgramStatus:
             mock_program.DoesNotExist
         )
 
-        with pytest.raises(ObjectDoesNotExist, match="Program with key 'bad' not found"):
+        with pytest.raises(MentorshipNotFoundError, match="Program with key 'bad' not found"):
             mutation.update_program_status(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_status_not_admin(self, mock_program, mutation):
-        """Test PermissionDenied when user is not an admin."""
+        """Test MentorshipPermissionDeniedError when user is not an admin."""
         user = MagicMock()
         info = _make_info(user)
         input_data = MagicMock()
@@ -507,5 +526,6 @@ class TestUpdateProgramStatus:
         mock_prog.has_admin.return_value = False
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
-        with pytest.raises(PermissionDenied):
+        with pytest.raises(MentorshipPermissionDeniedError):
             mutation.update_program_status(info, input_data)
+
