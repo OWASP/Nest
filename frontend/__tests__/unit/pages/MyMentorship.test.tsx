@@ -6,6 +6,7 @@ import { useSession as mockUseSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import MyMentorshipPage from 'app/my/mentorship/page'
+import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
@@ -129,7 +130,7 @@ describe('MyMentorshipPage', () => {
     expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
   })
 
-  it('renders the unified program list for a non-leader (e.g., mentee)', async () => {
+  it.each(['admin', 'mentee'])('renders the unified program list for the %s role', async (role) => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
@@ -138,7 +139,8 @@ describe('MyMentorshipPage', () => {
           login: 'user1',
           isLeader: false,
           isMentor: false,
-          isMentee: true,
+          isMentee: role === 'mentee',
+          isAdmin: role === 'admin',
         },
         expires: '2099-01-01T00:00:00.000Z',
       },
@@ -148,7 +150,7 @@ describe('MyMentorshipPage', () => {
     mockUseQuery.mockReturnValue({
       data: {
         myPrograms: {
-          programs: [{ ...mockProgramData.myPrograms.programs[0], userRole: 'mentee' }],
+          programs: [{ ...mockProgramData.myPrograms.programs[0], userRole: role }],
           totalPages: 1,
         },
       },
@@ -159,6 +161,10 @@ describe('MyMentorshipPage', () => {
     render(<MyMentorshipPage />)
     expect(await screen.findByText('Test Program')).toBeInTheDocument()
     expect(screen.queryByText(/Access Denied/i)).not.toBeInTheDocument()
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      GetMyProgramsDocument,
+      expect.objectContaining({ skip: false })
+    )
     // Non-leaders don't get the Create Program button.
     expect(screen.queryByRole('button', { name: /create program/i })).not.toBeInTheDocument()
   })
@@ -567,6 +573,7 @@ describe('MyMentorshipPage', () => {
           name: 'Plain User',
           email: 'plain@example.com',
           login: 'plainuser',
+          isAdmin: false,
           isLeader: false,
           isMentor: false,
           isMentee: false,
@@ -582,7 +589,9 @@ describe('MyMentorshipPage', () => {
 
     expect(await screen.findByText('Access Denied')).toBeInTheDocument()
     expect(
-      screen.getByText(/Only project leaders, mentors, or mentees can access this page/i)
+      screen.getByText(
+        /Only project leaders, program admins, mentors, or mentees can access this page/i
+      )
     ).toBeInTheDocument()
     expect(screen.queryByText('Test Program')).not.toBeInTheDocument()
   })

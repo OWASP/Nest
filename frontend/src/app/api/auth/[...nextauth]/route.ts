@@ -4,6 +4,7 @@ import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
 import { IsChapterLeaderDocument } from 'types/__generated__/chapterQueries.generated'
 import {
+  IsAdminDocument,
   IsMenteeDocument,
   IsMentorDocument,
   IsProjectLeaderDocument,
@@ -55,6 +56,9 @@ const checkIfChapterLeader = (login: string) =>
 // A failed chapter leader lookup is retried on later session reads, at most this often.
 const CHAPTER_LEADER_RETRY_INTERVAL_MS = 5 * 60 * 1000
 
+const checkIfAdmin = (login: string) =>
+  checkRole(IsAdminDocument, login, (data) => data?.isAdmin ?? false, 'program admin')
+
 const checkIfMentor = (login: string) =>
   checkRole(IsMentorDocument, login, (data) => data?.isMentor ?? false, 'mentor')
 
@@ -100,7 +104,7 @@ const authOptions: AuthOptions = {
         const login = (profile as ExtendedProfile).login
         token.login = login
 
-        const [isLeader, isChapterLeader, isMentor, isMentee] = await Promise.all([
+        const [isLeader, isChapterLeader, isAdmin, isMentor, isMentee] = await Promise.all([
           checkIfProjectLeader(login),
           // A failed lookup leaves the flag unset so the next session refresh retries it
           // instead of failing sign-in.
@@ -109,11 +113,13 @@ const authOptions: AuthOptions = {
             console.warn('Failed to fetch chapter leader status during sign-in:', err)
             return undefined
           }),
+          checkIfAdmin(login),
           checkIfMentor(login),
           checkIfMentee(login),
         ])
         token.isLeader = isLeader
         token.isChapterLeader = isChapterLeader
+        token.isAdmin = isAdmin
         token.isMentor = isMentor
         token.isMentee = isMentee
         token.chapterLeaderRetryAt =
@@ -146,6 +152,7 @@ const authOptions: AuthOptions = {
       if (session?.user) {
         const extSession = session as ExtendedSession
         extSession.user!.login = token.login as string
+        extSession.user!.isAdmin = token.isAdmin as boolean
         extSession.user!.isMentor = token.isMentor as boolean
         extSession.user!.isMentee = token.isMentee as boolean
         extSession.user!.isLeader = token.isLeader as boolean

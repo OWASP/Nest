@@ -3,6 +3,7 @@ import NextAuth from 'next-auth'
 import { apolloClient } from 'server/apolloClient'
 import { IsChapterLeaderDocument } from 'types/__generated__/chapterQueries.generated'
 import {
+  IsAdminDocument,
   IsMenteeDocument,
   IsMentorDocument,
   IsProjectLeaderDocument,
@@ -39,6 +40,7 @@ const jwt = authOptions.callbacks!.jwt! as (params: Partial<JwtParams>) => Retur
 const roleResponses = new Map<unknown, Record<string, boolean>>([
   [IsProjectLeaderDocument, { isProjectLeader: true }],
   [IsChapterLeaderDocument, { isChapterLeader: true }],
+  [IsAdminDocument, { isAdmin: true }],
   [IsMentorDocument, { isMentor: false }],
   [IsMenteeDocument, { isMentee: true }],
 ])
@@ -80,12 +82,19 @@ describe('NextAuth route jwt callback', () => {
 
     expect(token).toMatchObject({
       accessToken: 'gh-token',
+      isAdmin: true,
       isChapterLeader: true,
       isLeader: true,
       isMentee: true,
       isMentor: false,
       login: 'testuser',
     })
+    const sessionCallback = authOptions.callbacks!.session!
+    const session = await sessionCallback({
+      session: { user: {}, expires: '2099-01-01' },
+      token,
+    } as Parameters<typeof sessionCallback>[0])
+    expect(session.user).toMatchObject({ isAdmin: true })
     expect(mockQuery).toHaveBeenCalledWith(
       expect.objectContaining({ variables: { login: 'testuser' }, fetchPolicy: 'no-cache' })
     )

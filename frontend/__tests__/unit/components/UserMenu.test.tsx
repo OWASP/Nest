@@ -857,6 +857,7 @@ describe('UserMenu Component', () => {
     })
 
     it.each([
+      { role: 'program admin', flags: { isAdmin: true } },
       { role: 'mentor', flags: { isMentor: true } },
       { role: 'mentee', flags: { isMentee: true } },
     ])('shows My Mentorship for a $role who is not a project leader', async ({ flags }) => {

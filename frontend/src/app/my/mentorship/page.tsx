@@ -26,9 +26,11 @@ const MyMentorshipPage: React.FC = () => {
   const userName = session?.user?.login
   // Only project leaders create programs; everyone else just browses their list.
   const isProjectLeader = session?.user?.isLeader
+  const isAdmin = session?.user?.isAdmin
   const isMentor = session?.user?.isMentor
   const isMentee = session?.user?.isMentee
-  const hasNoProgramRole = isProjectLeader === false && isMentor === false && isMentee === false
+  const hasNoProgramRole =
+    isProjectLeader === false && !isAdmin && isMentor === false && isMentee === false
 
   const initialQuery = searchParams.get('q') || ''
   const initialPage = Number.parseInt(searchParams.get('page') || '1', 10)
@@ -97,7 +99,7 @@ const MyMentorshipPage: React.FC = () => {
 
   if (hasNoProgramRole) {
     return (
-      <AccessDeniedDisplay message="Only project leaders, mentors, or mentees can access this page." />
+      <AccessDeniedDisplay message="Only project leaders, program admins, mentors, or mentees can access this page." />
     )
   }
 

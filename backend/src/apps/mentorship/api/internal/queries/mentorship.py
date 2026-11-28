@@ -17,6 +17,7 @@ from apps.mentorship.models import Module
 from apps.mentorship.models.mentee import Mentee
 from apps.mentorship.models.mentee_module import MenteeModule
 from apps.mentorship.models.mentor import Mentor
+from apps.mentorship.models.program_admin import ProgramAdmin
 
 if TYPE_CHECKING:
     from apps.github.api.internal.nodes.issue import IssueNode
@@ -35,6 +36,14 @@ class UserRolesResult:
 @strawberry.type
 class MentorshipQuery:
     """GraphQL queries for mentorship-related data."""
+
+    @strawberry.field
+    def is_admin(self, login: str) -> bool:
+        """Check whether a GitHub login administers a mentorship program."""
+        if not (login := login.strip()):
+            return False
+
+        return ProgramAdmin.objects.filter(admin__github_user__login=login).exists()
 
     @strawberry.field
     def is_mentor(self, login: str) -> bool:

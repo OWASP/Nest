@@ -6,6 +6,12 @@ export const IS_PROJECT_LEADER_QUERY = gql`
   }
 `
 
+export const IS_ADMIN_QUERY = gql`
+  query IsAdmin($login: String!) {
+    isAdmin(login: $login)
+  }
+`
+
 export const IS_MENTOR_QUERY = gql`
   query IsMentor($login: String!) {
     isMentor(login: $login)

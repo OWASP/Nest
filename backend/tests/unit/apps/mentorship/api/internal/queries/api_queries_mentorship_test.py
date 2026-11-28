@@ -14,6 +14,21 @@ def api_mentorship_queries() -> MentorshipQuery:
     return MentorshipQuery()
 
 
+class TestIsAdmin:
+    @pytest.mark.parametrize("is_member", [True, False])
+    @patch("apps.mentorship.api.internal.queries.mentorship.ProgramAdmin.objects.filter")
+    def test_program_membership(self, mock_filter, is_member, api_mentorship_queries):
+        mock_filter.return_value.exists.return_value = is_member
+
+        assert api_mentorship_queries.is_admin(login=" invited-admin ") is is_member
+        mock_filter.assert_called_once_with(admin__github_user__login="invited-admin")
+
+    @patch("apps.mentorship.api.internal.queries.mentorship.ProgramAdmin.objects.filter")
+    def test_blank_login(self, mock_filter, api_mentorship_queries):
+        assert not api_mentorship_queries.is_admin(login="  ")
+        mock_filter.assert_not_called()
+
+
 class TestIsMentor:
     """Tests for the is_mentor query."""
 

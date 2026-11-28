@@ -12,6 +12,7 @@ export type ExtendedSession = Session & {
     email?: string
     expires?: string
     image?: string
+    isAdmin?: boolean
     isLeader?: boolean
     isChapterLeader?: boolean
     isMentee?: boolean

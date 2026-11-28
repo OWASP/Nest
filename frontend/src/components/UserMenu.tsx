@@ -23,11 +23,11 @@ export default function UserMenu({
   const dropdownId = useId()
   const isProjectLeader = session?.user?.isLeader
   const isChapterLeader = session?.user?.isChapterLeader
+  const isAdmin = session?.user?.isAdmin
   const isMentor = session?.user?.isMentor
   const isMentee = session?.user?.isMentee
   const isOwaspStaff = session?.user?.isOwaspStaff
-  // Anyone involved in mentorship — as a leader, mentor, or mentee — gets the entry point.
-  const canAccessMentorship = isProjectLeader || isMentor || isMentee
+  const canAccessMentorship = isProjectLeader || isAdmin || isMentor || isMentee
 
   // Refresh on every open so certificates issued or revoked during the session show up.
   const [getMyCertificate, { data: certificateData }] = useLazyQuery(GetMyCertificateDocument, {
