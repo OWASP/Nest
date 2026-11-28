@@ -74,7 +74,32 @@ class Commit(BulkSaveModel, NodeModel, TimestampedModel):
             fields (tuple[str], optional): Tuple of fields to update.
 
         """
-        BulkSaveModel.bulk_save(Commit, commits, fields=fields)
+        # Import at call time: common itself imports the models.
+        from apps.github.common import _repository_contribution_sync_lock  # noqa: PLC0415
+
+        grouped: dict[int, list[Commit]] = {}
+        for commit in commits:
+            grouped.setdefault(commit.repository_id, []).append(commit)
+        for repository_id in sorted(grouped):
+            batch = grouped[repository_id]
+            with _repository_contribution_sync_lock(batch[0].repository, "commits", wait=True):
+                existing = Commit.objects.filter(
+                    node_id__in=[commit.node_id for commit in batch]
+                ).in_bulk(field_name="node_id")
+                for commit in batch:
+                    if previous := existing.get(commit.node_id):
+                        if previous.repository_id != repository_id:
+                            message = "GitHub commit identity belongs to a different repository"
+                            raise ValueError(message)
+                        commit.pk = previous.pk
+                        commit.nest_created_at = previous.nest_created_at
+                        commit.nest_updated_at = previous.nest_updated_at
+                        if commit.author_id is None:
+                            commit.author_id = previous.author_id
+                        if commit.committer_id is None:
+                            commit.committer_id = previous.committer_id
+                BulkSaveModel.bulk_save(Commit, batch, fields=fields)
+        commits.clear()
 
     @staticmethod
     def update_data(

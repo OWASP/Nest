@@ -25,7 +25,11 @@ def mock_common_deps(mocker):
             "apps.github.common.check_owasp_site_repository", return_value=False
         ),
         "logger": mocker.patch("apps.github.common.logger"),
+        "sync_commits": mocker.patch("apps.github.common.sync_repository_commits"),
+        "activity_sync": mocker.patch("apps.github.common._repository_activity_sync"),
     }
+
+    mocks["activity_sync"].return_value.__enter__.return_value = timezone.now() - td(days=365)
 
     mock_repository = mocks["Repository"].update_data.return_value
     mock_repository.is_archived = False
@@ -93,6 +97,7 @@ class TestSyncRepository:
         )
         mock_common_deps["User"].update_data.assert_called_once_with(mock_gh_repository.owner)
         mock_common_deps["Repository"].update_data.assert_called_once()
+        mock_common_deps["sync_commits"].assert_called_once()
         mock_gh_repository.get_languages.assert_called_once()
         mock_gh_repository.get_releases.assert_called_once()
         mock_common_deps["Release"].bulk_save.assert_called_once()
@@ -110,13 +115,15 @@ class TestSyncRepository:
         mock_gh_repository.get_languages.assert_not_called()
         mock_common_deps["Release"].bulk_save.assert_called_once_with([])
 
-    def test_archived_repo_skips_syncing_items(self, mock_repo, mock_gh_repository):
-        """Tests that archived repos skip syncing milestones, issues, and PRs."""
+    def test_archived_repo_imports_contributions_but_skips_milestones(
+        self, mock_repo, mock_gh_repository
+    ):
+        """Archived repositories retain their dated contribution history."""
         mock_repo.is_archived = True
         sync_repository(mock_gh_repository)
         mock_gh_repository.get_milestones.assert_not_called()
-        mock_gh_repository.get_issues.assert_not_called()
-        mock_gh_repository.get_pulls.assert_not_called()
+        mock_gh_repository.get_issues.assert_called_once()
+        mock_gh_repository.get_pulls.assert_called_once()
 
     def test_repo_with_issue_tracking_disabled(
         self, mock_common_deps, mock_gh_repository, mock_repo
@@ -134,7 +141,7 @@ class TestSyncRepository:
     ):
         """Tests that syncing stops for items older than the 'until' date."""
         now = timezone.now()
-        mock_repo.latest_updated_issue = MagicMock(updated_at=now - td(days=10))
+        mock_common_deps["activity_sync"].return_value.__enter__.return_value = now - td(days=11)
         gh_issue_new = gh_item_factory(updated_at=now - td(days=1))
         gh_issue_old = gh_item_factory(updated_at=now - td(days=20))
         mock_gh_repository.get_issues.return_value = [gh_issue_new, gh_issue_old]
@@ -230,14 +237,15 @@ class TestSyncRepository:
         )
         mock_common_deps["Release"].bulk_save.assert_called_once_with([mock_updated_release])
 
-    def test_initial_sync_uses_30_day_fallback(
-        self, mock_common_deps, mock_gh_repository, mock_repo, gh_item_factory
+    @pytest.mark.parametrize("days", [30, 365])
+    def test_issue_collection_respects_activity_cutoff(
+        self, mock_common_deps, mock_gh_repository, mock_repo, gh_item_factory, days
     ):
-        """Tests that the 30-day fallback is used for initial sync."""
-        now = timezone.now()
-        mock_repo.latest_updated_issue = None
-        gh_issue_recent = gh_item_factory(updated_at=now - td(days=25))
-        gh_issue_ancient = gh_item_factory(updated_at=now - td(days=35))
+        """The issue collector uses the cutoff supplied by the activity context."""
+        cutoff = timezone.now() - td(days=days)
+        mock_common_deps["activity_sync"].return_value.__enter__.return_value = cutoff
+        gh_issue_recent = gh_item_factory(updated_at=cutoff)
+        gh_issue_ancient = gh_item_factory(updated_at=cutoff - td(seconds=1))
         mock_gh_repository.get_issues.return_value = [gh_issue_recent, gh_issue_ancient]
 
         sync_repository(mock_gh_repository)
@@ -318,7 +326,7 @@ class TestSyncRepository:
     ):
         """Tests that pull request syncing stops when an older PR is reached."""
         recent_time = timezone.now()
-        old_time = timezone.now() - td(days=60)
+        old_time = timezone.now() - td(days=400)
 
         gh_pr_recent = gh_item_factory(updated_at=recent_time)
         gh_pr_old = gh_item_factory(updated_at=old_time)
