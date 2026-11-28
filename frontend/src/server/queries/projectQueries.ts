@@ -89,6 +89,7 @@ export const GET_PROJECT_DATA = gql`
         }
         starsCount
         subscribersCount
+        updatedAt
         url
       }
       repositoriesCount

@@ -52,6 +52,7 @@ export const GET_USER_DATA = gql`
       }
       starsCount
       subscribersCount
+      updatedAt
       url
     }
     user(login: $key) {
