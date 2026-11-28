@@ -20,6 +20,10 @@ import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
 
+/**
+ * Site header with the logo, desktop navigation links, and action buttons.
+ * On mobile it shows the theme toggle, search, and menu buttons, and a slide-out sidebar.
+ */
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -110,7 +114,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+
+        <div className="ml-auto flex items-center justify-normal gap-1.5 md:gap-4 md:pl-4">
           <GlobalSearch />
           <div className="hidden md:flex">
             <NavButton
@@ -122,7 +127,6 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               text="Star"
             />
           </div>
-
           <div className="hidden md:flex">
             <NavButton
               href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
@@ -140,14 +144,19 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-md:min-w-0 max-md:p-0"
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
+              {mobileMenuOpen ? (
+                <FaTimes className="h-6 w-6 max-md:h-6.5 max-md:w-6.5" />
+              ) : (
+                <FaBars className="h-6 w-6 max-md:h-7 max-md:w-7" />
+              )}
             </Button>
           </div>
         </div>
       </div>
+
       <div
         className={cn(
           'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
