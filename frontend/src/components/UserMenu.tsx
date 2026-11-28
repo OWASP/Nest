@@ -75,7 +75,7 @@ export default function UserMenu({
         aria-haspopup="true"
         aria-controls={dropdownId}
         aria-label="User menu"
-        className="flex cursor-pointer items-center gap-1 focus:outline-hidden sm:gap-2"
+        className="flex w-auto cursor-pointer items-center gap-1 focus:outline-hidden sm:gap-2"
         disabled={isLoggingOut}
       >
         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -96,7 +96,7 @@ export default function UserMenu({
           </span>
         </div>
         <svg
-          className={`h-4 w-4 hidden md:block text-slate-500 transition-transform dark:text-slate-400 ${isOpen ? 'rotate-180' : ''}`}
+          className={`hidden h-4 w-4 text-slate-500 transition-transform md:block dark:text-slate-400 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
