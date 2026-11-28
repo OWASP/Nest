@@ -285,6 +285,28 @@ describe('ProgramForm Component', () => {
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
+    test('prevents submission in edit mode when admin logins is empty', async () => {
+      const user = userEvent.setup()
+      render(
+        <ProgramForm
+          formData={{ ...filledFormData, adminLogins: '   ' }}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Edit Program"
+          isEdit={true}
+        />
+      )
+
+      const submitButton = screen.getByRole('button', { name: /save/i })
+      await user.click(submitButton)
+
+      expect(mockOnSubmit).not.toHaveBeenCalled()
+      expect(
+        screen.getByText('A mentorship program must retain at least one administrator.')
+      ).toBeInTheDocument()
+    })
+
     test('submits form when all required fields are valid', async () => {
       const user = userEvent.setup()
       render(
@@ -654,6 +676,82 @@ describe('ProgramForm Component', () => {
       await user.type(nameInput, 'Different Name')
 
       expect(mockSetFormData).toHaveBeenCalled()
+    })
+
+    test('displays backend error for adminLogins and clears on input change', async () => {
+      const user = userEvent.setup()
+      mockOnSubmit.mockRejectedValueOnce({
+        graphQLErrors: [
+          {
+            message: 'A mentorship program must retain at least one administrator.',
+            extensions: { code: 'VALIDATION_ERROR', field: 'adminLogins' },
+          },
+        ],
+      })
+
+      render(
+        <ProgramForm
+          formData={filledFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Edit Program"
+          isEdit={true}
+        />
+      )
+
+      const submitButton = screen.getByRole('button', { name: /save/i })
+      await user.click(submitButton)
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('A mentorship program must retain at least one administrator.')
+        ).toBeInTheDocument()
+      })
+
+      const adminInput = screen.getByPlaceholderText('johndoe, jane-doe')
+      await user.type(adminInput, 'admin_new')
+
+      expect(mockSetFormData).toHaveBeenCalled()
+      expect(
+        screen.queryByText('A mentorship program must retain at least one administrator.')
+      ).not.toBeInTheDocument()
+    })
+
+    test('displays backend error for unknown admin handle and clears on input change', async () => {
+      const user = userEvent.setup()
+      mockOnSubmit.mockRejectedValueOnce({
+        graphQLErrors: [
+          {
+            message: "GitHub user 'unknown_handle' not found.",
+            extensions: { code: 'VALIDATION_ERROR', field: 'adminLogins' },
+          },
+        ],
+      })
+
+      render(
+        <ProgramForm
+          formData={filledFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Edit Program"
+          isEdit={true}
+        />
+      )
+
+      const submitButton = screen.getByRole('button', { name: /save/i })
+      await user.click(submitButton)
+
+      await waitFor(() => {
+        expect(screen.getByText("GitHub user 'unknown_handle' not found.")).toBeInTheDocument()
+      })
+
+      const adminInput = screen.getByPlaceholderText('johndoe, jane-doe')
+      await user.type(adminInput, 'valid_handle')
+
+      expect(mockSetFormData).toHaveBeenCalled()
+      expect(screen.queryByText("GitHub user 'unknown_handle' not found.")).not.toBeInTheDocument()
     })
 
     test('handles empty name validation', async () => {
